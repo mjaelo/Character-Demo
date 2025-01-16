@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3 uid="uid://bnros6www7p0j"]
+
+[ext_resource type="Script" path="res://UI/utils/ValuePicker.gd" id="1_syb0u"]
+[ext_resource type="Texture2D" uid="uid://cki8nbrguu2eb" path="res://UI/assets/dice.png" id="2_6o1gl"]
+
+[node name="ValuePicker" type="HBoxContainer"]
+script = ExtResource("1_syb0u")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Labels" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="VBoxContainer/Labels"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "Preset"
+
+[node name="Value" type="Label" parent="VBoxContainer/Labels"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "value"
+
+[node name="RandomButton" type="TextureButton" parent="."]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
+tooltip_text = "Randomize"
+texture_normal = ExtResource("2_6o1gl")
+ignore_texture_size = true
+stretch_mode = 4
+
+[connection signal="pressed" from="RandomButton" to="." method="_on_random_button_pressed"]

@@ -1,0 +1,76 @@
+[gd_scene load_steps=5 format=3 uid="uid://klqaekdm4u3l"]
+
+[ext_resource type="Script" path="res://UI/creator/Creator.gd" id="1_yntgj"]
+[ext_resource type="PackedScene" uid="uid://hdk05f78cjdv" path="res://UI/creator/preset_tab.tscn" id="2_85g5j"]
+[ext_resource type="Texture2D" uid="uid://cki8nbrguu2eb" path="res://UI/assets/dice.png" id="3_bn2rb"]
+[ext_resource type="Script" path="res://UI/creator/SetupCreator.gd" id="4_a5kin"]
+
+[node name="Creator" type="Control"]
+layout_mode = 3
+anchor_left = 0.0225694
+anchor_top = 0.0432099
+anchor_right = 0.241319
+anchor_bottom = 0.760802
+scale = Vector2(1.3, 1.3)
+script = ExtResource("1_yntgj")
+metadata/_edit_use_anchors_ = true
+
+[node name="SetupCreator" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("4_a5kin")
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+current_tab = 0
+
+[node name="Preset" parent="TabContainer" instance=ExtResource("2_85g5j")]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="RandomizeAll" type="TextureButton" parent="."]
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2
+anchor_left = 0.996217
+anchor_top = -0.0150175
+anchor_right = 1.13966
+anchor_bottom = 0.0609044
+offset_left = 1.52588e-05
+offset_right = 1.52588e-05
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 8
+tooltip_text = "Randomize"
+texture_normal = ExtResource("3_bn2rb")
+ignore_texture_size = true
+stretch_mode = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="CameraHeight" type="VSlider" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0041
+anchor_top = 0.0694143
+anchor_right = 1.13525
+anchor_bottom = 0.993492
+metadata/_edit_use_anchors_ = true
+
+[node name="Start Game" type="Button" parent="."]
+layout_mode = 0
+anchor_left = 2.90294
+anchor_top = 0.919769
+anchor_right = 3.36722
+anchor_bottom = 0.995038
+text = "Start Gane"
+metadata/_edit_use_anchors_ = true
+
+[connection signal="pressed" from="RandomizeAll" to="." method="_on_randomize_all_pressed"]
+[connection signal="value_changed" from="CameraHeight" to="." method="_on_camera_height_value_changed"]
+[connection signal="pressed" from="Start Game" to="." method="_on_start_game_pressed"]

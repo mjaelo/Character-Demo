@@ -1,0 +1,37 @@
+[gd_scene load_steps=7 format=3 uid="uid://1gcmvi5s3w26"]
+
+[ext_resource type="Script" path="res://mobs/player/Player.gd" id="1_i7q47"]
+[ext_resource type="PackedScene" uid="uid://vxfk3xv76ro7" path="res://mobs/Mob.tscn" id="1_kpuwe"]
+[ext_resource type="Script" path="res://mobs/player/controllers/CameraController.gd" id="3_kvh4h"]
+[ext_resource type="Script" path="res://mobs/player/controllers/CombatController.gd" id="15_fpdvi"]
+[ext_resource type="Script" path="res://mobs/player/controllers/MovementController.gd" id="17_cpbn8"]
+[ext_resource type="Script" path="res://mobs/player/controllers/ActionController.gd" id="17_t1esi"]
+
+[node name="Player" type="Node3D"]
+
+[node name="Mob" parent="." instance=ExtResource("1_kpuwe")]
+script = ExtResource("1_i7q47")
+
+[node name="Controllers" type="Node3D" parent="."]
+
+[node name="CameraController" type="Node3D" parent="Controllers"]
+script = ExtResource("3_kvh4h")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Controllers/CameraController"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00756574, 7.62772, 0)
+spring_length = 4.0
+
+[node name="Camera3D" type="Camera3D" parent="Controllers/CameraController/SpringArm3D"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+current = true
+fov = 93.1041
+far = 1000.0
+
+[node name="CombatController" type="Node" parent="Controllers"]
+script = ExtResource("15_fpdvi")
+
+[node name="MovementController" type="Node" parent="Controllers"]
+script = ExtResource("17_cpbn8")
+
+[node name="ActionController" type="Node" parent="Controllers"]
+script = ExtResource("17_t1esi")
