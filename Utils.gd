@@ -13,7 +13,6 @@ func get_key_from_event(event: InputEvent) -> int:
 		return event.button_mask
 	return 0
 
-# TODO use it for data files. possibly other places
 func get_user_defined_variables(instance:Node) ->Array:
 	var result := []
 	var properties:Array = instance.get_property_list()
@@ -25,6 +24,27 @@ func get_user_defined_variables(instance:Node) ->Array:
 			elif property.name == "script":
 				found_script = true
 	return result
+
+func duplicate_node(node):
+	var new_node = node.duplicate()
+	for var_name in get_user_defined_variables(node):
+		var new_val = node[var_name]
+		if new_val is Object && get_user_defined_variables(node[var_name]):
+			new_val = duplicate_node(node[var_name])
+		new_node[var_name] = new_val
+	return new_node
+
+func has_all(main_array: Array, elements_array: Array) -> bool:
+	for element in elements_array:
+		if element not in main_array:
+			return false
+	return true
+
+func has_any(main_array: Array, elements_array: Array) -> bool:
+	for element in elements_array:
+		if element in main_array:
+			return true
+	return false
 
 # READ DATA FROM FILES
 func get_file_names(folder_path: String, extention := ".tres", delete_extention := true)->Array:
@@ -66,7 +86,7 @@ func load_mesh(file_path:String) -> ArrayMesh:
 	return loaded_mesh
 
 # CACHE
-# TODO () add cache limit. move last cached object to front. when over limit, delete oldest cached one.
+# move last cached object to front. when over limit, delete oldest cached one.
 func set_cached_data(data, data_name:String, cache_dict:Dictionary):
 	if data:
 		if !cache_dict.has(data_name):

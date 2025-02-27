@@ -10,7 +10,9 @@ config_version=5
 
 [application]
 
-config/name="Animation Test"
+config/name="Character Demo"
+config/description="Demonstration of 3D character creator and short movement test"
+config/version="0.1"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
@@ -26,6 +28,16 @@ MobConstants="*res://mobs/utils/mob_constants.gd"
 [editor_plugins]
 
 enabled=PackedStringArray()
+
+[file_customization]
+
+folder_colors={
+"res://UI/": "green",
+"res://assets/": "purple",
+"res://assets/UI/": "purple",
+"res://assets/mob/": "purple",
+"res://mobs/": "red"
+}
 
 [filesystem]
 

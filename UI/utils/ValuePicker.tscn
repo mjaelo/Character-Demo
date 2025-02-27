@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bnros6www7p0j"]
 
 [ext_resource type="Script" path="res://UI/utils/ValuePicker.gd" id="1_syb0u"]
-[ext_resource type="Texture2D" uid="uid://cki8nbrguu2eb" path="res://UI/assets/dice.png" id="2_6o1gl"]
+[ext_resource type="Texture2D" uid="uid://cki8nbrguu2eb" path="res://assets/UI/dice.png" id="2_6o1gl"]
 
 [node name="ValuePicker" type="HBoxContainer"]
 script = ExtResource("1_syb0u")

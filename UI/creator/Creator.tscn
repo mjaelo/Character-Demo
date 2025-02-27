@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://UI/creator/Creator.gd" id="1_yntgj"]
 [ext_resource type="PackedScene" uid="uid://hdk05f78cjdv" path="res://UI/creator/preset_tab.tscn" id="2_85g5j"]
-[ext_resource type="Texture2D" uid="uid://cki8nbrguu2eb" path="res://UI/assets/dice.png" id="3_bn2rb"]
+[ext_resource type="Texture2D" uid="uid://cki8nbrguu2eb" path="res://assets/UI/dice.png" id="3_bn2rb"]
 [ext_resource type="Script" path="res://UI/creator/SetupCreator.gd" id="4_a5kin"]
 
 [node name="Creator" type="Control"]

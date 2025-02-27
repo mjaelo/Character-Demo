@@ -44,17 +44,14 @@ func create_tab(tab_data:Dictionary, tab_name:String):
 	scroll.add_theme_stylebox_override("panel", stylebox)
 
 func create_pickers(mesh_data:Array, mesh_name:String, vBox:VBoxContainer):
-	# TODO () also used similarly in BodyGenerator, preset_tab and Creator.
-	var mesh_instance = skeleton.get_node(mesh_name)
-	if MobConstants.hand_names.has(mesh_name): # get embedded mesh TODO () Code duplicate with B Gen
-		mesh_instance = mesh_instance.get_parent().get_node("Hip" if MobConstants.hand_names[0] == mesh_name else "Back").get_child(0).get_child(0)
+	var mesh_instance := MobUtils.get_mesh_from_skeleton(mesh_name, skeleton)
 	var range := range(0,10)
 	
 	var mesh_info = {"mesh_folder":"","color_range":{},"shape_names": []}
-	if BodyGenerator.body_mesh_info.has(mesh_name):
-		mesh_info = BodyGenerator.body_mesh_info[mesh_name]
-	elif BodyGenerator.eq_mesh_info.has(mesh_name):
-		mesh_info = BodyGenerator.eq_mesh_info[mesh_name]
+	if MobConstants.body_mesh_info.has(mesh_name):
+		mesh_info = MobConstants.body_mesh_info[mesh_name]
+	elif MobConstants.eq_mesh_info.has(mesh_name):
+		mesh_info = MobConstants.eq_mesh_info[mesh_name]
 	else:
 		print("Couldnt find mesh", mesh_name)
 	
@@ -93,10 +90,8 @@ func create_mesh_picker(vBox:VBoxContainer, mesh_name:String,mesh_info:Dictionar
 		node.disabled = true
 	else:
 		node.variable_changed.connect(
-			MobUtils.set_mesh.bind(mesh_instance, mesh_info.mesh_folder))
-		if mesh_name == "Hat":
-			node.variable_changed.connect(
-				MobUtils.adjust_hair_hider.bind(mesh_instance,skeleton))
+			_on_picker_value_changed.bind("Mesh", mesh_instance, mesh_info.mesh_folder)
+		)
 	return node
 
 func create_color_picker(vBox:VBoxContainer, mesh_name:String,mesh_info:Dictionary,range:Array,mesh_instance:MeshInstance3D):
@@ -112,18 +107,16 @@ func create_color_picker(vBox:VBoxContainer, mesh_name:String,mesh_info:Dictiona
 	if data_check.call(mesh_instance,range):
 		node.disabled = true
 	else:
-		node.variable_changed.connect(MobUtils.set_mesh_color.bind(mesh_instance))
-	
-	# set linked hair color
-	if mesh_instance == skeleton.get_node("Hair"):
 		node.variable_changed.connect(
-			get_parent().update_linked_colors.bind("Hair",MobConstants.hair_linked_names))
+			_on_picker_value_changed.bind("Color", mesh_instance)
+		)
+		
 	if MobConstants.hair_linked_names.has(mesh_name):
 		node.hide()
 		var box := CheckBox.new()
 		box.text = "Edit " + mesh_name + " Color"
 		box.add_theme_font_size_override("font_size",10)
-		box.toggled.connect(get_parent()._on_show_checkbox_toggled.bind(node,mesh_name))
+		box.toggled.connect(_on_show_checkbox_toggled.bind(node,mesh_name))
 		vBox.add_child(box)
 
 func create_shape_picker(vBox:VBoxContainer, mesh_name:String,mesh_info:Dictionary,range:Array,mesh_instance:MeshInstance3D,shape_name:String):
@@ -139,5 +132,43 @@ func create_shape_picker(vBox:VBoxContainer, mesh_name:String,mesh_info:Dictiona
 		node.disabled = true
 	else:
 		node.variable_changed.connect(
-			MobUtils.set_skeleton_shape_key.bind(shape_name, skeleton))
+			_on_picker_value_changed.bind("Shape", mesh_instance, "",shape_name)
+		)
 	return node
+
+func _on_picker_value_changed(value, picker_type:String, mesh_instance:MeshInstance3D,mesh_folder:="",shape_name:=""):
+	var mesh_name:String = mesh_instance.name
+	if MobConstants.weapon_names.has(mesh_name):
+		mesh_name =  MobConstants.hand_names[MobConstants.weapon_names.find(mesh_name)]
+	var data_type = "equipment_data" if $"../".menu_data.Clothes.keys().has(mesh_name) else "body_data"
+	var mesh_names:Array = MobConstants["body_mesh_info" if data_type == "body_data" else "eq_mesh_info"].keys()
+	var mesh_datas := Utils.get_user_defined_variables($"../".mob_data[data_type])
+	var mesh_type = mesh_datas[mesh_names.find(mesh_name)]
+	
+	if picker_type == "Mesh":
+		if $"../".mob_data[data_type][mesh_type].mesh_name == value:
+			return
+		$"../".mob_data[data_type][mesh_type].mesh_name = value
+		var is_bald:bool = false if mesh_type != "Hat" else $"../".mob_data.body_data.hair_data.mesh_name == "empty"
+		MobUtils.set_mesh(value, mesh_instance, mesh_folder,is_bald)
+	elif picker_type == "Color":
+		if $"../".mob_data[data_type][mesh_type].mesh_color == value:
+			return
+		MobUtils.set_mesh_color(value, mesh_instance)
+		if mesh_name == "Hair": # set linked color
+			for linked_name in MobConstants.hair_linked_names:
+				_on_picker_value_changed(value,picker_type,mesh_instance.get_parent().get_node(linked_name))
+				get_parent().update_mesh_picker(value,"Hair",linked_name,linked_name+"Color")
+	elif picker_type == "Shape":
+		var shape_id = MobUtils.get_shape_names_from_mesh(mesh_instance).find(shape_name)
+		if $"../".mob_data[data_type][mesh_type].mesh_shape[shape_id] == value:
+			return
+		$"../".mob_data[data_type][mesh_type].mesh_shape[shape_id] = value
+		MobUtils.set_skeleton_shape_key(value, shape_name, mesh_instance.get_parent())
+
+func _on_show_checkbox_toggled(toggled_on:bool,node_to_show:Control,mesh_name:String):
+	node_to_show.visible = toggled_on
+	if !toggled_on:
+		var hair_color := MobUtils.get_mesh_color(skeleton.get_node("Hair"))
+		_on_picker_value_changed(hair_color,"Color",skeleton.get_node(mesh_name))
+		get_parent().update_mesh_picker(hair_color,"Hair",mesh_name,mesh_name+"Color")
