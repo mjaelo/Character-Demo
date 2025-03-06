@@ -1,7 +1,10 @@
 extends Node
+# TODO RENAME TO MobGenerator
 
 var is_enforce_mesh_name := func (norms:MeshNormData, mesh_name:String): 
 	return norms.enforce.has("mesh_name") && norms.enforce.mesh_name.has(mesh_name)
+var is_enforce_tags := func (norms:MeshNormData, all_tags:Dictionary): 
+	return norms.enforce.has("tags") && all_tags.values().any(func (val:Array): return Utils.has_any(val, norms.enforce.tags))
 var is_enforce_color := func (norms:MeshNormData, mesh_name:String): 
 	return norms.enforce.has("color") && norms.enforce.color.has(mesh_name)
 var is_enforce_shape := func (norms:MeshNormData, mesh_name:String, shape_id:int): 
@@ -19,8 +22,8 @@ func get_random_mob_data(skeleton:Skeleton3D, race:=-1, type:=-1, gender:=-1, mo
 		var v_vals = possible_values[v_name]
 		if mob_data[v_name] < 0:
 			mob_data[v_name] = v_vals.pick_random()
-			if v_name == "gender" && randf() < MobConstants.variation_chance:
-				mob_data[v_name] = MobConstants.Gender.NonBin
+			if v_name == "gender":
+				mob_data[v_name] = MobConstants.get_random_gender.call()
 	
 	# get random body and eq
 	mob_data.body_data = get_random_body(skeleton, 
@@ -29,6 +32,7 @@ func get_random_mob_data(skeleton:Skeleton3D, race:=-1, type:=-1, gender:=-1, mo
 	mob_data.equipment_data = get_random_equipment(skeleton,
 		mob_data.gender, mob_data.type, mob_data.race, 
 		mob_data.equipment_data)
+	
 	
 	mob_data.mob_name = mob_name if mob_name != "empty" else MobConstants.mob_names[mob_data.gender].pick_random()
 	return mob_data
@@ -60,6 +64,8 @@ func get_random_body(skeleton:Skeleton3D, gender:=MobConstants.Gender.NonBin, ty
 		if MobConstants.hair_linked_names.has(mesh_name):
 			mesh_data.mesh_color = body_data.hair_mesh.mesh_color
 		
+		if mesh_data_name == "brow_mesh" && mesh_data.mesh_name && mesh_data.mesh_name != "empty": # TODO shouldnt be here
+			print("brow randb1 ",mesh_data.mesh_name)
 		# bulk changes
 		mesh_data.mesh_name = mesh_data.mesh_name if !bulk_mesh else bulk_mesh[0].mandatory_mesh["BodyBulk"]
 		mesh_data.mesh_color = mesh_data.mesh_color if !bulk_color else bulk_color[0].mandatory_colors["BodyBulk"]
@@ -111,7 +117,7 @@ func get_random_mesh_data(mesh_name:String, shape_names:Array, mesh_info:Diction
 	if mesh_name == "Body":
 		pass
 	mesh_info.mesh_folder = "" if !mesh_info.has("mesh_folder") else mesh_info.mesh_folder
-	var all_tags := Utils.read_json_file(mesh_info.mesh_folder+"tag_info.json")
+	var all_tags := Utils.load_json_from_file(mesh_info.mesh_folder+"tag_info.json")
 	var selected_tags:Array = all_tags[mesh_data.mesh_name] if all_tags.has(mesh_data.mesh_name) else []
 	if !is_mesh_name_within_norms(mesh_data.mesh_name, mesh_name, selected_tags, rtg_norms):
 		# get possible meshes
@@ -126,6 +132,10 @@ func get_random_mesh_data(mesh_name:String, shape_names:Array, mesh_info:Diction
 		
 		# get random mesh from all_files based on norms
 		mesh_data.mesh_name = get_random_mesh_name(all_files, mesh_name, all_tags, rtg_norms)
+	
+	if mesh_name == "Brows" && mesh_data.mesh_name && mesh_data.mesh_name != "empty": # TODO shouldnt be here
+		print("brow randm2 ",mesh_data.mesh_name)
+	
 	
 	# color					beard and brow color variations are disabled in get_random_body
 	if mesh_info.has("color_range") && !MobConstants.hair_linked_names.has(mesh_name):
@@ -156,7 +166,7 @@ func get_random_mesh_data(mesh_name:String, shape_names:Array, mesh_info:Diction
 # NEW GET
 # get random valid mesh name
 func get_random_mesh_name(all_files:Array, mesh_name:String, all_tags:Dictionary, rtg_norms: Array) -> String:
-	if randf() > MobConstants.variation_chance || rtg_norms.any(func (norms): return is_enforce_mesh_name.call(norms, mesh_name)):
+	if randf() > MobConstants.variation_chance || rtg_norms.any(func (norms): return is_enforce_mesh_name.call(norms, mesh_name) || is_enforce_tags.call(norms, all_tags) ):
 		for norms:MeshNormData in rtg_norms:
 			# check forbidden, mandatory tags
 			if norms.mandatory_tags:
@@ -179,6 +189,9 @@ func get_random_mesh_name(all_files:Array, mesh_name:String, all_tags:Dictionary
 				var forbidden_files = all_files.filter(func (file_name): 
 					return ![norms.forbidden_mesh[mesh_name]].has(file_name))
 				all_files = forbidden_files if forbidden_files else all_files
+	
+	if mesh_name == "Brows" && all_files!= [""] && all_files!= ["empty"]: # TODO shouldnt be here
+		print("brow randmn ",all_files)
 	
 	if !all_files:
 		print("ERROR")
@@ -228,8 +241,6 @@ func is_mesh_name_within_norms(mesh_file_name: String, mesh_name:String, tags:Ar
 		return false
 	
 	for norms:MeshNormData in rtg_norms:
-		if mesh_name == "Brows":
-			pass
 		# check tags
 		if norms.mandatory_tags:
 			return true if Utils.has_all(tags, norms.mandatory_tags) else false
@@ -237,8 +248,8 @@ func is_mesh_name_within_norms(mesh_file_name: String, mesh_name:String, tags:Ar
 			return false
 		# check tags
 		if norms.mandatory_mesh.has(mesh_name):
-			return true if norms.mandatory_mesh[mesh_name].has(mesh_file_name) else false
-		if norms.forbidden_mesh.has(mesh_name) && norms.forbidden_mesh[mesh_name].has(mesh_file_name):
+			return true if [norms.mandatory_mesh[mesh_name]].has(mesh_file_name) else false
+		if norms.forbidden_mesh.has(mesh_name) && [norms.forbidden_mesh[mesh_name]].has(mesh_file_name):
 			return false
 	return true
 
@@ -250,7 +261,7 @@ func is_mesh_color_within_norms(color: Color, mesh_name:String, rtg_norms: Array
 	for norms:MeshNormData in rtg_norms:
 		# check colors
 		if norms.mandatory_colors.has(mesh_name):
-			return true if norms.mandatory_colors[mesh_name].has(color) else false
+			return true if [norms.mandatory_colors[mesh_name]].has(color) else false
 		if norms.forbidden_colors.has(mesh_name) && norms.forbidden_colors[mesh_name].has(color):
 			return false
 	return true
@@ -273,7 +284,7 @@ func set_mob_data_to_mob(mob_data:MobData, mob:Mob):
 	mob.gender = mob_data.gender
 	mob.equipment_data = mob_data.equipment_data
 	mob.body_data = mob_data.body_data
-	mob.adjust_mob_to_race(mob_data.race)
+	adjust_mob_to_race(mob, mob_data.race)
 	set_equipment_data(mob_data.equipment_data, mob)
 	set_body_data(mob_data.body_data, mob)
 
@@ -294,18 +305,14 @@ func set_equipment_data(eq_data:EquipmentData, mob:Mob):
 	var skeleton:Skeleton3D = mob.get_node("body/Armature/Skeleton3D")
 	var mesh_names:Array = MobConstants.eq_mesh_info.keys()
 	var mesh_datas := Utils.get_user_defined_variables(eq_data)
-	var is_hair_bald := false
 	
 	for i in mesh_datas.size():
 		var mesh_name:String = mesh_names[i]
 		var mesh_data:MeshData = eq_data[mesh_datas[i]]
 		var mesh_instance:MeshInstance3D = MobUtils.get_mesh_from_skeleton(mesh_name, skeleton)
-		if mesh_instance.name == "Hat":
-			var hair_data:MeshData = mob.body_data.hair_mesh
-			is_hair_bald = hair_data.mesh_name == "empty"
-		set_mesh_data(mesh_data, mesh_name, mesh_instance, is_hair_bald)
+		set_mesh_data(mesh_data, mesh_name, mesh_instance)
 
-func set_mesh_data(mesh_data:MeshData, mesh_name:String,mesh_instance:MeshInstance3D, is_hair_bald := false):
+func set_mesh_data(mesh_data:MeshData, mesh_name:String,mesh_instance:MeshInstance3D):
 	# mesh
 	if mesh_data.mesh_name:
 		var is_body_mesh := MobConstants.body_mesh_info.has(mesh_name)
@@ -315,7 +322,7 @@ func set_mesh_data(mesh_data:MeshData, mesh_name:String,mesh_instance:MeshInstan
 				path = MobConstants.body_mesh_info[mesh_name].mesh_folder
 			else:
 				path = MobConstants.eq_mesh_info[mesh_name].mesh_folder 
-		MobUtils.set_mesh(mesh_data.mesh_name,mesh_instance,path, is_hair_bald)
+		MobUtils.set_mesh(mesh_data.mesh_name,mesh_instance,path)
 	
 	# color
 	if mesh_data.mesh_color != Color(-1,-1,-1):
@@ -329,6 +336,38 @@ func set_mesh_data(mesh_data:MeshData, mesh_name:String,mesh_instance:MeshInstan
 			return
 		
 		for i in mesh_data.mesh_shape.size():
-			var value = mesh_data.mesh_shape[i]
-			var shape_name = shape_names[i]
+			var value:float = float(mesh_data.mesh_shape[i])
+			var shape_name:String = shape_names[i]
 			MobUtils.set_skeleton_shape_key(value,shape_name,mesh_instance.get_parent())
+
+# ADJUST
+# adjust mob model in a way not covered by body and eq data
+func adjust_mob_to_race(mob:Mob, race:int):
+	mob.race = race
+	var dict:Dictionary =  MobConstants.race_action_dict[race]
+	var skeleton = mob.get_node("body/Armature/Skeleton3D")
+	# show_monster_body
+	var show_monster_body:bool = dict.has("show_monster_body") && dict.show_monster_body
+	skeleton.get_node("monster-body").visible = show_monster_body
+	const body_meshes := ["Body","Eyelashes","Brows","Eyes"] # meshes outside bodydata
+	for child in skeleton.get_children():
+		if body_meshes.has(child.name):
+			child.visible = !show_monster_body
+	
+	# change scale
+	mob.scale = Vector3.ONE if !dict.has("scale") else Vector3.ONE*dict.scale
+	
+	# disable details texture on body for statues
+	var body_mesh:MeshInstance3D = skeleton.get_node("Body")
+	var material:StandardMaterial3D = body_mesh.get_active_material(0)
+	material.albedo_texture_msdf = [MobConstants.MobRaces.Statue,MobConstants.MobRaces.Spirit].has(race)
+	
+	# change body colors outside of body_data
+	var def_body_colors := {"Eyes": {0:Color.WHITE, 2:Color.BLACK}, "Eyelashes":{0:Color.BLACK}}
+	def_body_colors.Eyes[0]=Color.WHITE if !dict.has("eye_whites") else dict.eye_whites
+	def_body_colors.Eyes[2]=Color.BLACK if !dict.has("eye_pupil") else dict.eye_whites
+	# set colors to all meshes outside body data TODO not needed really
+	for mesh_name in def_body_colors.keys():
+		for mat_nr in def_body_colors[mesh_name].keys():
+			var color = def_body_colors[mesh_name][mat_nr] if race != MobConstants.MobRaces.Statue else MobConstants.Statue_Grey
+			MobUtils.set_mesh_color(color, skeleton.get_node(mesh_name),mat_nr)

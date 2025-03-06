@@ -1,9 +1,11 @@
 extends Control
 
-var mob: Mob
-var skeleton: Skeleton3D
+@onready var mob := $"../Player/Mob"
+@onready var skeleton := $"../Player/Mob/body/Armature/Skeleton3D"
+@onready var preset_node := $TabContainer/Preset
+@onready var start_button := $"RightCreator/Start Game"
+
 var mob_data: MobData
-var preset_node: TabBar
 
 # pickers for mesh, color, shape
 const menu_data := {
@@ -14,7 +16,7 @@ const menu_data := {
 		"Eyes": [false,true,[]],
 		"Eyelashes": [true,false,[]],
 		"Body": [false,false,["Lips Width","Jaw Shape", "Face Length","Eye Lower Lid", "Eye Upper Lid","Eye Edge"]],
-		"Accesory": [true,false,[]],
+		"Accessory": [true,false,[]],
 	},
 	"Hair": {
 		"Hair": [true,true,[]],
@@ -31,41 +33,28 @@ const menu_data := {
 	},
 }
 
-# TODO
-	# cant reproduse:
-		# sometimes, preset race still incorrectly load (will be fixed when saved ti file?)
-	# shoe has shape key for some reason
-	# rename and better place water-try shader. delete test scene
-	# hat:
-		# use full_hide tag instead of full_hats variable
-		# remove old hat hiders from scene and code
-		# feather hat partly missing feather
-	# PRESET:
-		# save body to a file - copy solution from game? or even in a temporary method?
-
 func _ready():
-	skeleton = $"../Player/Mob/body/Armature/Skeleton3D"
-	mob = $"../Player/Mob"
-	preset_node = $TabContainer/Preset
-	$"../Player/Controllers/CameraController/SpringArm3D".transform.origin.z += 2
-	$CameraHeight.max_value = $"../Player/Controllers/CameraController/SpringArm3D".transform.origin.y
-	$CameraHeight.value = $CameraHeight.max_value - 2
+	# disable UI edit
+	UiUtils.disable_edit(start_button,!mob_data || !mob_data.mob_name)
+	UiUtils.disable_edit(preset_node.get_node("ScrollContainer/VBoxContainer/Preset Handler/Save Preset"),!mob_data || !mob_data.mob_name)
+	UiUtils.disable_edit(preset_node.get_node("ScrollContainer/VBoxContainer/Preset Handler/Delete Preset"),true)
 	
-	UiUtils.disable_edit($"Start Game",!mob_data || !mob_data.mob_name)
-	UiUtils.disable_edit(preset_node.get_node("ScrollContainer/VBoxContainer/Save Preset"),!mob_data || !mob_data.mob_name)
+	# take away player control
 	give_player_control(false)
 	
+	# create pickers
 	$SetupCreator.setup(menu_data,skeleton)
 	
 	#load_all_resources()
+	
+	# apply random mob data
 	randomize_all()
-	$TabContainer/Preset.mob_name_picker.text = ""
+	preset_node.mob_name_picker.text = ""
+	mob_data.mob_name = ""
 
 func give_player_control(has_control:bool):
 	mob.set_process_unhandled_input(has_control)
 	mob.set_physics_process(has_control)
-	$"../Player/Controllers/CameraController".sensitivity = 5 if has_control else 1
-	$"../Player/Controllers/CameraController".move_with_right_click = !has_control
 
 func load_all_resources():
 	var folders := []
@@ -96,21 +85,19 @@ func load_all_resources():
 			Utils.load_mesh(folder_path + file_name + ".tres")
 
 func randomize_all():
-	var gender:int = [0,2].pick_random()
-	var type := MobConstants.MobTypes.Civilian#alues().pick_random()
-	var race := MobConstants.MobRaces.Human
-	mob_data = BodyGenerator.get_random_mob_data(skeleton,race,type,gender,"")
-	BodyGenerator.set_mob_data_to_mob(mob_data,mob)
+	var type = MobConstants.MobTypes.Civilian if !mob_data else -1
+	var race = MobConstants.MobRaces.Human if !mob_data else -1
+	mob_data = MobGenerator.get_random_mob_data(skeleton,race,type)
+	MobGenerator.set_mob_data_to_mob(mob_data,mob)
 	update_all_pickers()
 
 # MESH EDIT
-# TODO works for meshes, but not clothes color and shape keys
 func update_all_pickers():
 	# preset data
-	$TabContainer/Preset.mob_name_picker.text = mob_data.mob_name
-	$TabContainer/Preset.mob_type_picker.picker.value = mob_data.type
-	$TabContainer/Preset.mob_race_picker.picker.value = mob_data.race
-	$TabContainer/Preset.mob_gender_picker.value = mob_data.gender
+	preset_node.mob_name_picker.text = mob_data.mob_name
+	preset_node.mob_type_picker.picker.value = mob_data.type
+	preset_node.mob_race_picker.picker.value = mob_data.race
+	preset_node.mob_gender_picker.value = mob_data.gender
 	
 	# BODY 
 	var body_data := mob_data.body_data
@@ -147,7 +134,7 @@ func set_mesh_data_to_pickers(mesh_data, mesh_name:String):
 					print(mesh_name+" shapes differ in saved data and mesh")
 					continue
 				for j in mesh_data.mesh_shape.size():
-					var shape_value:float = mesh_data.mesh_shape[j]
+					var shape_value:float = float(mesh_data.mesh_shape[j])
 					var shape_name:String = shape_names[j]
 					if menu_data[tab_name][mesh_name][2].has(shape_name):
 						update_mesh_picker(shape_value,tab_name,mesh_name,shape_name)
@@ -167,27 +154,10 @@ func update_mesh_picker(value, tab_name:String, mesh_name:String, picker_name:St
 	else:
 		print("\nCouldnt find "+picker_name+" in ", tab_name+" tab")
 
-# Basic Creator Controls
-func _on_randomize_all_pressed(node = $TabContainer.get_child($TabContainer.current_tab)):
-	# randomize all tabs with limits
-	if $TabContainer.current_tab == 0:
-		randomize_all()
-		return
-	
-	# randomize current tab without limits
-	for child in node.get_children():
-		# randomize slider
-		if child.has_method("_on_random_button_pressed"):
-			if !child.disabled && child.visible:
-				child._on_random_button_pressed()
-		elif child.get_children():
-			_on_randomize_all_pressed(child)
-
-func _on_camera_height_value_changed(value):
-	$"../Player/Controllers/CameraController/SpringArm3D".transform.origin.y = value
-
-func _on_start_game_pressed():
+func start_game():
 	print("starting game with ",mob_data.mob_name)
+	
+	FileUtils.deserialize_and_save(preset_node.presets, "res://UI/creator/", "preset.json")
 	
 	# get mob data
 	# get player data and set mob data to it

@@ -148,9 +148,16 @@ func _on_picker_value_changed(value, picker_type:String, mesh_instance:MeshInsta
 	if picker_type == "Mesh":
 		if $"../".mob_data[data_type][mesh_type].mesh_name == value:
 			return
+		
+		var old_brow_name:String # needed bc acceseory overrides brow...
+		if mesh_name == "Accessory":
+			old_brow_name = $"../".mob_data.body_data.brow_mesh.mesh_name
+		
 		$"../".mob_data[data_type][mesh_type].mesh_name = value
-		var is_bald:bool = false if mesh_type != "Hat" else $"../".mob_data.body_data.hair_data.mesh_name == "empty"
-		MobUtils.set_mesh(value, mesh_instance, mesh_folder,is_bald)
+		
+		if mesh_name == "Accessory":
+			$"../".mob_data.body_data.brow_mesh.mesh_name = old_brow_name
+		MobUtils.set_mesh(value, mesh_instance, mesh_folder)
 	elif picker_type == "Color":
 		if $"../".mob_data[data_type][mesh_type].mesh_color == value:
 			return
@@ -161,7 +168,7 @@ func _on_picker_value_changed(value, picker_type:String, mesh_instance:MeshInsta
 				get_parent().update_mesh_picker(value,"Hair",linked_name,linked_name+"Color")
 	elif picker_type == "Shape":
 		var shape_id = MobUtils.get_shape_names_from_mesh(mesh_instance).find(shape_name)
-		if $"../".mob_data[data_type][mesh_type].mesh_shape[shape_id] == value:
+		if float($"../".mob_data[data_type][mesh_type].mesh_shape[shape_id]) == value:
 			return
 		$"../".mob_data[data_type][mesh_type].mesh_shape[shape_id] = value
 		MobUtils.set_skeleton_shape_key(value, shape_name, mesh_instance.get_parent())

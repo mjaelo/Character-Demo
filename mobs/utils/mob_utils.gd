@@ -6,16 +6,21 @@ const main_materials := { # TODO () eyes are not here...
 	"guard-bottom": 1,
 	"guard-top": 2
 }
-const full_hats := ["guard-hat"] # TODO () use tag full-hat instead. Also, when this tag detected, hide whole hair?
+
+var full_hats: Array
+
+func _ready() -> void:
+	var hat_tag_dict := Utils.load_json_from_file(MobConstants.eq_mesh_info.Hat.mesh_folder+"tag_info.json")
+	full_hats = hat_tag_dict.keys().filter(func (key): return hat_tag_dict[key].has("full-hat"))
 
 # SET MESH DATA
-func set_mesh(file_name:String, mesh_instance:MeshInstance3D, path:String, is_hair_bald := false):
+func set_mesh(file_name:String, mesh_instance:MeshInstance3D, path:String):
 	# set mesh from file
-	if file_name == "empty": # TODO duplicate in some places
+	if file_name == "empty":
 		mesh_instance.hide()
 	else:
 		var file_path = path+file_name+".tres"
-		var new_mesh:ArrayMesh = Utils.load_mesh(file_path)
+		var new_mesh := Utils.load_mesh_from_file(file_path)
 		if new_mesh:
 			var color = get_mesh_color(mesh_instance)
 			mesh_instance.show()
@@ -28,7 +33,7 @@ func set_mesh(file_name:String, mesh_instance:MeshInstance3D, path:String, is_ha
 	
 	# handle specific case mashes
 	if mesh_instance.name == "Hat": 
-		adjust_hair_hider(file_name,mesh_instance,mesh_instance.get_parent(),is_hair_bald)
+		adjust_hair_hider(file_name,mesh_instance,mesh_instance.get_parent())
 	
 	# adjust sword collision shape
 	if mesh_instance.name == "Sword":
@@ -40,13 +45,14 @@ func set_mesh(file_name:String, mesh_instance:MeshInstance3D, path:String, is_ha
 			sphere.radius = 10
 			col_shape.shape = sphere
 
-# TODO fix full_hats perm hides hair
-func adjust_hair_hider(_hat_name, mesh_instance: MeshInstance3D, skeleton:Skeleton3D, is_hair_bald := false):
+# TODO use full_hats tag?
+func adjust_hair_hider(_hat_name, mesh_instance: MeshInstance3D, skeleton:Skeleton3D):
 	var hider_node:BoneAttachment3D = skeleton.get_node("HairHider")
 	var hair_node:MeshInstance3D = skeleton.get_node("Hair")
 	var hair_material: Material = hair_node.get_active_material(0)
 	
 	# hide hair if hat is visible and is full hat
+	var is_hair_bald:bool = skeleton.get_node("../../../").body_data.hair_mesh.mesh_name == "empty"
 	hair_node.visible = !is_hair_bald && !(mesh_instance.visible && full_hats.any(func (hat): return _hat_name == hat))
 	if mesh_instance.visible:
 		hider_node.show()
@@ -69,7 +75,7 @@ func adjust_hair_hider(_hat_name, mesh_instance: MeshInstance3D, skeleton:Skelet
 		hider_node.hide()
 		hair_material.transparency = 0
 
-func set_skeleton_shape_key(value, shape_name:String, skel:Skeleton3D):
+func set_skeleton_shape_key(value:float, shape_name:String, skel:Skeleton3D):
 	for mesh in skel.get_children():
 		if !mesh is MeshInstance3D:
 			continue
@@ -92,7 +98,7 @@ func adjust_hip(skel:Skeleton3D):
 	
 	hip_controller.transform.origin.x = 17 + added_amount
 
-func set_mesh_shape_key(value, shape_name:String, mesh:MeshInstance3D):
+func set_mesh_shape_key(value:float, shape_name:String, mesh:MeshInstance3D):
 	var shape_id = mesh.find_blend_shape_by_name(shape_name)
 	if shape_id>-1:
 		mesh.set_blend_shape_value(shape_id,value)

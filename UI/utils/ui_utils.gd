@@ -23,9 +23,11 @@ func change_label_visibility(label:CanvasItem, disabled:bool)-> CanvasItem:
 	return label
 
 func button_show_warning(button:Button, tooltip_text := "Warning"):
-	button.icon = load("res://assets/UI/Warning.png") # TODO use cached resource
+	print("showing warning")
+	button.icon = Utils.load_image_from_file("res://assets/UI/Warning.png") #load("res://assets/UI/Warning.png") # TODO use cached resource
 	button.tooltip_text = tooltip_text
 
 func button_hide_warning(button:Button):
+	print("hiding warning")
 	button.icon = null
 	button.tooltip_text = ""

@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://bnros6www7p0j"]
+[gd_scene load_steps=4 format=3 uid="uid://bnros6www7p0j"]
 
 [ext_resource type="Script" path="res://UI/utils/ValuePicker.gd" id="1_syb0u"]
 [ext_resource type="Texture2D" uid="uid://cki8nbrguu2eb" path="res://assets/UI/dice.png" id="2_6o1gl"]
+[ext_resource type="Texture2D" uid="uid://dm80ly07ng6dm" path="res://assets/UI/dice-hover.png" id="3_mtw4n"]
 
 [node name="ValuePicker" type="HBoxContainer"]
 script = ExtResource("1_syb0u")
@@ -31,6 +32,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 8
 tooltip_text = "Randomize"
 texture_normal = ExtResource("2_6o1gl")
+texture_hover = ExtResource("3_mtw4n")
 ignore_texture_size = true
 stretch_mode = 4
 

@@ -2,12 +2,12 @@ extends Mob
 class_name Player
 
 # PROCESSES
-func _unhandled_input(_event:InputEvent):
+func _unhandled_input(event:InputEvent):
+	if event is InputEventMouse || (event is InputEventKey && Input.is_action_pressed("Switch Camera")):
+		$"../Controllers/CameraController".handle_input(event)
 	for action:String in InputMap.get_actions():
 		if Input.is_action_just_pressed(action):
-			#if race == MobConstants.MobRaces.Statue:
-				#anim_tree.active = true
-			if body_states.get_current_node() != "Action" && is_on_floor():
+			if current_state != MobState.Action && is_on_floor():
 				handle_action_press(action)
 		elif Input.is_action_just_released(action) && is_on_floor():
 			handle_action_release(action)

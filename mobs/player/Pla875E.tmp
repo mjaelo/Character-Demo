@@ -12,20 +12,21 @@ script = ExtResource("1_i7q47")
 
 [node name="Controllers" type="Node3D" parent="."]
 
-[node name="MovementController" type="Node" parent="Controllers"]
-script = ExtResource("17_cpbn8")
-
 [node name="CameraController" type="Node3D" parent="Controllers"]
 script = ExtResource("3_kvh4h")
 
 [node name="1PCamera" type="Camera3D" parent="Controllers/CameraController"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.007, 6.7, -1.515)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0066793, 5.67256, -1.51547)
 
 [node name="SpringArm3D" type="SpringArm3D" parent="Controllers/CameraController"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00756574, 7.45132, 0.30575)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00756574, 6.99681, 0.953077)
 spring_length = 4.0
 
 [node name="3PCamera" type="Camera3D" parent="Controllers/CameraController/SpringArm3D"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 current = true
 fov = 93.1041
 far = 1000.0
+
+[node name="MovementController" type="Node" parent="Controllers"]
+script = ExtResource("17_cpbn8")

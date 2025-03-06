@@ -1,8 +1,8 @@
 [gd_scene load_steps=11 format=3 uid="uid://x7q417sdhroh"]
 
 [ext_resource type="PackedScene" uid="uid://1gcmvi5s3w26" path="res://mobs/player/Player.tscn" id="1_2yhql"]
-[ext_resource type="Script" path="res://main.gd" id="1_hg08b"]
-[ext_resource type="PackedScene" uid="uid://klqaekdm4u3l" path="res://UI/creator/Creator.tscn" id="4_cf756"]
+[ext_resource type="Script" path="res://general/main.gd" id="1_hg08b"]
+[ext_resource type="PackedScene" uid="uid://klqaekdm4u3l" path="res://UI/creator/Creator/Creator.tscn" id="4_cf756"]
 [ext_resource type="Texture2D" uid="uid://c6bvylyubnha2" path="res://env/autumn_field_2k.exr" id="5_adumc"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ybawd"]

@@ -13,10 +13,12 @@ func _on_body_action_pressed(action_name: String):
 		return
 	
 	# perform action
+	parent.current_state = parent.MobState.Action
 	parent.body_states.start("Action")
 	parent.action_states.travel(action_name)
 
 func _on_body_action_finished(action_name: String):
 	parent.body_states.travel("Idle")
+	parent.current_state = parent.MobState.Idle
 	if action_name == "Jump":
 		parent.idle_states.travel("Fall")

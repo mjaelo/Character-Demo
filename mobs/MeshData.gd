@@ -8,4 +8,4 @@ var mesh_shape:Array
 func _init(_mesh_color:=Color(-1,-1,-1), _mesh_name:="", _mesh_shape:=[]):
 	mesh_color = _mesh_color
 	mesh_name = _mesh_name
-	mesh_shape = _mesh_shape
+	mesh_shape = _mesh_shape.map(func (val): return float(val))

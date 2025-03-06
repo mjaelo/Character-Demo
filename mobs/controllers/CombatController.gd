@@ -28,21 +28,19 @@ func _ready():
 	sword = skeleton.get_node("Hip/HipContainer/Sword")
 	shield = skeleton.get_node("Back/BackContainer/Shield")
 
-func sheave_hip():
-	parent.arm_states.travel("PutHip")
-
-func sheave_back():
-	print(parent.body_blend)
-	parent.body_blend = 1
-	parent.arm_states.travel("PutBack")
-
-func unsheave_hip():
-	parent.arm_states.travel("DrawHip")
-
-func unsheave_back():
-	print(parent.body_blend)
-	parent.body_blend = 1
-	parent.arm_states.travel("DrawBack")
+#func sheave_hip():
+	#parent.arm_states.travel("PutHip")
+#
+#func sheave_back():
+	#parent.body_blend = 1
+	#parent.arm_states.travel("PutBack")
+#
+#func unsheave_hip():
+	#parent.arm_states.travel("DrawHip")
+#
+#func unsheave_back():
+	#parent.body_blend = 1
+	#parent.arm_states.travel("DrawBack")
 
 func attach_item_to_bone(new_slot:Node3D, item:Node3D):
 	if item:
@@ -52,62 +50,86 @@ func attach_item_to_bone(new_slot:Node3D, item:Node3D):
 		item.position = Vector3.ZERO
 		item.rotation_degrees = Vector3.ZERO
 
+func end_action():
+	parent.body_blend = 0
+	parent.current_state = parent.MobState.Idle
+
+func execute_action(action:String):
+	if action == "":
+		pass
+	
+	parent.arm_states.travel(action)
+
+func toggle_weapons():
+	if sword.visible:
+		var action := "PutHip" if weapon_drawn else "DrawHip"
+		execute_action(action)
+	elif shield.visible:
+		var action := "PutBack" if weapon_drawn else "DrawBack"
+		execute_action(action)
+	else:
+		end_action()
+
+func block():
+	if shield.visible:
+		execute_action("Block")
+	elif sword.visible:
+		execute_action("BlockSword")
+	else:
+		end_action()
+
+func attack():
+	attach_item_to_bone(r_hand_slot,sword)
+	execute_action("Attack")
+
 # SIGNALS (or external calls)
 func _on_combat_action_released(action_name: String):
-	if action_name == "Block":
-		parent.body_blend = 0
-		# TODO Slow down
+	# TODO make block go to idle in arm_states, otherwise when block again, anim wont go from start
+	if action_name == "Block" && ["Block","BlockSword"].has(parent.arm_states.get_current_node()):
+		end_action()
 
 func _on_combat_action_pressed(action_name: String):
+	# prepare for anims
 	parent.body_blend = 1
-	# unsheave sword
-	if action_name == "Attack" && !weapon_drawn:
-		if sword.visible:
-			unsheave_hip()
-		# on bare hands, just attack
-		else:
-			attach_item_to_bone(r_hand_slot,sword)
-			weapon_drawn = !weapon_drawn
-			parent.arm_states.travel(action_name)
-	# sheave/unsheave sword
-	elif action_name == "Sheave" && sword.visible:
-		if !weapon_drawn:
-			unsheave_hip()
-		else:
-			sheave_hip()
-	elif action_name == "Block":
-		if shield.visible:
-			parent.arm_states.travel(action_name)
-		elif sword.visible:
-			parent.arm_states.travel("BlockSword")
-		else:
-			parent.body_blend = 0
-			return
+	parent.current_state = parent.MobState.Arm
+	
+	# actions - weapon not drawn
+	if !weapon_drawn:
+		if action_name == "Attack" && !sword.visible:
+			attack()
+		else: # unsheave weapons
+			toggle_weapons()
+	
+	# actions - weapon drawn
 	else:
-		parent.arm_states.travel(action_name)
+		if action_name == "Attack":
+			attack()
+		elif action_name == "Block":
+			block()
+		else: # sheave weapons
+			toggle_weapons()
 
 func _on_combat_animation_finished(anim_name: String):
-	parent.body_blend = 0
-	if anim_name == "DrawBack":
-		if weapon_drawn:
-			attach_item_to_bone(back_slot,shield)
-		else:
-			attach_item_to_bone(l_hand_slot,shield)
-		weapon_drawn = !weapon_drawn
-	
-	elif anim_name == "DrawHip":
+	if anim_name == "DrawHip":
 		if weapon_drawn:
 			attach_item_to_bone(hip_slot, sword)
 		
 		if shield.visible:
-			if weapon_drawn:
-				sheave_back()
-			else:
-				unsheave_back()
+			var action := "PutBack" if weapon_drawn else "DrawBack"
+			execute_action(action)
 		else:
 			weapon_drawn = !weapon_drawn
+			end_action()
+	
+	elif anim_name == "DrawBack":
+		attach_item_to_bone(
+			back_slot if weapon_drawn else l_hand_slot,
+			shield
+		)
+		weapon_drawn = !weapon_drawn
+		end_action()
 
 func _on_weapon_body_entered(body):
-	if weapon_drawn && body != parent && body is Mob && !parent.arm_non_attacking_states.has(parent.arm_states.get_current_node()):
+	if weapon_drawn && body != parent && body is Mob && parent.damaging_states.has(parent.arm_states.get_current_node()):
 		(body as Mob).idle_states.travel("Die")
 		body.get_node("CollisionShape3D").queue_free()

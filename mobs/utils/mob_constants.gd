@@ -2,7 +2,9 @@ extends Node
 
 
 # UTILS FOR CONST
-var other_races := func (race_id:int): return MobRaces.keys().filter(func (race): return race != MobRaces.keys()[race_id])
+var other_races := func (race_id:int)->Array: return MobRaces.keys().filter(func (race): return race != MobRaces.keys()[race_id])
+var race_cam_height := func (race_id:int)->float: return race_cam_heights.default if !race_cam_heights.has(race_id) else race_cam_heights[race_id]
+var get_random_gender := func ()->int: return [Gender.Male,Gender.Female].pick_random() if randf()> variation_chance else Gender.NonBin
 
 # ENMUS
 enum MobTypes {Civilian, Guard, Noble, Merchant, Farmer}
@@ -20,13 +22,12 @@ const hip_movers := ["Body Shape", "Body Mass"]
 const shape_control_meshes := ["Body","Brows"] # meshes with shape keys
 
 const hair_color_ranges := {"hue": [0,.2], "saturation": [.1,.4], "brightness": [0,.7]} 
-const clothes_color_ranges := {"hue": [0.0, .9], "saturation": [0.0, .3], "brightness": [0.2, .6]}
+const clothes_color_ranges := {"hue": [0.0, .27], "saturation": [0.0, .3], "brightness": [0.2, .6]}
 const eyes_color_ranges := {"hue": [0.1, 0.6], "saturation": [0.2, 0.5], "brightness": [0.3, 0.8]}
 const skin_color_ranges := {"hue": [0.01, 0.08], "saturation": [0.2, 0.3], "brightness": [0.3, 0.95]}
 
 const variation_chance := 0.1 # chance for non normative gender and body shapes
 
-#const name_list := ["Jeff", "Hanz", "Anabelle", "Eve", "Alex", "Sam", "Think", "Hard", "About", "Your Life Choices"] # TODO () genderize it
 const mob_names := {
 	Gender.NonBin: ["Alex", "Sam", "Think", "Hard", "About", "Your Life Choices"],
 	Gender.Male: ["Jeff", "Hanz", "Louis", "Robert","Clyde","Rupert","Steve"], 
@@ -38,16 +39,21 @@ const Statue_Grey := Color(.3, .3, .3, 0)
 const race_action_dict := {
 	MobRaces.Human:{},
 	MobRaces.Skeleton:{"show_monster_body":true},
-	MobRaces.Spirit:{"scale": .75,"eye_whites":Color(100, 100, 100, 1.0)},
+	MobRaces.Spirit:{"scale": .75,"eye_whites":Color(100, 100, 100, 1.0),"eye_pupil":Color(100, 100, 100, 1.0)},
 	MobRaces.Ogre:{"scale": 1.5,"eye_whites":Color.ORANGE},
 	MobRaces.Demon:{"eye_whites":Color.BLACK},
 	MobRaces.Statue:{},
 }
 
+const race_cam_heights :={
+	"default": 6.7,
+	MobRaces.Ogre: 10,
+	MobRaces.Spirit: 5
+}
+
 # VAR CONST
 
-# TODO () tags full-hide, no-hide.
-# TODO () use it for validation. use 
+# TODO () use tag_list for validation of tags.
 var known_tags := ["masculine","feminine", MobTypes.keys(), MobRaces.keys(), "full-hat"] 
 
 var gender_norms := {
@@ -55,7 +61,7 @@ var gender_norms := {
 		[],["feminine"],
 		{},{},
 		{},{},
-		{"Body":{0: 0, 8: -1},"Brows":{0: 1}},#"Body Shape","Lips Width" "Brow Thickness"
+		{"Body":{0: 0, 8: -1},"Brows":{0: 1}},{},#"Body Shape","Lips Width" "Brow Thickness"
 		{"shape":{"Body": [0]}}  #"enforce": ["Body Shape"]
 	),
 	Gender.NonBin: MeshNormData.new(),
@@ -63,7 +69,7 @@ var gender_norms := {
 		[],["masculine"],
 		{"Beard":"empty"},{"Hair":"empty"},
 		{},{},
-		{"Body":{0: .5, 8: 1},"Brows":{0: 0}},#"Body Shape","Lips Width", "Brow Thickness"
+		{"Body":{0: .5, 8: 1},"Brows":{0: 0}},{},#"Body Shape","Lips Width", "Brow Thickness"
 		{"mesh_name":["Beard","Hair"]}# enforce
 	)
 }
@@ -78,11 +84,11 @@ var type_norms := {
 
 var race_norms := {
 	MobRaces.Human: MeshNormData.new(
-		[], other_races.call(MobRaces.Human), # enforce
-		{"Accesory": "empty"},{},
+		[], other_races.call(MobRaces.Human),
+		{"Accessory": "empty"},{},
 		{},{},
 		{"Body": {1: 0}},{}, # "Body Mass"
-		{"mesh_name": ["Accesory"]}
+		{"mesh_name": ["Accessory"],"tags":other_races.call(MobRaces.Human)}
 	),
 	MobRaces.Demon: MeshNormData.new(
 		["Demon"], other_races.call(MobRaces.Demon),
@@ -97,26 +103,27 @@ var race_norms := {
 		["Ogre"], other_races.call(MobRaces.Ogre),
 		{"Hair":"empty","Eyelashes":"empty","Beard":"empty","Brows":"empty","Shoes":"empty"},{},
 		{"Body":Color.DARK_OLIVE_GREEN},{},
-		{"Body": {1: 1}}#"Body Mass"
+		{"Body": {1: 1}},{},#"Body Mass"
+		{"mesh_name": ["Accessory","Hair","Brows","Beard"]}
 	),
 	MobRaces.Statue: MeshNormData.new(
 		[], other_races.call(MobRaces.Statue),
-		{"Hat":"empty","Accesory": "empty"},{},
-		{"EquipmentBulk":Statue_Grey,"BodyBulk":Statue_Grey},
+		{"Hat":"empty","Accessory": "empty"},{},
+		{"EquipmentBulk":Statue_Grey,"BodyBulk":Statue_Grey},{},
 		{"Body": {1: 0}}#"Body Mass"
 	),
 	MobRaces.Spirit: MeshNormData.new(
 		[], other_races.call(MobRaces.Spirit),
-		{"Hair":"empty","Eyelashes":"empty","Beard":"empty","Brows":"empty","EquipmentBulk":"empty","Accesory": "empty"},{},
+		{"Hair":"empty","Eyelashes":"empty","Beard":"empty","Brows":"empty","EquipmentBulk":"empty","Accessory": "empty"},{},
 		{
 			"Eyes": Color(10, 10, 10, 1.0),
 			"Body": [
 				range(10).map(func (n): return n/10.0),
-				[5], [5],
+				[2], [2],
 				[1.0]]#(randf()*11, randf()*11, randf()*11, 1.0),
-		},
-		{"Body": {1: 0}},#"Body Mass"
-		{"mesh_name": ["Accesory","Hair","Beard","Brows"]}
+		},{},
+		{"Body": {1: 0}},{},#"Body Mass"
+		{"mesh_name": ["Accessory","Hair","Beard","Brows"]}
 	),
 	MobRaces.Skeleton: MeshNormData.new(
 		[],other_races.call(MobRaces.Skeleton),
@@ -124,7 +131,7 @@ var race_norms := {
 	)
 }
 
-# TODO () shape names from mesh / some other place. use shape_id as key instead
+# TODO () shape names from mesh / some other place. use shape_id as key instead?
 var body_mesh_info := {
 	"Body": {
 		"color_range": skin_color_ranges,
@@ -176,7 +183,7 @@ var eq_mesh_info := {
 		"Left Hand": {
 			"mesh_folder": "res://assets/mob/l_hand/",
 		},
-		"Accesory": {
+		"Accessory": {
 			"mesh_folder": "res://assets/mob/accessories/",
 		},
 }

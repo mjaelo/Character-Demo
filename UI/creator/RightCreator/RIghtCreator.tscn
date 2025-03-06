@@ -1,0 +1,161 @@
+[gd_scene load_steps=8 format=3 uid="uid://cbnhv3c2toevu"]
+
+[ext_resource type="Script" path="res://UI/creator/RightCreator/camera_controls.gd" id="1_opu4t"]
+[ext_resource type="Texture2D" uid="uid://c7i25rbifin72" path="res://assets/UI/arrow.png" id="2_tabp0"]
+[ext_resource type="Texture2D" uid="uid://cdecgjlftecq" path="res://assets/UI/circle.png" id="3_0v2r7"]
+[ext_resource type="Texture2D" uid="uid://cpefxvms555v0" path="res://assets/UI/arrow-click.png" id="3_vdech"]
+[ext_resource type="Texture2D" uid="uid://bnn3puajbt4wj" path="res://assets/UI/arrow-hover.png" id="4_dcrma"]
+[ext_resource type="Texture2D" uid="uid://b2wji2toubay4" path="res://assets/UI/circle-click.png" id="6_8co8s"]
+[ext_resource type="Texture2D" uid="uid://dnpkqvxl6dppi" path="res://assets/UI/circle-hover.png" id="7_krv6e"]
+
+[node name="Right-Creator" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_opu4t")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 3
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Zoom" type="VBoxContainer" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="ZoomIn" type="Button" parent="HBoxContainer/VBoxContainer2/Zoom"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "+"
+
+[node name="ZoomOut" type="Button" parent="HBoxContainer/VBoxContainer2/Zoom"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "-"
+
+[node name="Rotation" type="Control" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(125, 113)
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 8
+
+[node name="Rotate-T" type="TextureButton" parent="HBoxContainer/VBoxContainer2/Rotation"]
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2
+offset_left = 45.0
+offset_right = 80.0
+offset_bottom = 35.0
+pivot_offset = Vector2(17.5, 17.5)
+size_flags_horizontal = 4
+tooltip_text = "Randomize"
+texture_normal = ExtResource("2_tabp0")
+texture_pressed = ExtResource("3_vdech")
+texture_hover = ExtResource("4_dcrma")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Rotation" type="Control" parent="HBoxContainer/VBoxContainer2/Rotation"]
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+anchors_preset = 0
+offset_top = 39.0
+offset_right = 125.0
+offset_bottom = 74.0
+metadata/_edit_use_anchors_ = true
+
+[node name="Rotate-L" type="TextureButton" parent="HBoxContainer/VBoxContainer2/Rotation/Rotation"]
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2
+offset_right = 39.0
+offset_bottom = 35.0
+rotation = -1.5708
+pivot_offset = Vector2(17.5, 17.5)
+size_flags_horizontal = 3
+tooltip_text = "Randomize"
+texture_normal = ExtResource("2_tabp0")
+texture_pressed = ExtResource("3_vdech")
+texture_hover = ExtResource("4_dcrma")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Rotate-Reset" type="TextureButton" parent="HBoxContainer/VBoxContainer2/Rotation/Rotation"]
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2
+offset_left = 43.0
+offset_right = 82.0
+offset_bottom = 35.0
+size_flags_horizontal = 3
+tooltip_text = "Randomize"
+texture_normal = ExtResource("3_0v2r7")
+texture_pressed = ExtResource("6_8co8s")
+texture_hover = ExtResource("7_krv6e")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Rotate-R" type="TextureButton" parent="HBoxContainer/VBoxContainer2/Rotation/Rotation"]
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2
+offset_left = 86.0
+offset_right = 125.0
+offset_bottom = 35.0
+rotation = 1.5708
+pivot_offset = Vector2(17.5, 17.5)
+size_flags_horizontal = 3
+tooltip_text = "Randomize"
+texture_normal = ExtResource("2_tabp0")
+texture_pressed = ExtResource("3_vdech")
+texture_hover = ExtResource("4_dcrma")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="Rotate-B" type="TextureButton" parent="HBoxContainer/VBoxContainer2/Rotation"]
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2
+offset_left = 45.0
+offset_top = 78.0
+offset_right = 80.0
+offset_bottom = 113.0
+rotation = 3.14159
+pivot_offset = Vector2(17.5, 17.5)
+size_flags_horizontal = 4
+tooltip_text = "Randomize"
+texture_normal = ExtResource("2_tabp0")
+texture_pressed = ExtResource("3_vdech")
+texture_hover = ExtResource("4_dcrma")
+ignore_texture_size = true
+stretch_mode = 4
+
+[node name="CameraHeight" type="VSlider" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+step = 0.1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Control" type="Control" parent="."]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="Start Game" type="Button" parent="."]
+layout_mode = 2
+text = "Start Game"
+
+[connection signal="button_down" from="HBoxContainer/VBoxContainer2/Zoom/ZoomIn" to="." method="_on_zoom_in_button_down"]
+[connection signal="button_up" from="HBoxContainer/VBoxContainer2/Zoom/ZoomIn" to="." method="_on_zoom_in_button_up"]
+[connection signal="button_down" from="HBoxContainer/VBoxContainer2/Zoom/ZoomOut" to="." method="_on_zoom_out_button_down"]
+[connection signal="button_up" from="HBoxContainer/VBoxContainer2/Zoom/ZoomOut" to="." method="_on_zoom_out_button_up"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer2/Rotation/Rotate-T" to="." method="_on_rotate_t_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer2/Rotation/Rotation/Rotate-L" to="." method="_on_rotate_l_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer2/Rotation/Rotation/Rotate-Reset" to="." method="_on_rotate_reset_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer2/Rotation/Rotation/Rotate-R" to="." method="_on_rotate_r_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer2/Rotation/Rotate-B" to="." method="_on_rotate_b_pressed"]
+[connection signal="value_changed" from="HBoxContainer/CameraHeight" to="." method="_on_camera_height_value_changed"]
+[connection signal="pressed" from="Start Game" to="." method="_on_start_game_pressed"]
