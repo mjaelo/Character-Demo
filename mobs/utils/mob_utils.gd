@@ -1,5 +1,6 @@
 extends Node
 
+# TODO fix after adding skin to clothes
 const main_materials := { # TODO () eyes are not here...
 	"merchant-top": 2,
 	"merchant-hat": 2,
@@ -16,24 +17,35 @@ func _ready() -> void:
 # SET MESH DATA
 func set_mesh(file_name:String, mesh_instance:MeshInstance3D, path:String):
 	# set mesh from file
-	if file_name == "empty":
-		mesh_instance.hide()
+	var file_path = path+file_name+".tres"
+	var new_mesh := Utils.load_mesh_from_file(file_path)
+	if new_mesh:
+		var color = get_mesh_color(mesh_instance)
+		var shape_names := get_shape_names_from_mesh(mesh_instance.mesh)
+		
+		mesh_instance.show()
+		mesh_instance.mesh = new_mesh
+		set_mesh_color(color,mesh_instance)
+		
+		# resetting shape values to mesh shouldnt be neccesarry
+		if get_shape_names_from_mesh(mesh_instance.mesh) != shape_names:
+			print(mesh_instance.mesh.resource_path," has wrong shape order")
+			var shape_values := range(mesh_instance.get_blend_shape_count()).map(func (id): return mesh_instance.get_blend_shape_value(id))
+			for i in shape_names.size():
+				var id = mesh_instance.find_blend_shape_by_name(shape_names[i])
+				if id >-1:
+					mesh_instance.set_blend_shape_value(id, shape_values[i])
 	else:
-		var file_path = path+file_name+".tres"
-		var new_mesh := Utils.load_mesh_from_file(file_path)
-		if new_mesh:
-			var color = get_mesh_color(mesh_instance)
-			mesh_instance.show()
-			mesh_instance.mesh = new_mesh
-			
-			set_mesh_color(color,mesh_instance)
-		else:
-			mesh_instance.hide()
+		mesh_instance.hide()
+		if file_name != "empty":
 			print(file_path," not found")
 	
 	# handle specific case mashes
-	if mesh_instance.name == "Hat": 
-		adjust_hair_hider(file_name,mesh_instance,mesh_instance.get_parent())
+	if mesh_instance.name == "Hat" || mesh_instance.name == "Hair": 
+		var skeleton:Skeleton3D = mesh_instance.get_parent()
+		var hair_node:MeshInstance3D = skeleton.get_node("Hair")
+		var hat_node:MeshInstance3D = skeleton.get_node("Hat")
+		adjust_hair_hider(hat_node,hair_node, skeleton)
 	
 	# adjust sword collision shape
 	if mesh_instance.name == "Sword":
@@ -46,31 +58,35 @@ func set_mesh(file_name:String, mesh_instance:MeshInstance3D, path:String):
 			col_shape.shape = sphere
 
 # TODO use full_hats tag?
-func adjust_hair_hider(_hat_name, mesh_instance: MeshInstance3D, skeleton:Skeleton3D):
+func adjust_hair_hider(hat_mesh: MeshInstance3D, hair_mesh: MeshInstance3D, skeleton:Skeleton3D):
 	var hider_node:BoneAttachment3D = skeleton.get_node("HairHider")
-	var hair_node:MeshInstance3D = skeleton.get_node("Hair")
-	var hair_material: Material = hair_node.get_active_material(0)
+	var hair_material: Material = hair_mesh.get_active_material(0)
+	var body_data:BodyData = skeleton.get_node("../../../").body_data
+	var eq_data:EquipmentData = skeleton.get_node("../../../").equipment_data
 	
 	# hide hair if hat is visible and is full hat
-	var is_hair_bald:bool = skeleton.get_node("../../../").body_data.hair_mesh.mesh_name == "empty"
-	hair_node.visible = !is_hair_bald && !(mesh_instance.visible && full_hats.any(func (hat): return _hat_name == hat))
-	if mesh_instance.visible:
+	var is_hair_bald:bool = body_data.hair_mesh.mesh_name == "empty"
+	hair_mesh.visible = !is_hair_bald && !(hat_mesh.visible && full_hats.any(func (hat): return eq_data.hat_mesh.mesh_name == hat))
+	if hat_mesh.visible && hair_mesh.visible:
 		hider_node.show()
 		
 		# add new hiders
 		var base_mesh:MeshInstance3D = hider_node.get_node("Controller/HatHairHider")
 		var new_hider_node:Node3D = hider_node.get_node("Controller/NewHiders")
+		
+		# adjust hiders
+		hair_material.transparency = 1
+		hair_material.render_priority = -1
+		base_mesh.mesh = hat_mesh.mesh
+		base_mesh.get_active_material(0).render_priority = 2
+		for hat_hider:MeshInstance3D in new_hider_node.get_children():
+			hat_hider.mesh = hat_mesh.mesh
+		
 		if new_hider_node.get_child_count() == 0:
 			for i in range(100):
 				var new_node = base_mesh.duplicate()
 				new_node.position.y += i * .1
 				new_hider_node.add_child(new_node)
-		
-		# adjust hiders
-		hair_material.transparency = 1
-		base_mesh.mesh = mesh_instance.mesh
-		for hat_hider:MeshInstance3D in new_hider_node.get_children():
-			hat_hider.mesh = mesh_instance.mesh
 	else:
 		hider_node.hide()
 		hair_material.transparency = 0
@@ -87,7 +103,7 @@ func set_skeleton_shape_key(value:float, shape_name:String, skel:Skeleton3D):
 
 func adjust_hip(skel:Skeleton3D):
 	var hip_controller = skel.get_node("Hip/HipContainer")
-	var body_mesh: MeshInstance3D = skel.get_node("Body")
+	var body_mesh: MeshInstance3D = skel.get_node("Top")
 	
 	var added_amount := 0
 	for shape_name in MobConstants.hip_movers:
@@ -117,6 +133,11 @@ func set_mesh_color(value:Color, mesh_instance:MeshInstance3D,material_nr:=-1):
 				mesh_instance.material_override = material
 			else:
 				mesh_instance.set_surface_override_material(material_nr, material)
+	
+		if mesh_instance.name == "Body" && material_nr == 0:
+			for n_name in MobConstants.meshes_with_skin:
+				if n_name != mesh_instance.name:
+					set_mesh_color(value, mesh_instance.get_parent().get_node(n_name),material_nr)
 
 # GET MESH DATA
 func get_main_material(mesh_instance:MeshInstance3D) -> int:
@@ -125,6 +146,8 @@ func get_main_material(mesh_instance:MeshInstance3D) -> int:
 	for mesh_name in main_materials.keys():
 		if mesh_instance.mesh.resource_path.find(mesh_name) != -1:
 			return main_materials[mesh_name]
+	if MobConstants.meshes_with_skin.has(mesh_instance.name):
+		return 1
 	return 0
 
 func get_mesh_color(mesh_instance:MeshInstance3D,material_nr:=-1)-> Color:
@@ -142,16 +165,17 @@ func get_mesh_color(mesh_instance:MeshInstance3D,material_nr:=-1)-> Color:
 	return Color(-1,-1,-1)
 
 func get_mesh_from_skeleton(mesh_name:String, skeleton:Skeleton3D) -> MeshInstance3D:
-	return skeleton.get_node(mesh_name) if !MobConstants.hand_names.has(mesh_name) else (func():
-		return  skeleton.get_node("Hip" if MobConstants.hand_names[0] == mesh_name else "Back").get_child(0).get_child(0)).call()
-
-# TODO add to caches in Utils
-var cached_mesh_shape_names := {} # f.e. "Body": ["Body Mass","Body Shape", ... ]
-func get_shape_names_from_mesh(mesh_instance:MeshInstance3D)->Array:
-	var mesh_name:String = mesh_instance.name
-	if cached_mesh_shape_names.has(mesh_name):
-		return cached_mesh_shape_names[mesh_name]
+	if MobConstants.hand_names.has(mesh_name):
+		return skeleton.get_node("Hip" if MobConstants.hand_names[0] == mesh_name else "Back").get_child(0).get_child(0)
 	else:
-		return range(0, mesh_instance.mesh.get_blend_shape_count()).map(
-				func (i): return mesh_instance.mesh.get_blend_shape_name(i)
-			)
+		return skeleton.get_node(mesh_name)  
+		
+# TODO add to caches in Utils
+var cached_mesh_shape_names := {} # f.e. "Top": ["Body Mass","Body Shape", ... ]
+func get_shape_names_from_mesh(mesh_array:ArrayMesh)->Array:
+	var mesh_name:String = mesh_array.resource_path
+	if !cached_mesh_shape_names.has(mesh_name):
+		cached_mesh_shape_names[mesh_name] = range(0, mesh_array.get_blend_shape_count()).map(
+			func (i): return mesh_array.get_blend_shape_name(i)
+		)
+	return cached_mesh_shape_names[mesh_name]

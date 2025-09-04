@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://hdk05f78cjdv"]
 
-[ext_resource type="Script" path="res://UI/creator/PresetTab/preset_tab.gd" id="1_2mwuw"]
+[ext_resource type="Script" uid="uid://dplf5gh5gs81a" path="res://UI/creator/PresetTab/preset_tab.gd" id="1_2mwuw"]
 [ext_resource type="Texture2D" uid="uid://cki8nbrguu2eb" path="res://assets/UI/dice.png" id="2_8tttn"]
 [ext_resource type="Texture2D" uid="uid://dm80ly07ng6dm" path="res://assets/UI/dice-hover.png" id="3_47ibg"]
 [ext_resource type="PackedScene" uid="uid://bnros6www7p0j" path="res://UI/utils/ValuePicker.tscn" id="3_qmqha"]

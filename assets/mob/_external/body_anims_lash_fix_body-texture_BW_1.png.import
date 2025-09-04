@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bjw71pirkr455"
+path="res://.godot/imported/body_anims_lash_fix_body-texture_BW_1.png-402ee41110c1102e1d98811f80c10c52.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "82720f707301826b787e3c9aa9b60665"
+}
+
+[deps]
+
+source_file="res://assets/mob/_external/body_anims_lash_fix_body-texture_BW_1.png"
+dest_files=["res://.godot/imported/body_anims_lash_fix_body-texture_BW_1.png-402ee41110c1102e1d98811f80c10c52.ctex"]
+
+[params]
+
+compress/mode=0
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=1

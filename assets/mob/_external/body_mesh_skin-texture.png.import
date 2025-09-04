@@ -2,14 +2,11 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://8ck5jiqlfr08"
+uid="uid://de277eg0gpiid"
 path.s3tc="res://.godot/imported/body_mesh_skin-texture.png-85f89fa13d8da107c6b0f58fcc3ac6c3.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
-}
-generator_parameters={
-"md5": "ab2e0ac409c04df85e8b0d6ddc890a61"
 }
 
 [deps]

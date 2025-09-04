@@ -1,9 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://x7q417sdhroh"]
+[gd_scene load_steps=9 format=3 uid="uid://x7q417sdhroh"]
 
 [ext_resource type="PackedScene" uid="uid://1gcmvi5s3w26" path="res://mobs/player/Player.tscn" id="1_2yhql"]
-[ext_resource type="Script" path="res://general/main.gd" id="1_hg08b"]
+[ext_resource type="Script" uid="uid://b0n4rthacfupr" path="res://general/main.gd" id="1_hg08b"]
 [ext_resource type="PackedScene" uid="uid://klqaekdm4u3l" path="res://UI/creator/Creator/Creator.tscn" id="4_cf756"]
-[ext_resource type="Texture2D" uid="uid://c6bvylyubnha2" path="res://env/autumn_field_2k.exr" id="5_adumc"]
+[ext_resource type="Environment" uid="uid://cmp5c1kaf6456" path="res://env/env.tres" id="4_xns65"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_ybawd"]
 size = Vector3(60, 1, 60)
@@ -12,49 +12,18 @@ size = Vector3(60, 1, 60)
 albedo_color = Color(0.196188, 0.25204, 0.21696, 1)
 metallic = 0.54
 metallic_specular = 0.7
-roughness = 0.49
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_f8dux"]
 size = Vector3(60, 1, 60)
 
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_6atnb"]
-panorama = ExtResource("5_adumc")
-
-[sub_resource type="Sky" id="Sky_y4c4k"]
-sky_material = SubResource("PanoramaSkyMaterial_6atnb")
-
-[sub_resource type="Environment" id="Environment_e0rme"]
-background_mode = 2
-sky = SubResource("Sky_y4c4k")
-ssr_enabled = true
-ssao_enabled = true
-ssil_enabled = true
-sdfgi_enabled = true
-glow_enabled = true
-glow_normalized = true
-glow_intensity = 1.13
-glow_strength = 0.8
-glow_bloom = 0.24
-glow_blend_mode = 1
-glow_hdr_threshold = 1.13
-glow_hdr_scale = 1.15
-fog_light_color = Color(0.505294, 0.561868, 0.579728, 1)
-fog_light_energy = 1.11
-fog_sun_scatter = 0.39
-fog_sky_affect = 0.644
-volumetric_fog_albedo = Color(0.750877, 0.774578, 0.752898, 1)
-volumetric_fog_anisotropy = 0.56
-volumetric_fog_length = 10.0
-volumetric_fog_sky_affect = 0.329
-adjustment_enabled = true
-adjustment_brightness = 0.89
-adjustment_contrast = 1.06
-adjustment_saturation = 1.75
+[sub_resource type="BoxShape3D" id="BoxShape3D_xns65"]
+size = Vector3(120, 120, 120)
 
 [node name="main" type="Node3D"]
 script = ExtResource("1_hg08b")
 
 [node name="Player" parent="." instance=ExtResource("1_2yhql")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.19209e-07, 0)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.669665, 0)
@@ -80,4 +49,11 @@ directional_shadow_blend_splits = true
 directional_shadow_fade_start = 0.65
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_e0rme")
+environment = ExtResource("4_xns65")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_xns65")
+
+[connection signal="body_exited" from="Area3D" to="." method="_on_area_3d_body_exited"]

@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=3 uid="uid://klqaekdm4u3l"]
 
-[ext_resource type="Script" path="res://UI/creator/Creator/Creator.gd" id="1_yntgj"]
+[ext_resource type="Script" uid="uid://dl5cq6kqcnnqd" path="res://UI/creator/Creator/Creator.gd" id="1_yntgj"]
 [ext_resource type="PackedScene" uid="uid://hdk05f78cjdv" path="res://UI/creator/PresetTab/preset_tab.tscn" id="2_85g5j"]
-[ext_resource type="Script" path="res://UI/creator/Creator/SetupCreator.gd" id="4_a5kin"]
+[ext_resource type="Script" uid="uid://3uud7t73nsw0" path="res://UI/creator/Creator/SetupCreator.gd" id="4_a5kin"]
 [ext_resource type="PackedScene" uid="uid://cbnhv3c2toevu" path="res://UI/creator/RightCreator/RIghtCreator.tscn" id="5_us56g"]
 
 [node name="Creator" type="Control"]

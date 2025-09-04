@@ -1,10 +1,11 @@
 extends Node
-
+#TODO add more probabilities: nonbin prob, hat prob
 
 # UTILS FOR CONST
 var other_races := func (race_id:int)->Array: return MobRaces.keys().filter(func (race): return race != MobRaces.keys()[race_id])
 var race_cam_height := func (race_id:int)->float: return race_cam_heights.default if !race_cam_heights.has(race_id) else race_cam_heights[race_id]
 var get_random_gender := func ()->int: return [Gender.Male,Gender.Female].pick_random() if randf()> variation_chance else Gender.NonBin
+# TODO add range conventer
 
 # ENMUS
 enum MobTypes {Civilian, Guard, Noble, Merchant, Farmer}
@@ -12,6 +13,7 @@ enum MobRaces {Human,Skeleton,Ogre,Spirit,Demon,Statue}
 enum Gender {Male,NonBin,Female}
 
 # CONST
+const meshes_with_skin := ["Top","Bottom","Head"]
 const hand_names := ["Right Hand","Left Hand"]
 const weapon_names := ["Sword","Shield"]
 const non_empty_names := ["Top","Bottom","Shoes","Eyelashes"]
@@ -19,21 +21,22 @@ const hair_linked_names := ["Brows","Beard"]
 const half_empty_names := ["Hat", "Beard"]
 const gendered_mesh_names := ["Beard","Eyelashes"]
 const hip_movers := ["Body Shape", "Body Mass"]
-const shape_control_meshes := ["Body","Brows"] # meshes with shape keys
+const shape_control_meshes := ["Body","Brows","Head"] # meshes with shape keys
 
 const hair_color_ranges := {"hue": [0,.2], "saturation": [.1,.4], "brightness": [0,.7]} 
 const clothes_color_ranges := {"hue": [0.0, .27], "saturation": [0.0, .3], "brightness": [0.2, .6]}
 const eyes_color_ranges := {"hue": [0.1, 0.6], "saturation": [0.2, 0.5], "brightness": [0.3, 0.8]}
 const skin_color_ranges := {"hue": [0.01, 0.08], "saturation": [0.2, 0.3], "brightness": [0.3, 0.95]}
+const Statue_Grey := Color(.3, .3, .3, 0)
 
-const variation_chance := 0.1 # chance for non normative gender and body shapes
+# TODO add separate probabilities for non binary, hat*
+const variation_chance := 0.1 # chance for non normative element.
 
 const mob_names := {
 	Gender.NonBin: ["Alex", "Sam", "Think", "Hard", "About", "Your Life Choices"],
 	Gender.Male: ["Jeff", "Hanz", "Louis", "Robert","Clyde","Rupert","Steve"], 
 	Gender.Female: ["Anabelle", "Eve", "Penny", "Cleo","Sue"], }
 
-const Statue_Grey := Color(.3, .3, .3, 0)
 
 # for adjusting mob model in a way not covered by body and eq data TODO add shape key override?
 const race_action_dict := {
@@ -68,8 +71,8 @@ var gender_norms := {
 	Gender.Female: MeshNormData.new(
 		[],["masculine"],
 		{"Beard":"empty"},{"Hair":"empty"},
-		{},{},
-		{"Body":{0: .5, 8: 1},"Brows":{0: 0}},{},#"Body Shape","Lips Width", "Brow Thickness"
+		{},{}, 
+		{"Body":{0: .5, 8: 1},"Brows":{0: 0}},{},#"Body Shape",TODO "Lips Width", "Brow Thickness"
 		{"mesh_name":["Beard","Hair"]}# enforce
 	)
 }
@@ -85,7 +88,7 @@ var type_norms := {
 var race_norms := {
 	MobRaces.Human: MeshNormData.new(
 		[], other_races.call(MobRaces.Human),
-		{"Accessory": "empty"},{},
+		{"Accessory": "empty","Top":"tshirt","Bottom":"pants"},{},
 		{},{},
 		{"Body": {1: 0}},{}, # "Body Mass"
 		{"mesh_name": ["Accessory"],"tags":other_races.call(MobRaces.Human)}
@@ -94,15 +97,15 @@ var race_norms := {
 		["Demon"], other_races.call(MobRaces.Demon),
 		{},{},
 		{
-			"Body": Color.DARK_RED,
+			"Top": Color.DARK_RED,
 			"EquipmentBulk":Color.BLACK,
 		},{},
 		{"Body": {1: 0}},{} # "Body Mass"
 	),
 	MobRaces.Ogre: MeshNormData.new(
 		["Ogre"], other_races.call(MobRaces.Ogre),
-		{"Hair":"empty","Eyelashes":"empty","Beard":"empty","Brows":"empty","Shoes":"empty"},{},
-		{"Body":Color.DARK_OLIVE_GREEN},{},
+		{"Hair":"empty","Eyelashes":"empty","Beard":"empty","Brows":"empty","Feet":"empty"},{},
+		{"Top":Color.DARK_OLIVE_GREEN},{},
 		{"Body": {1: 1}},{},#"Body Mass"
 		{"mesh_name": ["Accessory","Hair","Brows","Beard"]}
 	),
@@ -117,7 +120,7 @@ var race_norms := {
 		{"Hair":"empty","Eyelashes":"empty","Beard":"empty","Brows":"empty","EquipmentBulk":"empty","Accessory": "empty"},{},
 		{
 			"Eyes": Color(10, 10, 10, 1.0),
-			"Body": [
+			"Top": [
 				range(10).map(func (n): return n/10.0),
 				[2], [2],
 				[1.0]]#(randf()*11, randf()*11, randf()*11, 1.0),
@@ -132,13 +135,20 @@ var race_norms := {
 }
 
 # TODO () shape names from mesh / some other place. use shape_id as key instead?
+# TODO How to handle body and top separate colors?
 var body_mesh_info := {
 	"Body": {
 		"color_range": skin_color_ranges,
 		"shape_limits":{
 			"Body Shape": [0,1],"Body Mass": [-.5,1],"Body Muscles": [-.5,1],
-			"Lips Width": [-1,1],"Jaw Shape": [-1,1], "Face Length": [-.5,.5],
-			"Eye Lower Lid": [-1,1], "Eye Upper Lid": [-1,1],"Eye Edge": [-1,1]
+			#"Lips Width": [-1,1],"Jaw Shape": [-1,1], "Face Length": [-.5,.5],
+			#"Eye Lower Lid Height": [-1,1], "Eye Upper Lid Height": [-1,1],"Eye Edge Height": [-1,1]
+		}
+	},
+	"Head": {
+		"shape_limits":{
+			"Lips Width": [-1,1],"Lips Thickness": [-1,1],"Lip Corner": [-1,1],"Jaw Shape": [-1,1], "Face Length": [-1,1],
+			"Eye Lower Lid Height": [-1,1], "Eye Upper Lid Height": [-1,1],"Eye Edge Height": [-1,1]
 		}
 	},
 	"Eyes": {
@@ -169,7 +179,7 @@ var eq_mesh_info := {
 			"mesh_folder": "res://assets/mob/bottom/",
 			"color_range": clothes_color_ranges
 		},
-		"Shoes": {
+		"Feet": {
 			"mesh_folder": "res://assets/mob/shoes/",
 			"color_range": clothes_color_ranges
 		},

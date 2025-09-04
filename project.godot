@@ -14,7 +14,7 @@ config/name="Character Demo"
 config/description="Demonstration of 3D character creator and short movement test"
 config/version="0.1"
 run/main_scene="res://general/main.tscn"
-config/features=PackedStringArray("4.3", "Forward Plus")
+config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -44,6 +44,7 @@ folder_colors={
 
 [filesystem]
 
+import/blender/enabled=false
 import/fbx/enabled=false
 
 [input]
@@ -73,7 +74,7 @@ Run={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194325,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ]
 }
-Sheave={
+DrawWeapon={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":82,"key_label":0,"unicode":114,"location":0,"echo":false,"script":null)
 ]
@@ -107,4 +108,6 @@ Down={
 [rendering]
 
 textures/webp_compression/compression_method=3
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality=3
 lightmapping/primitive_meshes/texel_size=2.0

@@ -7,7 +7,7 @@ extends Control
 
 var mob_data: MobData
 
-# pickers for mesh, color, shape
+# tab name > mesh name > pickers for mesh, color, shape
 const menu_data := {
 	"Body": {
 		"Body": [false,true,["Body Shape","Body Mass","Body Muscles"]]
@@ -15,18 +15,18 @@ const menu_data := {
 	"Face": {
 		"Eyes": [false,true,[]],
 		"Eyelashes": [true,false,[]],
-		"Body": [false,false,["Lips Width","Jaw Shape", "Face Length","Eye Lower Lid", "Eye Upper Lid","Eye Edge"]],
+		"Head": [false,false,["Lips Width","Lips Thickness","Lip Corner","Jaw Shape", "Face Length","Eye Lower Lid Height", "Eye Upper Lid Height","Eye Edge Height"]],
 		"Accessory": [true,false,[]],
 	},
 	"Hair": {
 		"Hair": [true,true,[]],
-		"Brows":  [false,true,["Brow Thickness","Brow Length","Brow Inner","Brow Outer"]],
+		"Brows":  [false,true,["Brow Thickness","Brow Inner Height","Brow Outer Height"]],
 		"Beard": [true,true,[]]
 	},
 	"Clothes": {
 		"Top": [true,true,[]],
 		"Bottom": [true,true,[]],
-		"Shoes": [true,true,[]],
+		"Feet": [true,true,[]],
 		"Hat": [true,true,[]],
 		"Right Hand": [true,false,[]],
 		"Left Hand": [true,false,[]],
@@ -49,8 +49,8 @@ func _ready():
 	
 	# apply random mob data
 	randomize_all()
-	preset_node.mob_name_picker.text = ""
 	mob_data.mob_name = ""
+	preset_node.mob_name_picker.text = ""
 
 func give_player_control(has_control:bool):
 	mob.set_process_unhandled_input(has_control)
@@ -89,6 +89,7 @@ func randomize_all():
 	var race = MobConstants.MobRaces.Human if !mob_data else -1
 	mob_data = MobGenerator.get_random_mob_data(skeleton,race,type)
 	MobGenerator.set_mob_data_to_mob(mob_data,mob)
+	var mesh:MeshInstance3D = skeleton.get_node("Top")
 	update_all_pickers()
 
 # MESH EDIT
@@ -99,29 +100,19 @@ func update_all_pickers():
 	preset_node.mob_race_picker.picker.value = mob_data.race
 	preset_node.mob_gender_picker.value = mob_data.gender
 	
-	# BODY 
-	var body_data := mob_data.body_data
-	var mesh_data_names := Utils.get_user_defined_variables(body_data)
-	var mesh_names := MobConstants.body_mesh_info.keys()
-	
-	for i in mesh_data_names.size():
-		var mesh_name:String = mesh_names[i]
-		var mesh_data_name:String = mesh_data_names[i]
-		var mesh_data: MeshData = body_data[mesh_data_name]
-		set_mesh_data_to_pickers(mesh_data,mesh_name)
-	
-	# EQ
-	var eq_data := mob_data.equipment_data
-	var mesh_data_names2 := Utils.get_user_defined_variables(eq_data)
-	var mesh_names2 := MobConstants.eq_mesh_info.keys()
-	
-	for i in mesh_data_names2.size():
-		var mesh_name:String = mesh_names2[i]
-		var mesh_data_name:String = mesh_data_names2[i]
-		var mesh_data: MeshData = eq_data[mesh_data_name]
-		set_mesh_data_to_pickers(mesh_data,mesh_name)
+	# BODY, EQ
+	for data_type in ["body_data","equipment_data"]:
+		var body_eq_data = mob_data[data_type]
+		var mesh_data_names := Utils.get_user_defined_variables(body_eq_data)
+		var mesh_names:Array = MobConstants["body_mesh_info" if data_type == "body_data" else "eq_mesh_info"].keys()
+		
+		for i in mesh_data_names.size():
+			var mesh_name:String = mesh_names[i]
+			var mesh_data_name:String = mesh_data_names[i]
+			var mesh_data: MeshData = body_eq_data[mesh_data_name]
+			set_mesh_data_to_pickers(mesh_data,mesh_name)
 
-func set_mesh_data_to_pickers(mesh_data, mesh_name:String):
+func set_mesh_data_to_pickers(mesh_data:MeshData, mesh_name:String):
 	for tab_name:String in menu_data.keys():
 		if menu_data[tab_name].has(mesh_name):
 			if mesh_data.mesh_name && menu_data[tab_name][mesh_name][0]:
@@ -129,7 +120,7 @@ func set_mesh_data_to_pickers(mesh_data, mesh_name:String):
 			if mesh_data.mesh_color && menu_data[tab_name][mesh_name][1]:
 				update_mesh_picker(mesh_data.mesh_color,tab_name,mesh_name,mesh_name+"Color")
 			if mesh_data.mesh_shape && menu_data[tab_name][mesh_name][2]:
-				var shape_names := MobUtils.get_shape_names_from_mesh(skeleton.get_node(mesh_name))
+				var shape_names := MobUtils.get_shape_names_from_mesh(skeleton.get_node(mesh_name).mesh)
 				if shape_names.size() != mesh_data.mesh_shape.size():
 					print(mesh_name+" shapes differ in saved data and mesh")
 					continue

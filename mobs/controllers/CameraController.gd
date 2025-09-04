@@ -70,9 +70,3 @@ func handle_zoom(event:InputEventMouseButton):
 				switch_cameras()
 	elif current_camera == camera_1p && button_id == 5: # scroll up (out)
 		switch_cameras()
-
-# rotate player model to camera when moving
-func rotate_player_body(direction: Vector3, parent:Mob):
-	if direction != Vector3.ZERO && parent.speed > 0 && current_camera != camera_1p:
-		var camera_yaw = atan2(global_transform.basis.z.x, global_transform.basis.z.z)
-		parent.get_node("body").rotation.y = camera_yaw + PI # Add PI to make the player face the same direction as the camera

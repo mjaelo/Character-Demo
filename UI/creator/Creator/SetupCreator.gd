@@ -4,8 +4,8 @@ const padding := 10
 var skeleton:Skeleton3D
 var picker_scene = load("res://UI/utils/ValuePicker.tscn")
 # TODO does it even work? already used in ValuePicker
-var data_check := func (mesh:MeshInstance3D,ran:Array):
-	return !mesh || !ran || ran.size()<2
+var is_mesh_range_incorrect := func (mesh:MeshInstance3D,range:Array):
+	return !mesh || !range || range.size()<2
 
 func setup(menu_data:Dictionary,_skeleton:Skeleton3D):
 	skeleton = _skeleton
@@ -43,7 +43,7 @@ func create_tab(tab_data:Dictionary, tab_name:String):
 
 	scroll.add_theme_stylebox_override("panel", stylebox)
 
-func create_pickers(mesh_data:Array, mesh_name:String, vBox:VBoxContainer):
+func create_pickers(mesh_tab_data:Array, mesh_name:String, vBox:VBoxContainer):
 	var mesh_instance := MobUtils.get_mesh_from_skeleton(mesh_name, skeleton)
 	var range := range(0,10)
 	
@@ -52,8 +52,10 @@ func create_pickers(mesh_data:Array, mesh_name:String, vBox:VBoxContainer):
 		mesh_info = MobConstants.body_mesh_info[mesh_name]
 	elif MobConstants.eq_mesh_info.has(mesh_name):
 		mesh_info = MobConstants.eq_mesh_info[mesh_name]
+	elif mesh_name == "Head":
+		mesh_info = MobConstants.body_mesh_info["Body"]
 	else:
-		print("Couldnt find mesh", mesh_name)
+		print("Couldnt find mesh ", mesh_name)
 	
 	# add section mesh title
 	var label := Label.new()
@@ -61,15 +63,17 @@ func create_pickers(mesh_data:Array, mesh_name:String, vBox:VBoxContainer):
 	vBox.add_child(label)
 	
 	# Mesh
-	if mesh_data[0]:
+	if mesh_tab_data[0]:
 		create_mesh_picker(vBox,mesh_name,mesh_info,range,mesh_instance)
 	
 	# Color
-	if mesh_data[1]:
+	if mesh_tab_data[1]:
 		create_color_picker(vBox,mesh_name,mesh_info,range,mesh_instance)
 	
 	# Shape Keys
-	for shape_name:String in mesh_data[2]:
+	for shape_name:String in mesh_tab_data[2]:
+		if mesh_instance.name =="Top":
+			pass
 		create_shape_picker(vBox,mesh_name,mesh_info,range,mesh_instance,shape_name)
 	
 	# bottom margin
@@ -82,15 +86,15 @@ func create_mesh_picker(vBox:VBoxContainer, mesh_name:String,mesh_info:Dictionar
 	node.name = mesh_name
 	vBox.add_child(node)
 	range = Utils.get_file_names(mesh_info.mesh_folder)
-	if !MobConstants.non_empty_names.has(mesh_name):
-		range.insert(0,"empty") # add option to hide mesh
+	#if !MobConstants.non_empty_names.has(mesh_name): # TODO readd
+	range.insert(0,"empty") # add option to hide mesh
 	node.init(range, mesh_name)
 	
-	if data_check.call(mesh_instance,range):
+	if is_mesh_range_incorrect.call(mesh_instance,range):
 		node.disabled = true
 	else:
 		node.variable_changed.connect(
-			_on_picker_value_changed.bind("Mesh", mesh_instance, mesh_info.mesh_folder)
+			_on_picker_value_changed.bind("Mesh", mesh_instance, mesh_instance.name, mesh_info.mesh_folder)
 		)
 	return node
 
@@ -103,12 +107,12 @@ func create_color_picker(vBox:VBoxContainer, mesh_name:String,mesh_info:Dictiona
 			return range(minmax[0]*100, minmax[1]*100).map(
 				func (e): return e/100.0))
 	node.init(range, mesh_name+" Color", "color")
-
-	if data_check.call(mesh_instance,range):
+	
+	if is_mesh_range_incorrect.call(mesh_instance,range):
 		node.disabled = true
 	else:
 		node.variable_changed.connect(
-			_on_picker_value_changed.bind("Color", mesh_instance)
+			_on_picker_value_changed.bind("Color", mesh_instance, mesh_name)
 		)
 		
 	if MobConstants.hair_linked_names.has(mesh_name):
@@ -128,16 +132,16 @@ func create_shape_picker(vBox:VBoxContainer, mesh_name:String,mesh_info:Dictiona
 	range =  range(min_r*10,max_r*10+1).map(func (e): return e/10.0)
 	node.init(range,shape_name)
 	
-	if data_check.call(mesh_instance,range) || mesh_instance.find_blend_shape_by_name(shape_name) < 0:
+	if is_mesh_range_incorrect.call(mesh_instance,range) || mesh_instance.find_blend_shape_by_name(shape_name) < 0:
+		print(shape_name," not found on ",mesh_instance.name)
 		node.disabled = true
 	else:
 		node.variable_changed.connect(
-			_on_picker_value_changed.bind("Shape", mesh_instance, "",shape_name)
+			_on_picker_value_changed.bind("Shape", mesh_instance, mesh_instance.name, "",shape_name)
 		)
 	return node
 
-func _on_picker_value_changed(value, picker_type:String, mesh_instance:MeshInstance3D,mesh_folder:="",shape_name:=""):
-	var mesh_name:String = mesh_instance.name
+func _on_picker_value_changed(value, picker_type:String, mesh_instance:MeshInstance3D, mesh_name:String = mesh_instance.name,mesh_folder:="",shape_name:=""):
 	if MobConstants.weapon_names.has(mesh_name):
 		mesh_name =  MobConstants.hand_names[MobConstants.weapon_names.find(mesh_name)]
 	var data_type = "equipment_data" if $"../".menu_data.Clothes.keys().has(mesh_name) else "body_data"
@@ -159,16 +163,19 @@ func _on_picker_value_changed(value, picker_type:String, mesh_instance:MeshInsta
 			$"../".mob_data.body_data.brow_mesh.mesh_name = old_brow_name
 		MobUtils.set_mesh(value, mesh_instance, mesh_folder)
 	elif picker_type == "Color":
+		var material_nr = -1 if mesh_name != "Body" else 0
 		if $"../".mob_data[data_type][mesh_type].mesh_color == value:
 			return
-		MobUtils.set_mesh_color(value, mesh_instance)
+		MobUtils.set_mesh_color(value, mesh_instance,material_nr)
 		if mesh_name == "Hair": # set linked color
 			for linked_name in MobConstants.hair_linked_names:
 				_on_picker_value_changed(value,picker_type,mesh_instance.get_parent().get_node(linked_name))
 				get_parent().update_mesh_picker(value,"Hair",linked_name,linked_name+"Color")
 	elif picker_type == "Shape":
-		var shape_id = MobUtils.get_shape_names_from_mesh(mesh_instance).find(shape_name)
-		if float($"../".mob_data[data_type][mesh_type].mesh_shape[shape_id]) == value:
+		var shape_id = MobUtils.get_shape_names_from_mesh(mesh_instance.mesh).find(shape_name)
+		var mdata_shapes = $"../".mob_data[data_type][mesh_type].mesh_shape
+		
+		if float(mdata_shapes[shape_id]) == value:
 			return
 		$"../".mob_data[data_type][mesh_type].mesh_shape[shape_id] = value
 		MobUtils.set_skeleton_shape_key(value, shape_name, mesh_instance.get_parent())

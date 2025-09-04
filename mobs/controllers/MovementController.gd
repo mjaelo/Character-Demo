@@ -1,53 +1,57 @@
 extends Node
 
-var direction := Vector3()
-@onready var parent:Player = $"../../Mob"
+@onready var parent_mob:Mob = $"../../"
+@onready var parent_controller:ActionHandler = $"../"
 
-func handle_movement(delta:float, velocity:Vector3) -> Vector3:
-	var camera_rot:Basis = $"../CameraController".global_transform.basis
-	
-	if parent.current_state != parent.MobState.Action:
-		update_direction(camera_rot)
-	velocity = update_velocity(delta,velocity)
-	if parent.current_state != parent.MobState.Action:
-		update_animation(velocity)
-	
-	# rotate player model to camera when moving
-	$"../CameraController".rotate_player_body(direction, parent)
-	
-	return velocity
+func handle_movement(delta: float):
+	handle_input(delta)
+	handle_animation()
 
-func update_direction(camera_rot: Basis):
-	direction = Vector3.ZERO
-	if Input.is_action_pressed("Up") :
-		direction -= camera_rot.z  # Forward direction
-	if Input.is_action_pressed("Down") :
-		direction += camera_rot.z  # Backward direction
+func handle_input(delta:float):
+	if !parent_mob.is_on_floor():
+		parent_mob.velocity.y -= parent_mob.gravity * delta
+
+	var input_direction = Vector3.ZERO
+	if Input.is_action_pressed("Up"):
+		input_direction -= parent_mob.camera_controller.global_transform.basis.z
+	if Input.is_action_pressed("Down"):
+		input_direction += parent_mob.camera_controller.global_transform.basis.z
 	if Input.is_action_pressed("Left"):
-		direction -= camera_rot.x  # Left direction
+		input_direction -= parent_mob.camera_controller.global_transform.basis.x
 	if Input.is_action_pressed("Right"):
-		direction += camera_rot.x  # Right direction
+		input_direction += parent_mob.camera_controller.global_transform.basis.x
 	
-	# Normalize the move direction to maintain consistent movement speed in all directions
-	if direction.length_squared() > 0:
-		direction = direction.normalized()
-
-func update_velocity(delta:float, velocity:Vector3) -> Vector3:
-	if !parent.is_on_floor():
-		velocity.y -= parent.gravity * delta
-	velocity.x = direction.x * parent.speed
-	velocity.z = direction.z * parent.speed
+	if input_direction.length_squared() > 0:
+		input_direction = input_direction.normalized()
 	
-	return velocity
+	parent_mob.velocity.x = input_direction.x * parent_mob.current_speed
+	parent_mob.velocity.z = input_direction.z * parent_mob.current_speed
+	parent_mob.direction = input_direction
 
-func update_animation(velocity:Vector3):
-	if parent.current_state != parent.MobState.Action:
-		if !velocity || velocity.y < 0 || !parent.is_on_floor():
-			parent.current_state = parent.MobState.Idle
-			parent.body_states.travel("Idle")
-			var idle_anim = "Fall" if velocity.y < 0 || !parent.is_on_floor() else "Idle"
-			parent.idle_states.travel(idle_anim)
+func handle_animation():
+	if can_walk():
+		parent_controller.body_state_machine.travel("Movement")
+		
+		# stop idle event
+		if parent_controller.idle_controller.performing_event:
+			parent_controller.idle_controller.performing_event = false
+			parent_controller.body_idle_state_machine.next()
+			parent_controller.body_state_machine.start("Movement")
+		
+		# move or run
+		if Input.is_action_pressed("Run") && parent_mob.current_speed == parent_mob.normal_speed:
+			parent_controller.movement_state_machine.travel("Run")
+			parent_mob.current_speed = parent_mob.normal_speed * parent_controller.hold_speed_modifiers["Run"]
 		else:
-			parent.current_state = parent.MobState.Movement
-			parent.body_states.travel("Movement")
-			parent.move_states.travel("Run" if Input.is_action_pressed("Run") else "Walk")
+			parent_controller.movement_state_machine.travel("Walk")
+	elif !parent_controller.idle_controller.performing_event:
+		parent_controller.body_state_machine.travel("Idle")
+	
+	if can_reset_speed():
+		parent_mob.current_speed = parent_mob.normal_speed
+
+func can_reset_speed()->bool:
+	return !Input.is_action_pressed("Run") && !parent_controller.arm_blend && parent_controller.body_state_machine.get_current_node() != "Action" && parent_mob.current_speed != parent_mob.normal_speed
+
+func can_walk()->bool:
+	return parent_mob.direction && parent_mob.velocity && parent_mob.is_on_floor() && parent_controller.body_state_machine.get_current_node() != "Action"

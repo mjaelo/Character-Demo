@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://cbnhv3c2toevu"]
 
-[ext_resource type="Script" path="res://UI/creator/RightCreator/camera_controls.gd" id="1_opu4t"]
+[ext_resource type="Script" uid="uid://cgtuchec45g73" path="res://UI/creator/RightCreator/camera_controls.gd" id="1_opu4t"]
 [ext_resource type="Texture2D" uid="uid://c7i25rbifin72" path="res://assets/UI/arrow.png" id="2_tabp0"]
 [ext_resource type="Texture2D" uid="uid://cdecgjlftecq" path="res://assets/UI/circle.png" id="3_0v2r7"]
 [ext_resource type="Texture2D" uid="uid://cpefxvms555v0" path="res://assets/UI/arrow-click.png" id="3_vdech"]

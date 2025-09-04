@@ -2,9 +2,9 @@
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8mr3i"]
 resource_name = "Material.011"
-cull_mode = 2
-vertex_color_use_as_albedo = true
-albedo_color = Color(0.357459, 0.28427, 0.134767, 1)
+render_priority = -1
+transparency = 1
+albedo_color = Color(0.376471, 0.231373, 0.0980392, 1)
 
 [resource]
 resource_name = "hair_meshes_NurbsPath_014"
