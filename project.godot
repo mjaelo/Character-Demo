@@ -8,13 +8,17 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Character Demo"
 config/description="Demonstration of 3D character creator and short movement test"
 config/version="0.1"
 run/main_scene="res://general/main.tscn"
-config/features=PackedStringArray("4.4", "Forward Plus")
+config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -25,6 +29,10 @@ MobUtils="*res://mobs/utils/mob_utils.gd"
 UiUtils="*res://UI/utils/ui_utils.gd"
 MobConstants="*res://mobs/utils/mob_constants.gd"
 FileUtils="*res://general/Files/FileUtils.gd"
+
+[dotnet]
+
+project/assembly_name="Character Demo"
 
 [editor_plugins]
 

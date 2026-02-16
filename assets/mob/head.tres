@@ -1,4 +1,4 @@
-[gd_resource type="ArrayMesh" load_steps=5 format=4 uid="uid://btq76ackd1fwy"]
+[gd_resource type="ArrayMesh" format=4 uid="uid://btq76ackd1fwy"]
 
 [ext_resource type="Texture2D" uid="uid://djs5a5s8hhy5a" path="res://assets/mob/_external/body_mesh_head-texture_BW.webp" id="1_7sidw"]
 [ext_resource type="Texture2D" uid="uid://bfru0gyt0jgp" path="res://assets/mob/_external/body_mesh_head-texture.webp" id="2_6c50d"]
