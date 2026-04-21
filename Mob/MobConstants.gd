@@ -9,6 +9,31 @@ var get_random_gender := func ()->int: return [Gender.Male,Gender.Female].pick_r
 enum MobTypes {Civilian, Guard, Noble, Merchant, Farmer}
 enum MobRaces {Human,Skeleton,Ogre,Spirit,Demon,Statue}
 enum Gender {Male,NonBin,Female}
+
+# Meshes and their shapes TODO validate shapes upon mesh file load
+enum BodyMeshes {
+		Body, Top, Bottom, Shoes,  LeftHand, RightHand, # Body
+		Hat, Hair,  Head, Brows, Eyelashes, Beard, Eyes # Head
+}
+const BodyMeshShapes := {
+	# Body
+	"Body": ["Body Shape", "Body Mass", "Body Muscles"],
+	"Top": ["Body Shape", "Body Mass", "Body Muscles"],
+	"Bottom": ["Body Shape", "Body Mass", "Body Muscles"],
+	"Shoes": [],
+	"LeftHand": [],
+	"RightHand": [],
+	
+	# Head
+	"Hat": [],
+	"Hair": [],
+	"Head": ["Lips Width", "Lips Thickness", "Lip Corner", "Jaw Shape", "Face Length","Eye Lower Lid Height", "Eye Upper Lid Height","Eye Edge Height"],
+	"Brows": ["Brow Thickness","Brow Inner Height","Brow Outer Height"],
+	"Eyelashes": ["Eye Lower Lid Height", "Eye Upper Lid Height","Eye Edge Height"],
+	"Beard": ["Jaw Shape", "Face Length"],
+	"Eyes": []
+}
+
 # CONST
 const MOB_SCENE_PATH := "res://Mob/Scenes/Mob/Mob.tscn"
 
@@ -20,8 +45,10 @@ const hair_linked_names := ["Brows","Beard"]
 const half_empty_names := ["Hat", "Beard"]
 const gendered_mesh_names := ["Beard","Eyelashes"]
 const hip_movers := ["Body Shape", "Body Mass"]
-const shape_control_meshes := ["Body","Brows","Head"] # meshes with shape keys
+const meshes_with_shapes := ["Body","Brows","Head"] # meshes with shape keys
 const cloth_mesh_names := ["Top","Bottom","Shoes","Hat","Left Hand","Right Hand"]
+# TODO () use tag_list for validation of tags.
+var known_tags := ["masculine","feminine", MobTypes.keys(), MobRaces.keys(), "full-hat"] 
 
 # Colors
 const Color_Statue_Grey := Color(.3, .3, .3, 0)
@@ -29,12 +56,12 @@ var hair_color_ranges := ColorRangeInfo.new(Vector2(0,.2),Vector2(.1,.4),Vector2
 var clothes_color_ranges := ColorRangeInfo.new(Vector2(0.0, .27), Vector2(0.0, .3),  Vector2(0.2, .6))
 var eyes_color_ranges := ColorRangeInfo.new(Vector2(0.1, 0.6),Vector2(0.2, 0.5),  Vector2(0.3, 0.8))
 var skin_color_ranges := ColorRangeInfo.new(Vector2(0.01, 0.08),  Vector2(0.2, 0.3),  Vector2(0.3, 0.95))
-var demon_skin_color_range := UIUtils.get_color_range_from_color(Color.DARK_RED)
-var demon_clothes_color_range := UIUtils.get_color_range_from_color(Color.BLACK)
-var statue_color_range := UIUtils.get_color_range_from_color(Color_Statue_Grey)
-var ogre_color_range := UIUtils.get_color_range_from_color(Color.DARK_OLIVE_GREEN)
-var spirit_eyes_color_range := UIUtils.get_color_range_from_color(Color(10, 10, 10, 1.0))
-var spirit_skin_color_range := ColorRangeInfo.new(Vector2(0.1, 0.6),Vector2(0.2, 0.5),  Vector2(0.3, 0.8),Vector2(5,5))
+var demon_skin_colors := UIUtils.get_colors_from_color_range(UIUtils.get_color_range_from_color(Color.DARK_RED))
+var demon_clothes_colors := UIUtils.get_colors_from_color_range(UIUtils.get_color_range_from_color(Color.BLACK))
+var statue_colors := UIUtils.get_colors_from_color_range(UIUtils.get_color_range_from_color(Color_Statue_Grey))
+var ogre_colors := UIUtils.get_colors_from_color_range(UIUtils.get_color_range_from_color(Color.DARK_OLIVE_GREEN))
+var spirit_eyes_colors := UIUtils.get_colors_from_color_range(UIUtils.get_color_range_from_color(Color(10, 10, 10, 1.0)))
+var spirit_skin_colors := UIUtils.get_colors_from_color_range(ColorRangeInfo.new(Vector2(0.1, 0.6),Vector2(0.2, 0.5),  Vector2(0.3, 0.8),Vector2(5,5)))
 
 # TODO add separate probabilities for non binary, hat*
 const variation_chance := 0.1 # chance for non normative element.
@@ -58,94 +85,79 @@ const race_cam_heights := {
 	MobRaces.Spirit: 5
 }
 
-# VAR CONST
-# TODO () use tag_list for validation of tags.
-var known_tags := ["masculine","feminine", MobTypes.keys(), MobRaces.keys(), "full-hat"] 
+# norms CONST
+enum NormType {Tag, Mesh, Color, Shape}
 var gender_norms := {
-	Gender.Male: MeshNormData.new(
-		[],["feminine"],
-		{},{},
-		{},{},
-		{"Body":{0: 0, 8: -1},"Brows":{0: 1}},{},#"Body Shape","Lips Width" "Brow Thickness"
-		{"shape":{"Body": [0]}}  #"enforce": ["Body Shape"]
-		),
-	Gender.NonBin: MeshNormData.new(),
-	Gender.Female: MeshNormData.new(
-		[],["masculine"],
-		{"Beard":"empty"},{"Hair":"empty"},
-		{},{}, 
-		{"Body":{0: .5, 8: 1},"Brows":{0: 0}},{},#"Body Shape",TODO "Lips Width", "Brow Thickness"
-		{"mesh_name":["Beard","Hair"]}# enforce
-	)
+	Gender.Male: [
+		NormData.new(NormType.Tag,["feminine"],true),
+		NormData.new(NormType.Shape, {"Body":{0: [0]}},false,true), #"Body Shape" enforce,
+		NormData.new(NormType.Shape, {"Body":{8: [-1]},"Brows":{0: [1]}})# "Lips Width" "Brow Thickness")
+	],
+	Gender.NonBin: [],
+	Gender.Female: [
+		NormData.new(NormType.Tag,["masculine"],true),
+		NormData.new(NormType.Mesh,{"Beard":"empty"},false,true),
+		NormData.new(NormType.Mesh,{"Hair":"empty"}, true,true),
+		NormData.new(NormType.Shape,{"Body":{0: [.5], 8: [1]},"Brows":{0: [0]}}),#"Body Shape","Lips Width", "Brow Thickness"
+	]
 }
 
 var type_norms := {
-	MobTypes.Civilian : MeshNormData.new([],MobTypes.keys()),
-	MobTypes.Guard : MeshNormData.new(["Guard"]),
-	MobTypes.Noble : MeshNormData.new(["Noble"]),
-	MobTypes.Merchant : MeshNormData.new(["Merchant"]),
-	MobTypes.Farmer : MeshNormData.new(["Farmer"])
+	MobTypes.Civilian : [NormData.new(NormType.Tag,MobTypes.keys(),true)],
+	MobTypes.Guard : [NormData.new(NormType.Tag,["Guard"])],
+	MobTypes.Noble : [NormData.new(NormType.Tag,["Noble"])],
+	MobTypes.Merchant : [NormData.new(NormType.Tag,["Merchant"])],
+	MobTypes.Farmer : [NormData.new(NormType.Tag,["Farmer"])]
 }
 
 var race_norms := {
-	MobRaces.Human: MeshNormData.new(
-		[], other_races.call(MobRaces.Human),
-		{"Accessory": "empty","Top":"tshirt","Bottom":"pants"},{},
-		{},{},
-		{"Body": {1: 0}},{}, # "Body Mass"
-		{"mesh_name": ["Accessory"],"tags":other_races.call(MobRaces.Human)}
-	),
-	MobRaces.Demon: MeshNormData.new(
-		["Demon"], other_races.call(MobRaces.Demon),
-		{},{},
-		{
-		"Top": demon_skin_color_range,
-		"EquipmentBulk":demon_clothes_color_range,
-		},{},
-		{"Body": {1: 0}},{} # "Body Mass"
-	),
-	MobRaces.Ogre: MeshNormData.new(
-		["Ogre"], other_races.call(MobRaces.Ogre),
-		{"Hair":"empty","Eyelashes":"empty","Beard":"empty","Brows":"empty","Shoes":"empty"},{},
-		{"Top":ogre_color_range},{},
-		{"Body": {1: 1}},{},#"Body Mass"
-		{"mesh_name": ["Accessory","Hair","Brows","Beard"]}
-	),
-	MobRaces.Statue: MeshNormData.new(
-		[], other_races.call(MobRaces.Statue),
-		{"Hat":"empty","Accessory": "empty"},{},
-		{"EquipmentBulk":statue_color_range,"BodyBulk":statue_color_range},{},
-		{"Body": {1: 0}}#"Body Mass"
-	),
-	MobRaces.Spirit: MeshNormData.new(
-		[], other_races.call(MobRaces.Spirit),
-		{"Hair":"empty","Eyelashes":"empty","Beard":"empty","Brows":"empty","EquipmentBulk":"empty","Accessory": "empty"},{},
-		{
-		"Eyes": spirit_eyes_color_range,
-		"Top": spirit_skin_color_range
-		},{},
-		{"Body": {1: 0}},{},#"Body Mass"
-		{"mesh_name": ["Accessory","Hair","Beard","Brows"]}
-	),
-	MobRaces.Skeleton: MeshNormData.new(
-		[],other_races.call(MobRaces.Skeleton),
-		{"EquipmentBulk":"empty", "BodyBulk":"empty"}
-	)
+	MobRaces.Human: [
+		NormData.new(NormType.Tag, other_races.call(MobRaces.Human),true,true),
+		NormData.new(NormType.Mesh, {"Accessory": "empty"},false,true),
+		NormData.new(NormType.Shape, {"Body": {1: [0]}}) # "Body Mass"
+	],
+	MobRaces.Demon: [
+		NormData.new(NormType.Tag, other_races.call(MobRaces.Demon),true, true),
+		NormData.new(NormType.Color,{"Top": demon_skin_colors, "EquipmentBulk":demon_clothes_colors}),
+		NormData.new(NormType.Shape,{"Body": {1: [0]}}) # "Body Mass"
+	],
+	MobRaces.Ogre: [
+		NormData.new(NormType.Tag, other_races.call(MobRaces.Ogre),true, true),
+		NormData.new(NormType.Mesh, {"Hair":"empty","Eyelashes":"empty","Beard":"empty","Brows":"empty","Shoes":"empty"}),
+		NormData.new(NormType.Color, {"Top":ogre_colors}),
+		NormData.new(NormType.Shape,{"Body": {1: [1]}}),#"Body Mass"
+	],
+	MobRaces.Statue: [
+		NormData.new(NormType.Tag, other_races.call(MobRaces.Statue),true, true),
+		NormData.new(NormType.Mesh, {"Hat":"empty","Accessory": "empty"}),
+		NormData.new(NormType.Color,{"EquipmentBulk":statue_colors,"BodyBulk":statue_colors}),
+		NormData.new(NormType.Shape,{"Body": {1: [0]}})#"Body Mass"
+	],
+	MobRaces.Spirit: [
+		NormData.new(NormType.Tag, other_races.call(MobRaces.Spirit),true, true),
+		NormData.new(NormType.Mesh, {"Hair":"empty","Eyelashes":"empty","Beard":"empty","Brows":"empty","EquipmentBulk":"empty","Accessory": "empty"},false,true),
+		NormData.new(NormType.Color,{"Eyes": spirit_eyes_colors,"Top": spirit_skin_colors}),
+		NormData.new(NormType.Shape,{"Body": {1: [0]}}),#"Body Mass"
+	],
+	MobRaces.Skeleton: [
+		NormData.new(NormType.Tag, other_races.call(MobRaces.Skeleton),true, true),
+		NormData.new(NormType.Mesh,{"EquipmentBulk":"empty", "BodyBulk":"empty"})
+	]
 }
 
 # TODO () shape names from mesh / some other place. use shape_id as key instead?
 # TODO How to handle body and top separate colors?
 var body_mesh_info := {
-	"Body": MobMeshInfo.new("", skin_color_ranges, {"Body Shape": [0,1],"Body Mass": [-.5,1],"Body Muscles": [-.5,1]}),
+	"Body": MobMeshInfo.new("", skin_color_ranges, {"Body Shape": Vector2(0, 1), "Body Mass": Vector2(-0.5, 1), "Body Muscles": Vector2(-0.5, 1)}),
 	"Head": MobMeshInfo.new("", null, {
-		"Lips Width": [-1,1],"Lips Thickness": [-1,1],"Lip Corner": [-1,1],"Jaw Shape": [-1,1], "Face Length": [-1,1],
-		"Eye Lower Lid Height": [-1,1], "Eye Upper Lid Height": [-1,1],"Eye Edge Height": [-1,1]
+		"Lips Width": Vector2(-1, 1), "Lips Thickness": Vector2(-1, 1), "Lip Corner": Vector2(-1, 1), "Jaw Shape": Vector2(-1, 1), "Face Length": Vector2(-1, 1),
+		"Eye Lower Lid Height": Vector2(-1, 1), "Eye Upper Lid Height": Vector2(-1, 1), "Eye Edge Height": Vector2(-1, 1)
 	}),
 	"Eyes": MobMeshInfo.new("", eyes_color_ranges),
 	"Eyelashes": MobMeshInfo.new("res://Assets/Mob/face/lashes/"),
 	"Hair": MobMeshInfo.new("res://Assets/Mob/hair/", hair_color_ranges),
 	"Beard": MobMeshInfo.new("res://Assets/Mob/face/beard/", hair_color_ranges),
-	"Brows": MobMeshInfo.new("", hair_color_ranges, {"Brow Thickness": [0,1], "Brow Inner Height": [0,1], "Brow Outer Height": [0,1]})
+	"Brows": MobMeshInfo.new("", hair_color_ranges, {"Brow Thickness": Vector2(0, 1), "Brow Inner Height": Vector2(0, 1), "Brow Outer Height": Vector2(0, 1)})
 }
 
 var eq_mesh_info := {

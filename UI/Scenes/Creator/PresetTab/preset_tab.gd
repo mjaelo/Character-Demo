@@ -1,10 +1,11 @@
 extends TabBar
+class_name PresetTab
 
 var override_warning: String = UIConstants.OVERRIDE_WARNING
+var parent:Creator
 
-@onready var parent := $"../../"
-
-@onready var start_game_button := $"../../RightCreator/Start Game"
+@onready var start_game_button := $"../../CreatorCameraManager/Start Game" # TODO move outside CreatorCameraManager
+@onready var camera_manager := $"../../CreatorCameraManager"
 @onready var save_preset_button := $"ScrollContainer/VBoxContainer/Preset Handler/Save Preset"
 @onready var delete_preset_button := $"ScrollContainer/VBoxContainer/Preset Handler/Delete Preset"
 
@@ -17,24 +18,23 @@ var override_warning: String = UIConstants.OVERRIDE_WARNING
 var def_name: String = UIConstants.DEFAULT_PRESET_NAME
 var presets := {def_name: {}}
 
-func _ready():
-	# setup preset picker
+func initialize(_parent:Creator):
+	parent = _parent
+	
+	# load presets from file
 	var saved_presets = FileUtils.serialize_and_load("preset.json","res://UI/Scenes/Creator/")
 	for key in saved_presets.keys():
 		presets[key] = saved_presets[key]
 	
-	preset_picker.init(presets.keys(), "Preset") # setup slider with loaded presets
+	# setup preset, type and race pickers
+	preset_picker.init(presets.keys(), "Preset")
 	preset_picker.variable_changed.connect(_on_preset_changed)
-	
-	# setup type picker TODO () remove when connected to game
 	mob_type_picker.init(MobConstants.MobTypes.keys(), "Mob Type")
 	mob_type_picker.variable_changed.connect(_on_type_changed)
-	
-	# setup race picker TODO () remove when connected to game
 	mob_race_picker.init(MobConstants.MobRaces.keys(), "Race")
 	mob_race_picker.variable_changed.connect(_on_race_changed)
 
-# PRESET
+# Preset UI elements Callbacks
 func _on_save_preset_pressed():
 	var old_data:MobData = parent.mob_data
 	var new_data:MobData = MobData.new(
@@ -70,13 +70,12 @@ func _on_preset_changed(mob_name:String):
 	if !is_new_character:
 		var mob_data:MobData = presets[mob_name]
 		parent.mob_data = mob_data
-		MobGenerator.set_mob_data_to_mob(mob_data,parent.mob)
+		MobSetter.set_mob_data_to_mob(mob_data,parent.mob)
 		parent.update_all_pickers()
 	else:
 		parent.randomize_all()
 
-
-# Other Pickers
+# Gender, Name, Type and Race UI elements Callbacks
 func _on_gender_changed(gender:int): # 0 - male, 2 - female
 	if parent.mob_data.gender == gender:
 		return
@@ -84,8 +83,11 @@ func _on_gender_changed(gender:int): # 0 - male, 2 - female
 	parent.mob_data.gender = gender
 	
 	if gender != MobConstants.Gender.NonBin:
-		parent.mob_data = MobGenerator.get_random_mob_data(parent.skeleton, parent.mob_data.race, parent.mob_data.type, parent.mob_data.gender, parent.mob_data.mob_name, parent.mob_data)
-	MobGenerator.set_mob_data_to_mob(parent.mob_data,parent.mob)
+		var norms: Array[NormData] = []
+		norms.append_array(MobConstants.gender_norms[gender])
+		parent.mob_data.body_data = MobAdjuster.adjust_body_data(parent.skeleton, norms, parent.mob_data.body_data)
+		parent.mob_data.equipment_data = MobAdjuster.adjust_equipment_data(parent.skeleton, norms, parent.mob_data.equipment_data)
+	MobSetter.set_mob_data_to_mob(parent.mob_data, parent.mob)
 	parent.update_all_pickers()
 
 func _on_random_name_pressed():
@@ -93,7 +95,6 @@ func _on_random_name_pressed():
 	mob_name_picker.text = new_name
 	_on_mob_name_changed(new_name)
 
-# TODO name changes then save preset doesnt work very well...
 func _on_mob_name_changed(new_text: String):
 	if parent.mob_data.mob_name == new_text:
 		return
@@ -108,7 +109,7 @@ func _on_mob_name_changed(new_text: String):
 		UIUtils.button_hide_warning(save_preset_button)
 
 func _on_race_changed(race_v:String):
-	parent.get_node("RightCreator").set_camera_height_by_race(MobConstants.MobRaces[race_v])
+	camera_manager.set_camera_height_by_race(MobConstants.MobRaces[race_v])
 	if parent.mob_data.race == MobConstants.MobRaces[race_v]:
 		return
 	
@@ -118,11 +119,13 @@ func _on_race_changed(race_v:String):
 	if last_races: 
 		range(presets.size()).map(func (i): presets.values()[i].race = last_races[i])
 	
-	# adjust current mob data
-	parent.mob_data = MobGenerator.get_random_mob_data(parent.skeleton, parent.mob_data.race, 
-		parent.mob_data.type, parent.mob_data.gender, parent.mob_data.mob_name)
-	MobGenerator.set_mob_data_to_mob(parent.mob_data,parent.mob)
-	parent.update_all_pickers()
+	# adjust current mob data with new race norms
+	var norms: Array[NormData] = []
+	norms.append_array(MobConstants.race_norms[parent.mob_data.race])
+	parent.mob_data.body_data = MobAdjuster.adjust_body_data(parent.skeleton, norms, parent.mob_data.body_data)
+	parent.mob_data.equipment_data = MobAdjuster.adjust_equipment_data(parent.skeleton, norms, parent.mob_data.equipment_data)
+	MobSetter.set_mob_data_to_mob(parent.mob_data, parent.player)
+	parent.set_mob_data_to_pickers(parent.mob_data)
 
 func _on_type_changed(type_v:String):
 	if parent.mob_data.type == MobConstants.MobTypes[type_v]:
@@ -130,17 +133,26 @@ func _on_type_changed(type_v:String):
 	parent.mob_data.type = MobConstants.MobTypes[type_v]
 	_on_random_clothes_pressed()
 
-# New randomizers.
+# General Randomizers
 func _on_random_body_pressed():
-	parent.mob_data.body_data = MobGenerator.get_random_body(parent.skeleton,parent.mob_data.gender,parent.mob_data.type,parent.mob_data.race)
-	#parent.mob_data = MobGenerator.adjust_mob_data_to_race(parent.mob_data, parent.mob_data.race)
-	MobGenerator.set_body_data(parent.mob_data.body_data,parent.mob)
-	parent.update_all_pickers()
+	var norms_body := MobGetter._get_rtg_norms(parent.mob_data.race, parent.mob_data.type, parent.mob_data.gender)
+	parent.mob_data.body_data = MobGetter.get_random_body_data(parent.skeleton, norms_body)
+	#parent.mob_data = MobAdjuster.adjust_mob_data_to_race(parent.mob_data, parent.mob_data.race)
+	MobSetter.set_body_data(parent.mob_data.body_data, parent.player)
+	parent.set_mob_data_to_pickers(parent.mob_data)
 
 func _on_random_clothes_pressed():
-	parent.mob_data.equipment_data = MobGenerator.get_random_equipment(parent.skeleton,parent.mob_data.gender,parent.mob_data.type,parent.mob_data.race)
-	MobGenerator.set_equipment_data(parent.mob_data.equipment_data,parent.mob)
-	parent.update_all_pickers()
+	var norms_eq := MobGetter._get_rtg_norms(parent.mob_data.race, parent.mob_data.type, parent.mob_data.gender)
+	parent.mob_data.equipment_data = MobGetter.get_random_equipment_data(parent.skeleton, norms_eq)
+	MobSetter.set_equipment_data(parent.mob_data.equipment_data, parent.player)
+	parent.set_mob_data_to_pickers(parent.mob_data)
 
 func _on_randomize_all_pressed() -> void:
 	parent.randomize_all()
+
+# Utils
+func set_mob_data_to_preset_pickers(mob_data:MobData):
+	mob_name_picker.text = mob_data.mob_name
+	mob_type_picker.picker.value = mob_data.type
+	mob_race_picker.picker.value = mob_data.race
+	mob_gender_picker.value = mob_data.gender

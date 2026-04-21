@@ -1,5 +1,4 @@
 extends Control
-# TODO rename
 
 @onready var player_camera_controller := $"../../Player/Controllers/CameraController"
 @onready var player_camera_3p_spring := $"../../Player/Controllers/CameraController/SpringArm3D"

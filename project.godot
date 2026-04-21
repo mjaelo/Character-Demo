@@ -25,7 +25,6 @@ config/icon="res://icon.svg"
 
 GeneralConstants="*res://General/GeneralConstants.gd"
 UIConstants="*res://UI/UIConstants.gd"
-MobGenerator="*res://Mob/Services/MobGenerator.gd"
 GeneralUtils="*res://General/GeneralUtils.gd"
 MobUtils="*res://Mob/MobUtils.gd"
 UIUtils="*res://UI/UIUtils.gd"

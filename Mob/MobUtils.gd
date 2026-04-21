@@ -11,7 +11,7 @@ const main_materials := { # TODO () eyes are not here...
 var full_hats: Array
 
 func _ready() -> void:
-	var hat_tag_dict: Dictionary = FileUtils.load_json_from_file(MobConstants.eq_mesh_info.Hat.mesh_folder+"tag_info.json")
+	var hat_tag_dict: Dictionary = FileUtils.load_json_from_file(MobConstants.eq_mesh_info.Hat.file_folder+"tag_info.json")
 	full_hats = hat_tag_dict.keys().filter(func (key): return hat_tag_dict[key].has("full-hat"))
 
 # SET MESH DATA
@@ -74,8 +74,8 @@ func adjust_hair_hider(hat_mesh: MeshInstance3D, hair_mesh: MeshInstance3D, skel
 	var eq_data:EquipmentData = skeleton.get_node("../../../").equipment_data
 	
 	# hide hair if hat is visible and is full hat
-	var is_hair_bald:bool = body_data.hair_mesh.mesh_name == "empty"
-	hair_mesh.visible = !is_hair_bald && !(hat_mesh.visible && full_hats.any(func (hat): return eq_data.hat_mesh.mesh_name == hat))
+	var is_hair_bald:bool = body_data.hair_mesh.mesh_file == "empty"
+	hair_mesh.visible = !is_hair_bald && !(hat_mesh.visible && full_hats.any(func (hat): return eq_data.hat_mesh.mesh_file == hat))
 	if hat_mesh.visible && hair_mesh.visible:
 		hider_node.show()
 		
@@ -199,9 +199,13 @@ func spawn_opponent(parent: Node = null):
 		mob.transform.origin += Vector3(x * 3, 0, 5)
 		var race = MobConstants.MobRaces.values().pick_random()
 		var type := MobConstants.MobTypes.Civilian
-		MobGenerator.set_mob_data_to_mob(
-			MobGenerator.get_random_mob_data(mob.get_node("body/Armature/Skeleton3D"), race, type),
+		MobSetter.set_mob_data_to_mob(
+			MobGetter.get_random_mob_data(mob.get_node("body/Armature/Skeleton3D"), race, type),
 			mob
 		)
 		var target = parent if parent else get_tree().current_scene
 		target.add_child(mob)
+
+func toggle_player_control(has_control:bool, mob:Player):
+	mob.set_process_unhandled_input(has_control)
+	mob.set_physics_process(has_control)

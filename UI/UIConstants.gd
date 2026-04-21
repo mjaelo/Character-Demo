@@ -22,17 +22,17 @@ var COLOR_PICKER_SCENE: PackedScene = load("res://UI/Scenes/Utility/ColorPicker/
 # tab name > mesh name > pickers for mesh, color, shape
 var menu_data := {
 	"Body":[ 
-		MeshPickerInfo.new("Body",false,true,true,["Body Shape","Body Mass","Body Muscles"])
+		MeshPickerInfo.new("Body",false,true,true)
 	],
 	"Face": [
 		MeshPickerInfo.new("Eyes",false,true),
 		MeshPickerInfo.new("Eyelashes",true,false),
-		MeshPickerInfo.new("Head",false,false,true,["Lips Width","Lips Thickness","Lip Corner","Jaw Shape", "Face Length","Eye Lower Lid Height", "Eye Upper Lid Height","Eye Edge Height"]),
+		MeshPickerInfo.new("Head",false,false,true),
 		MeshPickerInfo.new("Accessory",true,false,false)
 	],
 	"Hair": [
 		MeshPickerInfo.new("Hair",true,true),
-		MeshPickerInfo.new("Brows",false,true,true,["Brow Thickness","Brow Inner Height","Brow Outer Height"]),
+		MeshPickerInfo.new("Brows",false,true,true),
 		MeshPickerInfo.new("Beard",true,true)
 	],
 	"Clothes": [

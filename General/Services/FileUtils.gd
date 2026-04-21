@@ -55,13 +55,13 @@ func load_json_from_file(file_path: String) -> Dictionary:
 	return result
 
 # Get file names (without extension) from a directory of .tres files
-func get_file_names(folder_path: String) -> Array:
+func get_file_names(folder_path: String) -> Array[String]:
 	if !folder_path:
 		return []
 	var cache_key = "dir:" + folder_path
 	if _cache.has(cache_key):
 		return _cache[cache_key].duplicate()
-	var names := []
+	var names :Array[String]= []
 	var dir = DirAccess.open(folder_path)
 	if !dir:
 		_cache[cache_key] = names

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dl5cq6kqcnnqd" path="res://UI/Scenes/Creator/Creator.gd" id="1_yntgj"]
 [ext_resource type="PackedScene" uid="uid://hdk05f78cjdv" path="res://UI/Scenes/Creator/PresetTab/preset_tab.tscn" id="2_85g5j"]
-[ext_resource type="PackedScene" uid="uid://dkebf5g513vk3" path="res://UI/Scenes/Creator/RightCreator/RightCreator.tscn" id="5_us56g"]
+[ext_resource type="PackedScene" uid="uid://dkebf5g513vk3" path="res://UI/Scenes/Creator/CreatorCameraManager/CreatorCameraManager.tscn" id="5_us56g"]
 
 [node name="Creator" type="Control" unique_id=1581537457]
 layout_mode = 3
@@ -28,7 +28,7 @@ current_tab = 0
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="RightCreator" parent="." unique_id=1710987498 instance=ExtResource("5_us56g")]
+[node name="CreatorCameraManager" parent="." unique_id=1710987498 instance=ExtResource("5_us56g")]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 2.76985
