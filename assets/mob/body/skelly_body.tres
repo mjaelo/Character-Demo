@@ -1,8 +1,8 @@
 [gd_resource type="ArrayMesh" format=4 uid="uid://dm57cubnmpsvl"]
 
-[ext_resource type="Texture2D" uid="uid://cqlp86ky3luiy" path="res://assets/mob/_external/body_mesh_Image_0.webp" id="1_gp1q2"]
-[ext_resource type="Texture2D" uid="uid://divuxha0mn7fk" path="res://assets/mob/_external/body_mesh_Image_1.webp" id="2_mmc5k"]
-[ext_resource type="Texture2D" uid="uid://eb2j7gs4lst" path="res://assets/mob/_external/body_mesh_Image_2.webp" id="3_cso1j"]
+[ext_resource type="Texture2D" uid="uid://bdgkftlqrpaoh" path="res://Assets/Mob/_external/body_mesh_Image_0.webp" id="1_gp1q2"]
+[ext_resource type="Texture2D" uid="uid://bk7tu0q75a54t" path="res://Assets/Mob/_external/body_mesh_Image_1.webp" id="2_mmc5k"]
+[ext_resource type="Texture2D" uid="uid://dhrky7k0er5lj" path="res://Assets/Mob/_external/body_mesh_Image_2.webp" id="3_cso1j"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rcdwy"]
 resource_name = "Scene_-_Root"

@@ -1,9 +1,9 @@
 [gd_resource type="ArrayMesh" load_steps=9 format=3 uid="uid://dnc1faidjxo43"]
 
-[ext_resource type="Texture2D" uid="uid://dsekscfwr3l30" path="res://assets/mob/_external/roles_clothes_Metal_1_specularGlossiness_5.png" id="1_gr5tl"]
-[ext_resource type="Texture2D" uid="uid://b6ewgd1nwojyg" path="res://assets/mob/_external/roles_clothes_Cota_de_malla_diffuse.png" id="2_a4pl8"]
-[ext_resource type="Texture2D" uid="uid://1blppvxmgv6" path="res://assets/mob/_external/roles_clothes_Cota_de_malla_specularGlossiness_3.png" id="3_fi647"]
-[ext_resource type="Texture2D" uid="uid://dwerftuii80vc" path="res://assets/mob/_external/roles_clothes_Cota_de_malla_normal.png" id="4_idhy5"]
+[ext_resource type="Texture2D" uid="uid://dsekscfwr3l30" path="res://Assets/mob/_external/roles_clothes_Metal_1_specularGlossiness_5.png" id="1_gr5tl"]
+[ext_resource type="Texture2D" uid="uid://b6ewgd1nwojyg" path="res://Assets/mob/_external/roles_clothes_Cota_de_malla_diffuse.png" id="2_a4pl8"]
+[ext_resource type="Texture2D" uid="uid://1blppvxmgv6" path="res://Assets/mob/_external/roles_clothes_Cota_de_malla_specularGlossiness_3.png" id="3_fi647"]
+[ext_resource type="Texture2D" uid="uid://dwerftuii80vc" path="res://Assets/mob/_external/roles_clothes_Cota_de_malla_normal.png" id="4_idhy5"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_phsfb"]
 resource_name = "Metal_1"

@@ -1,10 +1,10 @@
 [gd_resource type="ArrayMesh" load_steps=9 format=3 uid="uid://ddaahfxrw6ru8"]
 
-[ext_resource type="Texture2D" uid="uid://clipo1qtskjcj" path="res://assets/mob/_external/roles_clothes_Other_baseColor.png" id="1_757kv"]
-[ext_resource type="Texture2D" uid="uid://bd15lrjk4bxck" path="res://assets/mob/_external/roles_clothes_Other_normal.png" id="2_qh6s7"]
-[ext_resource type="Texture2D" uid="uid://bgscyueilk1le" path="res://assets/mob/_external/roles_clothes_material_baseColor.png" id="3_cwidi"]
-[ext_resource type="Texture2D" uid="uid://dsv3ovfn80xwv" path="res://assets/mob/_external/roles_clothes_material_metallicRoughness.png" id="4_0dx5u"]
-[ext_resource type="Texture2D" uid="uid://cyya41h8pkj6x" path="res://assets/mob/_external/roles_clothes_material_normal.png" id="5_7igxe"]
+[ext_resource type="Texture2D" uid="uid://clipo1qtskjcj" path="res://Assets/mob/_external/roles_clothes_Other_baseColor.png" id="1_757kv"]
+[ext_resource type="Texture2D" uid="uid://bd15lrjk4bxck" path="res://Assets/mob/_external/roles_clothes_Other_normal.png" id="2_qh6s7"]
+[ext_resource type="Texture2D" uid="uid://bgscyueilk1le" path="res://Assets/mob/_external/roles_clothes_material_baseColor.png" id="3_cwidi"]
+[ext_resource type="Texture2D" uid="uid://dsv3ovfn80xwv" path="res://Assets/mob/_external/roles_clothes_material_metallicRoughness.png" id="4_0dx5u"]
+[ext_resource type="Texture2D" uid="uid://cyya41h8pkj6x" path="res://Assets/mob/_external/roles_clothes_material_normal.png" id="5_7igxe"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nqwnw"]
 resource_name = "black-cloth"

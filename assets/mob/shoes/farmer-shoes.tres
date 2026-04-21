@@ -1,6 +1,6 @@
 [gd_resource type="ArrayMesh" load_steps=3 format=3 uid="uid://b45wptwx8ua2y"]
 
-[ext_resource type="Texture2D" uid="uid://how23skr0a7b" path="res://assets/mob/_external/roles_clothes_set4_baseColor.png" id="1_mb6rf"]
+[ext_resource type="Texture2D" uid="uid://how23skr0a7b" path="res://Assets/mob/_external/roles_clothes_set4_baseColor.png" id="1_mb6rf"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ek1sx"]
 resource_name = "shoe-mesh"

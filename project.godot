@@ -17,18 +17,20 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="Character Demo"
 config/description="Demonstration of 3D character creator and short movement test"
 config/version="0.1"
-run/main_scene="res://general/main.tscn"
+run/main_scene="res://General/Scenes/Main/Main.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-MobGenerator="*res://mobs/utils/MobGenerator.gd"
-Utils="*res://general/Utils.gd"
-MobUtils="*res://mobs/utils/mob_utils.gd"
-UiUtils="*res://UI/utils/ui_utils.gd"
-MobConstants="*res://mobs/utils/mob_constants.gd"
-FileUtils="*res://general/Files/FileUtils.gd"
+GeneralConstants="*res://General/GeneralConstants.gd"
+UIConstants="*res://UI/UIConstants.gd"
+MobGenerator="*res://Mob/Services/MobGenerator.gd"
+GeneralUtils="*res://General/GeneralUtils.gd"
+MobUtils="*res://Mob/MobUtils.gd"
+UIUtils="*res://UI/UIUtils.gd"
+MobConstants="*res://Mob/MobConstants.gd"
+FileUtils="*res://General/Services/FileUtils.gd"
 
 [dotnet]
 
@@ -41,13 +43,13 @@ enabled=PackedStringArray()
 [file_customization]
 
 folder_colors={
-"res://UI/": "green",
-"res://assets/": "purple",
-"res://assets/UI/": "purple",
-"res://assets/mob/": "purple",
-"res://general/": "yellow",
-"res://mobs/": "red",
-"res://shaders/": "pink"
+"res://Assets/": "purple",
+"res://Assets/Mob/": "purple",
+"res://Assets/Mob/shaders/": "pink",
+"res://Assets/UI/": "purple",
+"res://General/": "yellow",
+"res://Mob/": "red",
+"res://UI/": "green"
 }
 
 [filesystem]

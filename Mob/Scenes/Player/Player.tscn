@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3 uid="uid://1gcmvi5s3w26"]
+
+[ext_resource type="Script" uid="uid://dttnudsjtw8ux" path="res://Mob/Scenes/Player/Player.gd" id="1_i7q47"]
+[ext_resource type="PackedScene" uid="uid://vxfk3xv76ro7" path="res://Mob/Scenes/Mob/Mob.tscn" id="1_kpuwe"]
+[ext_resource type="Script" uid="uid://dpq4endth3yo" path="res://Mob/Scenes/Controllers/CameraController.gd" id="3_kvh4h"]
+
+[node name="Player" type="Node3D"]
+
+[node name="Mob" parent="." instance=ExtResource("1_kpuwe")]
+script = ExtResource("1_i7q47")
+
+[node name="Controllers" type="Node3D" parent="."]
+
+[node name="CameraController" type="Node3D" parent="Controllers"]
+script = ExtResource("3_kvh4h")
+
+[node name="1PCamera" type="Camera3D" parent="Controllers/CameraController"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.007, 6.7, -1.515)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Controllers/CameraController"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00756574, 7.45132, 0.30575)
+spring_length = 4.0
+
+[node name="3PCamera" type="Camera3D" parent="Controllers/CameraController/SpringArm3D"]
+current = true
+fov = 93.1041
+far = 1000.0

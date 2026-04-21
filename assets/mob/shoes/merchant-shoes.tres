@@ -1,8 +1,8 @@
 [gd_resource type="ArrayMesh" load_steps=5 format=3 uid="uid://be7614on4ur8k"]
 
-[ext_resource type="Texture2D" uid="uid://63i8s4lapoks" path="res://assets/mob/_external/roles_clothes_Image_17.jpg" id="1_51lmn"]
-[ext_resource type="Texture2D" uid="uid://wu81ice77am7" path="res://assets/mob/_external/roles_clothes_Image_18.png" id="2_lbf6g"]
-[ext_resource type="Texture2D" uid="uid://b7tqbr68jmkc4" path="res://assets/mob/_external/roles_clothes_Image_19.png" id="3_3ob37"]
+[ext_resource type="Texture2D" uid="uid://63i8s4lapoks" path="res://Assets/mob/_external/roles_clothes_Image_17.jpg" id="1_51lmn"]
+[ext_resource type="Texture2D" uid="uid://wu81ice77am7" path="res://Assets/mob/_external/roles_clothes_Image_18.png" id="2_lbf6g"]
+[ext_resource type="Texture2D" uid="uid://b7tqbr68jmkc4" path="res://Assets/mob/_external/roles_clothes_Image_19.png" id="3_3ob37"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8rc7l"]
 resource_name = "boots leather"

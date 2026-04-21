@@ -1,6 +1,6 @@
 [gd_resource type="ArrayMesh" load_steps=3 format=4 uid="uid://bc1qox28tv26y"]
 
-[ext_resource type="Texture2D" uid="uid://bcsye6c5iixl" path="res://assets/mob/_external/body_mesh_body-texture_BW.webp" id="1_phmcb"]
+[ext_resource type="Texture2D" uid="uid://bcsye6c5iixl" path="res://Assets/mob/_external/body_mesh_body-texture_BW.webp" id="1_phmcb"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l0ux6"]
 resource_name = "body"

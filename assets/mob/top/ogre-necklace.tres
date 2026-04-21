@@ -1,8 +1,8 @@
 [gd_resource type="ArrayMesh" load_steps=7 format=4 uid="uid://dbg3gogoovx2p"]
 
-[ext_resource type="Texture2D" uid="uid://dwo7f2fh80k3y" path="res://assets/mob/_external/oger_clothes_Image_11.png" id="1_rtirb"]
-[ext_resource type="Texture2D" uid="uid://clgxebkdwqdgj" path="res://assets/mob/_external/oger_clothes_Image_12.png" id="2_ai3cv"]
-[ext_resource type="Texture2D" uid="uid://bqnfeliskfhpy" path="res://assets/mob/_external/oger_clothes_Image_15.png" id="3_gtd8r"]
+[ext_resource type="Texture2D" uid="uid://dwo7f2fh80k3y" path="res://Assets/mob/_external/oger_clothes_Image_11.png" id="1_rtirb"]
+[ext_resource type="Texture2D" uid="uid://clgxebkdwqdgj" path="res://Assets/mob/_external/oger_clothes_Image_12.png" id="2_ai3cv"]
+[ext_resource type="Texture2D" uid="uid://bqnfeliskfhpy" path="res://Assets/mob/_external/oger_clothes_Image_15.png" id="3_gtd8r"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_micu1"]
 resource_name = "ogre-bone-heads"

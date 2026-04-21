@@ -1,8 +1,8 @@
 [gd_resource type="ArrayMesh" load_steps=6 format=3 uid="uid://dxh1v0d137use"]
 
-[ext_resource type="Texture2D" uid="uid://dnrfvk01ye52i" path="res://assets/mob/_external/clothes_meshes_cloth_testure.jpg" id="1_qujmk"]
-[ext_resource type="Texture2D" uid="uid://ben7o110op8fr" path="res://assets/mob/_external/clothes_meshes_Other_baseColor.png" id="2_i0hs4"]
-[ext_resource type="Texture2D" uid="uid://cgppxvkff0weh" path="res://assets/mob/_external/clothes_meshes_Other_normal.png" id="3_q1rba"]
+[ext_resource type="Texture2D" uid="uid://dnrfvk01ye52i" path="res://Assets/mob/_external/clothes_meshes_cloth_testure.jpg" id="1_qujmk"]
+[ext_resource type="Texture2D" uid="uid://ben7o110op8fr" path="res://Assets/mob/_external/clothes_meshes_Other_baseColor.png" id="2_i0hs4"]
+[ext_resource type="Texture2D" uid="uid://cgppxvkff0weh" path="res://Assets/mob/_external/clothes_meshes_Other_normal.png" id="3_q1rba"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k2vyt"]
 resource_name = "straw"

@@ -155,5 +155,8 @@ editor_settings.tres
 *.import_override
 *.import_override.meta
 
-# Godot C# UID files
-*.cs.uid
+# Godot UID metadata
+*.uid
+
+# other
+*.md
