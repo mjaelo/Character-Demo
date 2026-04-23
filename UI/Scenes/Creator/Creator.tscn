@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://klqaekdm4u3l"]
 
 [ext_resource type="Script" uid="uid://dl5cq6kqcnnqd" path="res://UI/Scenes/Creator/Creator.gd" id="1_yntgj"]
-[ext_resource type="PackedScene" uid="uid://hdk05f78cjdv" path="res://UI/Scenes/Creator/PresetTab/preset_tab.tscn" id="2_85g5j"]
+[ext_resource type="PackedScene" path="res://UI/Scenes/Creator/PresetTab/PresetTab.tscn" id="2_lka5l"]
 [ext_resource type="PackedScene" uid="uid://dkebf5g513vk3" path="res://UI/Scenes/Creator/CreatorCameraManager/CreatorCameraManager.tscn" id="5_us56g"]
 
 [node name="Creator" type="Control" unique_id=1581537457]
@@ -24,7 +24,7 @@ grow_vertical = 2
 size_flags_horizontal = 3
 current_tab = 0
 
-[node name="Preset" parent="TabContainer" unique_id=535816213 instance=ExtResource("2_85g5j")]
+[node name="Preset" parent="TabContainer" unique_id=250273077 instance=ExtResource("2_lka5l")]
 layout_mode = 2
 metadata/_tab_index = 0
 

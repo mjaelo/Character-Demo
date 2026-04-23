@@ -26,10 +26,10 @@ func set_mesh(file_name:String, mesh_instance:MeshInstance3D, path:String):
 		return
 	
 	# set mesh from file
-	var file_path = path+file_name+".tres"
+	var file_path := path+file_name+".tres"
 	var new_mesh = FileUtils.load_mesh_from_file(file_path)
 	if new_mesh:
-		var color = get_mesh_color(mesh_instance)
+		var color := get_mesh_color(mesh_instance)
 		var shape_names := get_shape_names_from_mesh(mesh_instance.mesh)
 		
 		mesh_instance.show()
@@ -70,8 +70,11 @@ func set_mesh(file_name:String, mesh_instance:MeshInstance3D, path:String):
 func adjust_hair_hider(hat_mesh: MeshInstance3D, hair_mesh: MeshInstance3D, skeleton:Skeleton3D):
 	var hider_node:BoneAttachment3D = skeleton.get_node("HairHider")
 	var hair_material: Material = hair_mesh.get_active_material(0)
-	var body_data:BodyData = skeleton.get_node("../../../").body_data
-	var eq_data:EquipmentData = skeleton.get_node("../../../").equipment_data
+	var mob:Mob = skeleton.get_node("../../../")
+	if !mob || !mob.get("body_data") || !mob.get("equipment_data"):
+		return
+	var body_data: BodyData = mob.body_data
+	var eq_data: EquipmentData = mob.equipment_data
 	
 	# hide hair if hat is visible and is full hat
 	var is_hair_bald:bool = body_data.hair_mesh.mesh_file == "empty"

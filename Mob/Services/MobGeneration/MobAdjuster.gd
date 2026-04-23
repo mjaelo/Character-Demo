@@ -12,6 +12,15 @@ static func adjust_body_data(skeleton:Skeleton3D, norms:Array[NormData], body_da
 		var mesh_instance := MobUtils.get_mesh_from_skeleton(mesh_name, skeleton)
 		var shape_names: Array[String] = MobGetter._get_shape_names(mesh_name, mesh_instance)
 		body_data[mesh_data_name] = adjust_mesh_data(mesh_name, shape_names, mesh_info, norms, body_data[mesh_data_name])
+	
+	# Propagate hair color to hair-linked meshes (Brows, Beard)TODO duplicated by TabBuilder MobGetter and MobAdjuster
+	if body_data.hair_mesh && body_data.hair_mesh.has_color():
+		var hair_color := body_data.hair_mesh.mesh_color
+		for linked_name in MobConstants.hair_linked_names:
+			var field := MobGetter._mesh_name_to_field(linked_name)
+			if field && body_data.get(field):
+				body_data[field].mesh_color = hair_color
+	
 	return body_data
 
 static func adjust_equipment_data(skeleton:Skeleton3D, norms:Array[NormData], eq_data:EquipmentData) -> EquipmentData:
@@ -44,9 +53,10 @@ static func adjust_mesh_file(mesh_name:String, mesh_file:String, norms:Array[Nor
 	if is_mesh_file_within_norms(mesh_file, mesh_name, selected_tags, tag_norms, mesh_norms):
 		return mesh_file
 	var all_files := MobGetter._get_all_file_names(mesh_name, file_folder)
-	if randf() > MobConstants.variation_chance:
-		return MobGetter._pick_valid_mesh_file(all_files, all_tags, mesh_name, tag_norms, mesh_norms)
-	return all_files.pick_random()
+	if randf() <= MobConstants.variation_chance:
+		tag_norms = tag_norms.filter(func(n): return n.enforce)
+		mesh_norms = mesh_norms.filter(func(n): return n.enforce)
+	return MobGetter._pick_valid_mesh_file(all_files, all_tags, mesh_name, tag_norms, mesh_norms)
 
 static func adjust_mesh_color(mesh_name:String, mesh_color:Color, norms:Array[NormData], all_colors:Array[Color]) -> Color:
 	if all_colors.is_empty():
@@ -54,9 +64,9 @@ static func adjust_mesh_color(mesh_name:String, mesh_color:Color, norms:Array[No
 	var color_norms := norms.filter(func(n: NormData): return n.type == MobConstants.NormType.Color)
 	if is_mesh_color_within_norms(mesh_color, mesh_name, color_norms):
 		return mesh_color
-	if randf() > MobConstants.variation_chance:
-		return MobGetter._pick_valid_mesh_color(all_colors, mesh_name, color_norms)
-	return all_colors.pick_random()
+	if randf() <= MobConstants.variation_chance:
+		color_norms = color_norms.filter(func(n): return n.enforce)
+	return MobGetter._pick_valid_mesh_color(all_colors, mesh_name, color_norms)
 
 static func adjust_mesh_shape(mesh_name:String, mesh_shape:Array, norms:Array[NormData], shapes:Dictionary, shape_names:Array[String]) -> Array:
 	if shapes.is_empty() || shape_names.size() != shapes.size():
@@ -71,10 +81,10 @@ static func adjust_mesh_shape(mesh_name:String, mesh_shape:Array, norms:Array[No
 			shape_array.append(shape_value)
 		else:
 			var shape_range: Array[float] = shapes[shape_names[shape_id]]
-			if randf() > MobConstants.variation_chance:
-				shape_array.append(MobGetter._pick_valid_mesh_shape(shape_range, shape_id, mesh_name, shape_norms))
-			else:
-				shape_array.append(shape_range.pick_random())
+			var active_norms := shape_norms
+			if randf() <= MobConstants.variation_chance:
+				active_norms = shape_norms.filter(func(n): return n.enforce)
+			shape_array.append(MobGetter._pick_valid_mesh_shape(shape_range, shape_id, mesh_name, active_norms))
 	return shape_array
 
 # === VALIDATION ===
@@ -87,7 +97,9 @@ static func is_mesh_file_within_norms(mesh_file: String, mesh_name:String, tags:
 		if norm.forbidden && tags.has(norm.value):
 			return false
 	for norm: NormData in mesh_norms:
-		var has_value: bool = norm.value.has(mesh_name) && norm.value[mesh_name].has(mesh_file)
+		if !norm.value.has(mesh_name):
+			continue
+		var has_value: bool = norm.value[mesh_name] == mesh_file
 		if !norm.forbidden && !has_value:
 			return false
 		if norm.forbidden && has_value:
@@ -98,7 +110,9 @@ static func is_mesh_color_within_norms(color: Color, mesh_name:String, color_nor
 	if !color || color == Color(-1, -1, -1):
 		return false
 	for norm: NormData in color_norms:
-		var has_value: bool = norm.value.has(mesh_name) && norm.value[mesh_name].has(color)
+		if !norm.value.has(mesh_name):
+			continue
+		var has_value: bool = norm.value[mesh_name].has(color)
 		if !norm.forbidden && !has_value:
 			return false
 		if norm.forbidden && has_value:
@@ -107,7 +121,9 @@ static func is_mesh_color_within_norms(color: Color, mesh_name:String, color_nor
 
 static func is_mesh_shape_within_norms(shape_value: float, mesh_name:String, shape_id:int, shape_norms: Array[NormData]) -> bool:
 	for norm: NormData in shape_norms:
-		var has_value: bool = norm.value.has(mesh_name) && norm.value[mesh_name].has(shape_id) && norm.value[mesh_name][shape_id].has(shape_value)
+		if !norm.value.has(mesh_name) || !norm.value[mesh_name].has(shape_id):
+			continue
+		var has_value: bool = norm.value[mesh_name][shape_id].has(shape_value)
 		if !norm.forbidden && !has_value:
 			return false
 		if norm.forbidden && has_value:

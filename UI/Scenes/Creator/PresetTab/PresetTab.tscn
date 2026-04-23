@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://hdk05f78cjdv"]
+[gd_scene format=3 uid="uid://2yx7df26g7uj"]
 
-[ext_resource type="Script" uid="uid://dplf5gh5gs81a" path="res://UI/Scenes/Creator/PresetTab/preset_tab.gd" id="1_2mwuw"]
+[ext_resource type="Script" uid="uid://dplf5gh5gs81a" path="res://UI/Scenes/Creator/PresetTab/PresetTab.gd" id="1_0atk6"]
 [ext_resource type="Texture2D" uid="uid://cki8nbrguu2eb" path="res://Assets/UI/dice.png" id="2_8tttn"]
 [ext_resource type="Texture2D" uid="uid://dm80ly07ng6dm" path="res://Assets/UI/dice-hover.png" id="3_47ibg"]
 [ext_resource type="PackedScene" path="res://UI/Scenes/Utility/SliderPicker/SliderPickerComponent.tscn" id="3_qmqha"]
@@ -11,7 +11,7 @@ anchor_right = 0.311632
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_2mwuw")
+script = ExtResource("1_0atk6")
 metadata/_edit_use_anchors_ = true
 
 [node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=474004285]

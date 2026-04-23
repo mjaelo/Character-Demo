@@ -40,11 +40,7 @@ func _on_random_button_pressed() -> void:
 	if values.size() < 3:
 		disabled = true
 		return
-	var random_color = Color.from_hsv(
-		values[0].pick_random(),
-		values[1].pick_random(),
-		values[2].pick_random()
-	)
+	var random_color = values.pick_random()
 	set_value(random_color)
 
 func _on_picker_value_changed(new_value: Color) -> void:

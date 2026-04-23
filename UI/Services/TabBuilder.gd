@@ -59,7 +59,7 @@ func create_pickers_for_mesh(picker_info:MeshPickerInfo, vBox: VBoxContainer):
 	vBox.add_child(label)
 	
 	if mesh_info != null:
-		if picker_info.has_mesh_picker:
+		if picker_info.has_file_picker:
 			var options := FileUtils.get_file_names(mesh_info.file_folder)
 			var picker := create_mesh_picker(mesh_name, options, mesh_instance,mesh_info.file_folder)
 			vBox.add_child(picker)
@@ -87,7 +87,7 @@ func create_mesh_picker(mesh_name: String, file_names: Array, mesh_instance: Mes
 		node.disabled = true
 	else:
 		node.variable_changed.connect(
-			_on_mesh_picker_value_changed.bind(mesh_instance, mesh_instance.name, mesh_name, file_folder)
+			_on_mesh_picker_value_changed.bind(mesh_instance,  mesh_name, file_folder)
 		)
 	return node
 
@@ -125,9 +125,9 @@ func _on_mesh_picker_value_changed(value:String, mesh_instance: MeshInstance3D, 
 	var data_field_name := get_data_field_name_from_mesh(mesh_name)
 	
 	if BodyData.FIELD_NAMES.has(data_field_name):
-		mob_data.body_data[data_field_name].mesh_name = value
+		mob_data.body_data[data_field_name].mesh_file = value
 	elif EquipmentData.FIELD_NAMES.has(data_field_name):
-		mob_data.equipment_data[data_field_name].mesh_name = value
+		mob_data.equipment_data[data_field_name].mesh_file = value
 	else:
 		print("Mesh picker value changed for unknown mesh: ", mesh_name)
 	
@@ -137,14 +137,24 @@ func _on_color_picker_value_changed(value:Color, mesh_instance: MeshInstance3D, 
 	var data_field_name := get_data_field_name_from_mesh(mesh_name)
 	
 	if BodyData.FIELD_NAMES.has(data_field_name):
-		mob_data.body_data[data_field_name].color = value
+		mob_data.body_data[data_field_name].mesh_color = value
 	elif EquipmentData.FIELD_NAMES.has(data_field_name):
-		mob_data.equipment_data[data_field_name].color = value
+		mob_data.equipment_data[data_field_name].mesh_color = value
 	else:
 		print("Color picker value changed for unknown mesh: ", mesh_name)
 	
 	var material_nr := -1 if mesh_name != "Body" else 0
 	MobUtils.set_mesh_color(value, mesh_instance, material_nr)
+	
+	# Propagate hair color to linked meshes (Brows, Beard) TODO duplicated by TabBuilder MobGetter and MobAdjuster
+	if mesh_name == "Hair":
+		for linked_name in MobConstants.hair_linked_names:
+			var linked_field := get_data_field_name_from_mesh(linked_name)
+			if linked_field && BodyData.FIELD_NAMES.has(linked_field):
+				mob_data.body_data[linked_field].mesh_color = value
+			var linked_mesh := MobUtils.get_mesh_from_skeleton(linked_name, skeleton)
+			if linked_mesh:
+				MobUtils.set_mesh_color(value, linked_mesh)
 
 func _on_shape_picker_value_changed(value:float, mesh_instance: MeshInstance3D, mesh_name: String = mesh_instance.name, shape_id := 0, shape_name := ""):
 	var data_field_name := get_data_field_name_from_mesh(mesh_name)
@@ -159,10 +169,11 @@ func _on_shape_picker_value_changed(value:float, mesh_instance: MeshInstance3D, 
 	MobUtils.set_skeleton_shape_key(value, shape_name, mesh_instance.get_parent())
 
 func get_data_field_name_from_mesh(mesh_name: String) -> String:
-	var bd_id := BodyData.FIELD_NAMES.find(mesh_name.to_lower())
-	if bd_id != -1:
-		return BodyData.FIELD_NAMES[bd_id]
-	var ed_id := EquipmentData.FIELD_NAMES.find(mesh_name.to_lower())
-	if ed_id != -1:
-		return EquipmentData.FIELD_NAMES[ed_id]
-	return ""
+	# Map display mesh names to data field names
+	var name_to_field := {
+		"Body": "body_mesh", "Head": "head_mesh", "Eyes": "eye_mesh",
+		"Eyelashes": "lashes_mesh", "Hair": "hair_mesh", "Beard": "beard_mesh", "Brows": "brow_mesh",
+		"Top": "top_mesh", "Bottom": "bottom_mesh", "Shoes": "shoe_mesh",
+		"Hat": "hat_mesh", "Right Hand": "r_hand_mesh", "Left Hand": "l_hand_mesh", "Accessory": "accessory_mesh"
+	}
+	return name_to_field[mesh_name] if name_to_field.has(mesh_name) else ""

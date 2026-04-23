@@ -48,9 +48,18 @@ func randomize_creator_values():
 	var race: int = MobConstants.MobRaces.Human if !mob_data else -1
 	mob_data = MobGetter.get_random_mob_data(skeleton,race,type)
 	mob_data.mob_name = ""
+	tab_builder.mob_data = mob_data
+	MobSetter.set_mob_data_to_mob(mob_data, player)
 	preset_tab.set_mob_data_to_preset_pickers(mob_data)
 	set_mob_data_to_pickers(mob_data)
-	MobSetter.set_mob_data_to_mob(mob_data, player)	
+
+func randomize_all():
+	randomize_creator_values()
+
+func update_all_pickers():
+	tab_builder.mob_data = mob_data
+	preset_tab.set_mob_data_to_preset_pickers(mob_data)
+	set_mob_data_to_pickers(mob_data)
 
 func set_mob_data_to_pickers(_mob_data: MobData):
 	var body_mesh_names:Array = MobConstants.body_mesh_info.keys()
@@ -67,23 +76,31 @@ func set_mob_data_to_pickers(_mob_data: MobData):
 		var mesh_data: MeshData = _mob_data.equipment_data[mesh_data_name]
 		set_mesh_data_to_pickers(mesh_data,mesh_name)
 
-func set_mesh_data_to_pickers(mesh_data:MeshData, mesh_name:String): # TODO theres gotta be a better way then to use find_picker_and_set_value
-	for tab_name:String in UIConstants.menu_data.keys():
-		if UIConstants.menu_data[tab_name].has(mesh_name):
-			if mesh_data.mesh_file && UIConstants.menu_data[tab_name][mesh_name][0]:
-				find_picker_and_set_value(mesh_data.mesh_file,tab_name,mesh_name)
-			if mesh_data.mesh_color && UIConstants.menu_data[tab_name][mesh_name][1]:
-				find_picker_and_set_value(mesh_data.mesh_color,tab_name,mesh_name+"Color")
-			if mesh_data.mesh_shape && UIConstants.menu_data[tab_name][mesh_name][2]:
-				var shape_names := MobUtils.get_shape_names_from_mesh(skeleton.get_node(mesh_name).mesh)
-				if shape_names.size() != mesh_data.mesh_shape.size():
-					print(mesh_name+" shapes differ in saved data and mesh")
-					continue
-				for j in mesh_data.mesh_shape.size():
-					var shape_value:float = float(mesh_data.mesh_shape[j])
-					var shape_name:String = shape_names[j]
-					if UIConstants.menu_data[tab_name][mesh_name][2].has(shape_name):
-						find_picker_and_set_value(shape_value,tab_name,shape_name)
+func set_mesh_data_to_pickers(mesh_data:MeshData, mesh_name:String):
+	for tab_name: String in UIConstants.menu_data.keys():
+		var picker_info: MeshPickerInfo = null
+		for info: MeshPickerInfo in UIConstants.menu_data[tab_name]:
+			if info.mesh_name == mesh_name:
+				picker_info = info
+				break
+		if !picker_info:
+			continue
+		if mesh_data.mesh_file && picker_info.has_file_picker:
+			find_picker_and_set_value(mesh_data.mesh_file, tab_name, mesh_name)
+		if mesh_data.has_color() && picker_info.has_color_picker:
+			find_picker_and_set_value(mesh_data.mesh_color, tab_name, mesh_name + "Color")
+		if mesh_data.mesh_shape && picker_info.has_shape_picker:
+			var mesh_instance := skeleton.get_node(mesh_name) if skeleton.has_node(mesh_name) else null
+			if !mesh_instance:
+				continue
+			var shape_names := MobUtils.get_shape_names_from_mesh(mesh_instance.mesh)
+			if shape_names.size() != mesh_data.mesh_shape.size():
+				print(mesh_name + " shapes differ in saved data and mesh")
+				continue
+			for j in mesh_data.mesh_shape.size():
+				var shape_value: float = float(mesh_data.mesh_shape[j])
+				var shape_name: String = shape_names[j]
+				find_picker_and_set_value(shape_value, tab_name, shape_name)
 
 func find_picker_and_set_value(value, tab_name:String, picker_name:String) -> void:
 	# find picker

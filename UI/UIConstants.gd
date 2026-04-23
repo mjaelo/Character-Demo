@@ -32,8 +32,8 @@ var menu_data := {
 	],
 	"Hair": [
 		MeshPickerInfo.new("Hair",true,true),
-		MeshPickerInfo.new("Brows",false,true,true),
-		MeshPickerInfo.new("Beard",true,true)
+		MeshPickerInfo.new("Brows",false,false,true),
+		MeshPickerInfo.new("Beard",true,false)
 	],
 	"Clothes": [
 		MeshPickerInfo.new("Top",true,true),

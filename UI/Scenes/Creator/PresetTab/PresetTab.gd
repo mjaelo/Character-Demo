@@ -70,7 +70,8 @@ func _on_preset_changed(mob_name:String):
 	if !is_new_character:
 		var mob_data:MobData = presets[mob_name]
 		parent.mob_data = mob_data
-		MobSetter.set_mob_data_to_mob(mob_data,parent.mob)
+		parent.tab_builder.mob_data = mob_data
+		MobSetter.set_mob_data_to_mob(mob_data,parent.player)
 		parent.update_all_pickers()
 	else:
 		parent.randomize_all()
@@ -87,7 +88,7 @@ func _on_gender_changed(gender:int): # 0 - male, 2 - female
 		norms.append_array(MobConstants.gender_norms[gender])
 		parent.mob_data.body_data = MobAdjuster.adjust_body_data(parent.skeleton, norms, parent.mob_data.body_data)
 		parent.mob_data.equipment_data = MobAdjuster.adjust_equipment_data(parent.skeleton, norms, parent.mob_data.equipment_data)
-	MobSetter.set_mob_data_to_mob(parent.mob_data, parent.mob)
+	MobSetter.set_mob_data_to_mob(parent.mob_data, parent.player)
 	parent.update_all_pickers()
 
 func _on_random_name_pressed():
@@ -114,10 +115,15 @@ func _on_race_changed(race_v:String):
 		return
 	
 	# otherwise, it changes race of the last saved preset for some reason. GRRRR
-	var last_races:Array = presets.values().map(func (mb:MobData): return mb.race)
+	var mob_presets := presets.values().filter(func(v): return v is MobData)
+	var last_races: Array = mob_presets.map(func(mb: MobData): return mb.race)
 	parent.mob_data.race = MobConstants.MobRaces[race_v]
-	if last_races: 
-		range(presets.size()).map(func (i): presets.values()[i].race = last_races[i])
+	if last_races:
+		var idx := 0
+		for key in presets.keys():
+			if presets[key] is MobData:
+				presets[key].race = last_races[idx]
+				idx += 1
 	
 	# adjust current mob data with new race norms
 	var norms: Array[NormData] = []
