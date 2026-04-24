@@ -36,36 +36,26 @@ static func _get_rtg_norms(race: int, type: int, gender: int) -> Array[NormData]
 # === RANDOM (fresh) ===
 
 static func get_random_body_data(skeleton:Skeleton3D, rtg_norms:Array[NormData], body_data := BodyData.new()) -> BodyData:
-	var mesh_data_names := BodyData.FIELD_NAMES
-	var mesh_names := MobConstants.body_mesh_info.keys()
-	for i in mesh_data_names.size():
-		var mesh_name: String = mesh_names[i]
-		var mesh_data_name: String = mesh_data_names[i]
-		var mesh_info: MobMeshInfo = MobConstants.body_mesh_info[mesh_name]
+	for mesh_name:String in MobConstants.BODY_MESHES_INFO.keys():
+		var mesh_info: MobMeshInfo = MobConstants.BODY_MESHES_INFO[mesh_name]
+		var field_name: String = mesh_info.field_name
 		var mesh_instance := MobUtils.get_mesh_from_skeleton(mesh_name, skeleton)
 		var shape_names: Array[String] = _get_shape_names(mesh_name, mesh_instance)
-		body_data[mesh_data_name] = get_random_mesh_data(mesh_name, shape_names, mesh_info, rtg_norms)
+		body_data[field_name] = get_random_mesh_data(mesh_name, shape_names, mesh_info, rtg_norms)
 	
 	# Propagate hair color to hair-linked meshes (Brows, Beard)TODO duplicated by TabBuilder MobGetter and MobAdjuster
-	if body_data.hair_mesh && body_data.hair_mesh.has_color():
-		var hair_color := body_data.hair_mesh.mesh_color
-		for linked_name in MobConstants.hair_linked_names:
-			var field := _mesh_name_to_field(linked_name)
-			if field && body_data.get(field):
-				body_data[field].mesh_color = hair_color
+	MobUtils.propagade_hair_color(body_data)
 	
 	return body_data
 
+
 static func get_random_equipment_data(skeleton:Skeleton3D, rtg_norms:Array[NormData], eq_data := EquipmentData.new()) -> EquipmentData:
-	var mesh_data_names := EquipmentData.FIELD_NAMES
-	var mesh_names := MobConstants.eq_mesh_info.keys()
-	for i in mesh_data_names.size():
-		var mesh_name: String = mesh_names[i]
-		var mesh_data_name: String = mesh_data_names[i]
-		var mesh_info: MobMeshInfo = MobConstants.eq_mesh_info[mesh_name]
+	for mesh_name:String in MobConstants.EQ_MESHES_INFO.keys():
+		var mesh_info: MobMeshInfo = MobConstants.EQ_MESHES_INFO[mesh_name]
+		var field_name: String = mesh_info.field_name
 		var mesh_instance: MeshInstance3D = MobUtils.get_mesh_from_skeleton(mesh_name, skeleton)
 		var shape_names: Array[String] = _get_shape_names(mesh_name, mesh_instance)
-		eq_data[mesh_data_name] = get_random_mesh_data(mesh_name, shape_names, mesh_info, rtg_norms)
+		eq_data[field_name] = get_random_mesh_data(mesh_name, shape_names, mesh_info, rtg_norms)
 	return eq_data
 
 static func get_random_mesh_data(mesh_name:String, shape_names:Array[String], mesh_info:MobMeshInfo, rtg_norms:Array[NormData]) -> MeshData:
@@ -118,17 +108,6 @@ static func get_random_mesh_shape(mesh_name:String, rtg_norms:Array[NormData], s
 		shape_array.append(_pick_valid_mesh_shape(shape_range, shape_id, mesh_name, active_norms))
 	return shape_array
 
-# === INTERNAL HELPERS ===
-const _NAME_TO_FIELD := { #TODO not needed
-	"Body": "body_mesh", "Head": "head_mesh", "Eyes": "eye_mesh",
-	"Eyelashes": "lashes_mesh", "Hair": "hair_mesh", "Beard": "beard_mesh", "Brows": "brow_mesh",
-	"Top": "top_mesh", "Bottom": "bottom_mesh", "Shoes": "shoe_mesh",
-	"Hat": "hat_mesh", "Right Hand": "r_hand_mesh", "Left Hand": "l_hand_mesh", "Accessory": "accessory_mesh"
-}
-
-static func _mesh_name_to_field(mesh_name: String) -> String:
-	return _NAME_TO_FIELD[mesh_name] if _NAME_TO_FIELD.has(mesh_name) else ""
-
 static func _get_shape_names(mesh_name: String, mesh_instance: MeshInstance3D) -> Array[String]:
 	var shape_names: Array[String] = []
 	if MobConstants.meshes_with_shapes.has(mesh_name) && mesh_instance:
@@ -164,8 +143,12 @@ static func _pick_valid_mesh_file(all_files:Array, all_tags:Dictionary, mesh_nam
 	for norm: NormData in mesh_norms:
 		if !norm.value.has(mesh_name):
 			continue
+		var target: String = norm.value[mesh_name]
+		# If norm mandates a specific file that isn't in the pool yet (e.g. "empty" for non_empty_names), add it
+		if !norm.forbidden && !possible_files.has(target):
+			possible_files.append(target)
 		var filtered := possible_files.filter(func(file_name: String):
-			var matches: bool = norm.value[mesh_name] == file_name
+			var matches: bool = target == file_name
 			return !matches if norm.forbidden else matches
 		)
 		if filtered:
@@ -179,12 +162,16 @@ static func _pick_valid_mesh_color(all_colors:Array[Color], mesh_name:String, co
 	for norm: NormData in color_norms:
 		if !norm.value.has(mesh_name):
 			continue
-		var filtered := possible_colors.filter(func(color: Color):
-			var matches: bool = norm.value[mesh_name].has(color)
-			return !matches if norm.forbidden else matches
-		)
-		if filtered:
-			possible_colors = filtered
+		if norm.forbidden:
+			var filtered := possible_colors.filter(func(color: Color):
+				return !norm.value[mesh_name].has(color)
+			)
+			if filtered:
+				possible_colors = filtered
+		else:
+			var norm_colors: Array = norm.value[mesh_name]
+			if !norm_colors.is_empty():
+				possible_colors = norm_colors
 	
 	return possible_colors.pick_random()
 

@@ -45,12 +45,12 @@ func create_pickers_for_mesh(picker_info:MeshPickerInfo, vBox: VBoxContainer):
 	var mesh_instance := MobUtils.get_mesh_from_skeleton(mesh_name, skeleton)
 	
 	var mesh_info: MobMeshInfo
-	if MobConstants.body_mesh_info.has(mesh_name):
-		mesh_info = MobConstants.body_mesh_info[mesh_name]
-	elif MobConstants.eq_mesh_info.has(mesh_name):
-		mesh_info = MobConstants.eq_mesh_info[mesh_name]
+	if MobConstants.BODY_MESHES_INFO.has(mesh_name):
+		mesh_info = MobConstants.BODY_MESHES_INFO[mesh_name]
+	elif MobConstants.EQ_MESHES_INFO.has(mesh_name):
+		mesh_info = MobConstants.EQ_MESHES_INFO[mesh_name]
 	elif mesh_name == "Head":
-		mesh_info = MobConstants.body_mesh_info["Body"]
+		mesh_info = MobConstants.BODY_MESHES_INFO["Body"]
 	else:
 		print("Couldnt find mesh ", mesh_name)
 	
@@ -121,25 +121,25 @@ func create_shape_picker(mesh_name: String, shape_values: Array, mesh_instance: 
 	return node
 
 # PICKER CALLBACKS update mob_data and mob body
-func _on_mesh_picker_value_changed(value:String, mesh_instance: MeshInstance3D, mesh_name: String = mesh_instance.name, file_folder := ""):
-	var data_field_name := get_data_field_name_from_mesh(mesh_name)
-	
-	if BodyData.FIELD_NAMES.has(data_field_name):
-		mob_data.body_data[data_field_name].mesh_file = value
-	elif EquipmentData.FIELD_NAMES.has(data_field_name):
-		mob_data.equipment_data[data_field_name].mesh_file = value
+func _on_mesh_picker_value_changed(value:String, mesh_instance: MeshInstance3D, mesh_name: String = mesh_instance.name, file_folder := ""):	
+	if MobConstants.BODY_MESHES_INFO.has(mesh_name):
+		var field_name:String= MobConstants.BODY_MESHES_INFO[mesh_name].field_name
+		mob_data.body_data[field_name].mesh_file = value
+	elif MobConstants.EQ_MESHES_INFO.has(mesh_name):
+		var field_name:String= MobConstants.EQ_MESHES_INFO[mesh_name].field_name
+		mob_data.equipment_data[field_name].mesh_file = value
 	else:
 		print("Mesh picker value changed for unknown mesh: ", mesh_name)
 	
 	MobUtils.set_mesh(value, mesh_instance, file_folder)
 
 func _on_color_picker_value_changed(value:Color, mesh_instance: MeshInstance3D, mesh_name: String = mesh_instance.name):
-	var data_field_name := get_data_field_name_from_mesh(mesh_name)
-	
-	if BodyData.FIELD_NAMES.has(data_field_name):
-		mob_data.body_data[data_field_name].mesh_color = value
-	elif EquipmentData.FIELD_NAMES.has(data_field_name):
-		mob_data.equipment_data[data_field_name].mesh_color = value
+	if MobConstants.BODY_MESHES_INFO.has(mesh_name):
+		var field_name:String= MobConstants.BODY_MESHES_INFO[mesh_name].field_name
+		mob_data.body_data[field_name].mesh_color = value
+	elif MobConstants.EQ_MESHES_INFO.has(mesh_name):
+		var field_name:String= MobConstants.EQ_MESHES_INFO[mesh_name].field_name
+		mob_data.equipment_data[field_name].mesh_color = value
 	else:
 		print("Color picker value changed for unknown mesh: ", mesh_name)
 	
@@ -148,32 +148,16 @@ func _on_color_picker_value_changed(value:Color, mesh_instance: MeshInstance3D, 
 	
 	# Propagate hair color to linked meshes (Brows, Beard) TODO duplicated by TabBuilder MobGetter and MobAdjuster
 	if mesh_name == "Hair":
-		for linked_name in MobConstants.hair_linked_names:
-			var linked_field := get_data_field_name_from_mesh(linked_name)
-			if linked_field && BodyData.FIELD_NAMES.has(linked_field):
-				mob_data.body_data[linked_field].mesh_color = value
-			var linked_mesh := MobUtils.get_mesh_from_skeleton(linked_name, skeleton)
-			if linked_mesh:
-				MobUtils.set_mesh_color(value, linked_mesh)
+		MobUtils.propagade_hair_color(mob_data.body_data, skeleton)
 
 func _on_shape_picker_value_changed(value:float, mesh_instance: MeshInstance3D, mesh_name: String = mesh_instance.name, shape_id := 0, shape_name := ""):
-	var data_field_name := get_data_field_name_from_mesh(mesh_name)
-	
-	if BodyData.FIELD_NAMES.has(data_field_name):
-		mob_data.body_data[data_field_name].mesh_shape[shape_id] = value
-	elif EquipmentData.FIELD_NAMES.has(data_field_name):
-		mob_data.equipment_data[data_field_name].mesh_shape[shape_id] = value
+	if MobConstants.BODY_MESHES_INFO.has(mesh_name):
+		var field_name:String= MobConstants.BODY_MESHES_INFO[mesh_name].field_name
+		mob_data.body_data[field_name].mesh_shape[shape_id] = value
+	elif MobConstants.EQ_MESHES_INFO.has(mesh_name):
+		var field_name:String = MobConstants.EQ_MESHES_INFO[mesh_name].field_name
+		mob_data.equipment_data[field_name].mesh_shape[shape_id] = value
 	else:
 		print("Shape picker value changed for unknown mesh: ", mesh_name)
 	
 	MobUtils.set_skeleton_shape_key(value, shape_name, mesh_instance.get_parent())
-
-func get_data_field_name_from_mesh(mesh_name: String) -> String:
-	# Map display mesh names to data field names
-	var name_to_field := {
-		"Body": "body_mesh", "Head": "head_mesh", "Eyes": "eye_mesh",
-		"Eyelashes": "lashes_mesh", "Hair": "hair_mesh", "Beard": "beard_mesh", "Brows": "brow_mesh",
-		"Top": "top_mesh", "Bottom": "bottom_mesh", "Shoes": "shoe_mesh",
-		"Hat": "hat_mesh", "Right Hand": "r_hand_mesh", "Left Hand": "l_hand_mesh", "Accessory": "accessory_mesh"
-	}
-	return name_to_field[mesh_name] if name_to_field.has(mesh_name) else ""

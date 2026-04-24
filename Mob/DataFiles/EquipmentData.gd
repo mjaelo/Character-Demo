@@ -1,8 +1,6 @@
 extends Resource
 class_name EquipmentData
 
-const FIELD_NAMES := ["top_mesh", "bottom_mesh", "shoe_mesh", "hat_mesh", "r_hand_mesh", "l_hand_mesh", "accessory_mesh"]
-
 var top_mesh: MeshData
 var bottom_mesh: MeshData
 var shoe_mesh: MeshData

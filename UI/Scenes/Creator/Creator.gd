@@ -62,18 +62,16 @@ func update_all_pickers():
 	set_mob_data_to_pickers(mob_data)
 
 func set_mob_data_to_pickers(_mob_data: MobData):
-	var body_mesh_names:Array = MobConstants.body_mesh_info.keys()
-	for i in BodyData.FIELD_NAMES.size():
-		var mesh_name:String = body_mesh_names[i]
-		var mesh_data_name:String = BodyData.FIELD_NAMES[i]
-		var mesh_data: MeshData = _mob_data.body_data[mesh_data_name]
+	for mesh_name:String in MobConstants.BODY_MESHES_INFO.keys():
+		var mesh_info: MobMeshInfo = MobConstants.BODY_MESHES_INFO[mesh_name]
+		var field_name: String = mesh_info.field_name
+		var mesh_data: MeshData = _mob_data.body_data[field_name]
 		set_mesh_data_to_pickers(mesh_data,mesh_name)
 	
-	var eq_mesh_names:Array = MobConstants.eq_mesh_info.keys()
-	for i in EquipmentData.FIELD_NAMES.size():
-		var mesh_name:String = eq_mesh_names[i]
-		var mesh_data_name:String = EquipmentData.FIELD_NAMES[i]
-		var mesh_data: MeshData = _mob_data.equipment_data[mesh_data_name]
+	for mesh_name:String in MobConstants.EQ_MESHES_INFO.keys():
+		var mesh_info: MobMeshInfo = MobConstants.EQ_MESHES_INFO[mesh_name]
+		var field_name: String = mesh_info.field_name
+		var mesh_data: MeshData = _mob_data.equipment_data[field_name]
 		set_mesh_data_to_pickers(mesh_data,mesh_name)
 
 func set_mesh_data_to_pickers(mesh_data:MeshData, mesh_name:String):

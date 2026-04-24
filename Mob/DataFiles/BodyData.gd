@@ -1,8 +1,6 @@
 extends Resource
 class_name BodyData
 
-const FIELD_NAMES := ["body_mesh", "head_mesh", "eye_mesh", "lashes_mesh", "hair_mesh", "beard_mesh", "brow_mesh"]
-
 var body_mesh: MeshData
 var head_mesh: MeshData
 var eye_mesh: MeshData

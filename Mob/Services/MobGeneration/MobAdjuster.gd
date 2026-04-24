@@ -3,36 +3,25 @@ class_name MobAdjuster
 
 # === ADJUST (keep valid, re-randomize invalid) ===
 static func adjust_body_data(skeleton:Skeleton3D, norms:Array[NormData], body_data:BodyData) -> BodyData:
-	var mesh_data_names := BodyData.FIELD_NAMES
-	var mesh_names := MobConstants.body_mesh_info.keys()
-	for i in mesh_data_names.size():
-		var mesh_name: String = mesh_names[i]
-		var mesh_data_name: String = mesh_data_names[i]
-		var mesh_info: MobMeshInfo = MobConstants.body_mesh_info[mesh_name]
+	for mesh_name:String in MobConstants.BODY_MESHES_INFO.keys():
+		var mesh_info: MobMeshInfo = MobConstants.BODY_MESHES_INFO[mesh_name]
+		var field_name: String = mesh_info.field_name
 		var mesh_instance := MobUtils.get_mesh_from_skeleton(mesh_name, skeleton)
 		var shape_names: Array[String] = MobGetter._get_shape_names(mesh_name, mesh_instance)
-		body_data[mesh_data_name] = adjust_mesh_data(mesh_name, shape_names, mesh_info, norms, body_data[mesh_data_name])
+		body_data[field_name] = adjust_mesh_data(mesh_name, shape_names, mesh_info, norms, body_data[field_name])
 	
 	# Propagate hair color to hair-linked meshes (Brows, Beard)TODO duplicated by TabBuilder MobGetter and MobAdjuster
-	if body_data.hair_mesh && body_data.hair_mesh.has_color():
-		var hair_color := body_data.hair_mesh.mesh_color
-		for linked_name in MobConstants.hair_linked_names:
-			var field := MobGetter._mesh_name_to_field(linked_name)
-			if field && body_data.get(field):
-				body_data[field].mesh_color = hair_color
+	MobUtils.propagade_hair_color(body_data)
 	
 	return body_data
 
 static func adjust_equipment_data(skeleton:Skeleton3D, norms:Array[NormData], eq_data:EquipmentData) -> EquipmentData:
-	var mesh_data_names := EquipmentData.FIELD_NAMES
-	var mesh_names := MobConstants.eq_mesh_info.keys()
-	for i in mesh_data_names.size():
-		var mesh_name: String = mesh_names[i]
-		var mesh_data_name: String = mesh_data_names[i]
-		var mesh_info: MobMeshInfo = MobConstants.eq_mesh_info[mesh_name]
+	for mesh_name:String in MobConstants.EQ_MESHES_INFO.keys():
+		var mesh_info: MobMeshInfo = MobConstants.EQ_MESHES_INFO[mesh_name]
+		var field_name: String = mesh_info.field_name
 		var mesh_instance: MeshInstance3D = MobUtils.get_mesh_from_skeleton(mesh_name, skeleton)
 		var shape_names: Array[String] = MobGetter._get_shape_names(mesh_name, mesh_instance)
-		eq_data[mesh_data_name] = adjust_mesh_data(mesh_name, shape_names, mesh_info, norms, eq_data[mesh_data_name])
+		eq_data[field_name] = adjust_mesh_data(mesh_name, shape_names, mesh_info, norms, eq_data[field_name])
 	return eq_data
 
 static func adjust_mesh_data(mesh_name:String, shape_names:Array[String], mesh_info:MobMeshInfo, norms:Array[NormData], mesh_data:MeshData) -> MeshData:

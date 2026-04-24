@@ -7,11 +7,12 @@ const main_materials := { # TODO () eyes are not here...
 	"guard-bottom": 1,
 	"guard-top": 2
 }
-
+# TODO add to caches in Utils
+var cached_mesh_shape_names := {} # f.e. "Top": ["Body Mass","Body Shape", ... ]
 var full_hats: Array
 
 func _ready() -> void:
-	var hat_tag_dict: Dictionary = FileUtils.load_json_from_file(MobConstants.eq_mesh_info.Hat.file_folder+"tag_info.json")
+	var hat_tag_dict: Dictionary = FileUtils.load_json_from_file(MobConstants.EQ_MESHES_INFO.Hat.file_folder+"tag_info.json")
 	full_hats = hat_tag_dict.keys().filter(func (key): return hat_tag_dict[key].has("full-hat"))
 
 # SET MESH DATA
@@ -114,20 +115,20 @@ func set_skeleton_shape_key(value:float, shape_name:String, skel:Skeleton3D):
 		adjust_hip(skel)
 
 func adjust_hip(skel:Skeleton3D):
-	var hip_controller = skel.get_node("Hip/HipContainer")
+	var hip_controller := skel.get_node("Hip/HipContainer")
 	var body_mesh: MeshInstance3D = skel.get_node("Top")
 	
 	var added_amount := 0
 	for shape_name in MobConstants.hip_movers:
 		var shape_id = (body_mesh.mesh as ArrayMesh)._blend_shape_names.find(shape_name)
-		var value = body_mesh.get_blend_shape_value(shape_id)
+		var value := body_mesh.get_blend_shape_value(shape_id)
 		var multiplier := 4 if shape_name == MobConstants.hip_movers[0] else 7
 		added_amount += value * multiplier
 	
 	hip_controller.transform.origin.x = 17 + added_amount
 
 func set_mesh_shape_key(value:float, shape_name:String, mesh:MeshInstance3D):
-	var shape_id = mesh.find_blend_shape_by_name(shape_name)
+	var shape_id := mesh.find_blend_shape_by_name(shape_name)
 	if shape_id>-1:
 		mesh.set_blend_shape_value(shape_id,value)
 
@@ -184,8 +185,6 @@ func get_mesh_from_skeleton(mesh_name:String, skeleton:Skeleton3D) -> MeshInstan
 	else:
 		return skeleton.get_node(mesh_name)  
 		
-# TODO add to caches in Utils
-var cached_mesh_shape_names := {} # f.e. "Top": ["Body Mass","Body Shape", ... ]
 func get_shape_names_from_mesh(mesh_array:ArrayMesh)->Array:
 	var mesh_name:String = mesh_array.resource_path
 	if !cached_mesh_shape_names.has(mesh_name):
@@ -193,7 +192,6 @@ func get_shape_names_from_mesh(mesh_array:ArrayMesh)->Array:
 			func (i): return mesh_array.get_blend_shape_name(i)
 		)
 	return cached_mesh_shape_names[mesh_name]
-
 
 func spawn_opponent(parent: Node = null):
 	var scene = load(MobConstants.MOB_SCENE_PATH)
@@ -206,9 +204,62 @@ func spawn_opponent(parent: Node = null):
 			MobGetter.get_random_mob_data(mob.get_node("body/Armature/Skeleton3D"), race, type),
 			mob
 		)
-		var target = parent if parent else get_tree().current_scene
+		var target := parent if parent else get_tree().current_scene
 		target.add_child(mob)
 
 func toggle_player_control(has_control:bool, mob:Player):
 	mob.set_process_unhandled_input(has_control)
 	mob.set_physics_process(has_control)
+
+func propagade_hair_color(body_data: BodyData,skeleton:Skeleton3D = null):
+	if body_data.hair_mesh && body_data.hair_mesh.has_color():
+		var hair_color := body_data.hair_mesh.mesh_color
+		for linked_name in MobConstants.hair_linked_names:
+			var field :String= MobConstants.BODY_MESHES_INFO.get(linked_name).field_name
+			body_data[field].mesh_color = hair_color
+			
+			# update meshes directly
+			if !skeleton:
+				continue
+			var linked_mesh := get_mesh_from_skeleton(linked_name, skeleton)
+			if linked_mesh:
+				set_mesh_color(hair_color, linked_mesh)
+
+# data expansion handlers
+func _expand_bulk(dict: Dictionary) -> Dictionary:
+	var result := dict.duplicate()
+	const body_bulk := "BodyBulk"
+	const equipment_bulk := "EquipmentBulk"
+	if result.has(body_bulk):
+		var bulk_val = result[body_bulk]
+		result.erase(body_bulk)
+		for mesh_name in MobConstants.BODY_MESHES_INFO.keys():
+			if !result.has(mesh_name):
+				result[mesh_name] = bulk_val
+	if result.has(equipment_bulk):
+		var bulk_val = result[equipment_bulk]
+		result.erase(equipment_bulk)
+		for mesh_name in MobConstants.EQ_MESHES_INFO.keys():
+			if !result.has(mesh_name):
+				result[mesh_name] = bulk_val
+	return result
+
+func _expand_float_range(limits: Vector2) -> Array[float]:
+	var result: Array[float] = []
+	for v in range(int(limits.x * 10), int(limits.y * 10) + 1):
+		result.append(v / 10.0)
+	return result
+
+func get_colors_from_color_range(cr: ColorRangeInfo)->Array[Color]:
+	var color_values: Array[Color] = []
+	var colors := 10
+	for i in colors:
+		var weight := float(i) / float(colors - 1)
+		var h :float= lerp(cr.hue.x, cr.hue.y, weight)
+		var s :float= lerp(cr.saturation.x, cr.saturation.y, weight)
+		var v :float= lerp(cr.brightness.x, cr.brightness.y, weight)
+		color_values.append(Color.from_hsv(h, s, v))
+	return color_values
+	
+func get_color_range_from_color(color:Color)->ColorRangeInfo:
+	return ColorRangeInfo.new(Vector2(color.h,color.h),Vector2(color.s,color.s),Vector2(color.v,color.v),Vector2(color.a,color.a))
