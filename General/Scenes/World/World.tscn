@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c5bc32v5me474"]
 
-[ext_resource type="Script" uid="uid://cxf3edb026nvd" path="res://General/Scenes/World/world.gd" id="1_lkayy"]
-[ext_resource type="Environment" uid="uid://cmp5c1kaf6456" path="res://Assets/Env/env.tres" id="1_xt4ie"]
+[ext_resource type="Script" path="res://General/Scenes/World/World.cs" id="1_lkayy"]
+[ext_resource type="Environment" path="res://Assets/Env/env.tres" id="1_xt4ie"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_xns65"]
 size = Vector3(120, 120, 120)

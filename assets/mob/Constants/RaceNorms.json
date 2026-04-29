@@ -1,0 +1,37 @@
+﻿{
+  "Human": [
+    { "tags": ["Skeleton", "Ogre", "Spirit", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
+    { "meshes": { "Accessory": "empty" }, "Enforce": true },
+    { "shapes": { "Body": { "1": [0.0] } } }
+  ],
+  "Demon": [
+    { "tags": ["Human", "Skeleton", "Ogre", "Spirit", "Statue"], "Forbidden": true, "Enforce": true },
+    { "tags": ["Demon"], "Enforce": true },
+    { "colors": { "Body": "DemonSkinColors", "Head": "DemonSkinColors", "Top": "DemonSkinColors", "EquipmentBulk": "DemonClothesColors" } },
+    { "shapes": { "Body": { "1": [0.0] } } }
+  ],
+  "Ogre": [
+    { "tags": ["Human", "Skeleton", "Spirit", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
+    { "tags": ["Ogre"], "Enforce": true },
+    { "meshes": { "Hair": "empty", "Eyelashes": "empty", "Beard": "empty", "Brows": "empty", "Shoes": "empty" } },
+    { "colors": { "Body": "OgreColors", "Head": "OgreColors", "Top": "OgreColors" } },
+    { "shapes": { "Body": { "1": [1.0] } } }
+  ],
+  "Statue": [
+    { "tags": ["Human", "Skeleton", "Ogre", "Spirit", "Demon"], "Forbidden": true, "Enforce": true },
+    { "meshes": { "Hat": "empty", "Accessory": "empty" } },
+    { "colors": { "EquipmentBulk": "StatueColors", "BodyBulk": "StatueColors" } },
+    { "shapes": { "Body": { "1": [0.0] } } }
+  ],
+  "Spirit": [
+    { "tags": ["Human", "Skeleton", "Ogre", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
+    { "meshes": { "Hair": "empty", "Eyelashes": "empty", "Beard": "empty", "Brows": "empty", "EquipmentBulk": "empty", "Accessory": "empty" }, "Enforce": true },
+    { "colors": { "Body": "SpiritSkinColors", "Head": "SpiritSkinColors", "Eyes": "SpiritEyesColors", "Top": "SpiritSkinColors" } },
+    { "shapes": { "Body": { "1": [0.0] } } }
+  ],
+  "Skeleton": [
+    { "tags": ["Human", "Ogre", "Spirit", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
+    { "meshes": { "EquipmentBulk": "empty", "BodyBulk": "empty" } }
+  ]
+}
+

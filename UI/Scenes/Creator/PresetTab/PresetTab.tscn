@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://2yx7df26g7uj"]
 
-[ext_resource type="Script" uid="uid://dplf5gh5gs81a" path="res://UI/Scenes/Creator/PresetTab/PresetTab.gd" id="1_0atk6"]
-[ext_resource type="Texture2D" uid="uid://cki8nbrguu2eb" path="res://Assets/UI/dice.png" id="2_8tttn"]
-[ext_resource type="Texture2D" uid="uid://dm80ly07ng6dm" path="res://Assets/UI/dice-hover.png" id="3_47ibg"]
+[ext_resource type="Script" path="res://UI/Scenes/Creator/PresetTab/PresetTab.cs" id="1_0atk6"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UiIcons/dice.png" id="2_8tttn"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UiIcons/dice-hover.png" id="3_47ibg"]
 [ext_resource type="PackedScene" path="res://UI/Scenes/Utility/SliderPicker/SliderPickerComponent.tscn" id="3_qmqha"]
 
 [node name="Preset" type="TabBar" unique_id=250273077]

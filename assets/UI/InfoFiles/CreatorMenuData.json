@@ -1,0 +1,25 @@
+﻿{
+  "Body": [
+    { "MeshName": "Body",  "HasColorPicker": true, "HasShapePicker": true }
+  ],
+  "Face": [
+    { "MeshName": "Eyes",  "HasColorPicker": true },
+    { "MeshName": "Eyelashes", "HasFilePicker": true },
+    { "MeshName": "Head",  "HasShapePicker": true },
+    { "MeshName": "Accessory", "HasFilePicker": true }
+  ],
+  "Hair": [
+    { "MeshName": "Hair", "HasFilePicker": true, "HasColorPicker": true },
+    { "MeshName": "Brows",  "HasShapePicker": true },
+    { "MeshName": "Beard", "HasFilePicker": true }
+  ],
+  "Clothes": [
+    { "MeshName": "Top", "HasFilePicker": true, "HasColorPicker": true },
+    { "MeshName": "Bottom", "HasFilePicker": true, "HasColorPicker": true },
+    { "MeshName": "Shoes", "HasFilePicker": true, "HasColorPicker": true },
+    { "MeshName": "Hat", "HasFilePicker": true, "HasColorPicker": true },
+    { "MeshName": "Right Hand", "HasFilePicker": true },
+    { "MeshName": "Left Hand", "HasFilePicker": true }
+  ]
+}
+
