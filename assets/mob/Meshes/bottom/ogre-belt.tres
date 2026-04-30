@@ -1,10 +1,10 @@
-[gd_resource type="ArrayMesh" load_steps=9 format=4 uid="uid://va72fm8en11y"]
+[gd_resource type="ArrayMesh" load_steps=9 format=4]
 
-[ext_resource type="Texture2D" uid="uid://14yx0p4vhsfa" path="res://Assets/mob/_external/oger_clothes_Image_0.png" id="1_bjij1"]
-[ext_resource type="Texture2D" uid="uid://dinm3ygde3l0i" path="res://Assets/mob/_external/oger_clothes_Image_1.png" id="2_perdt"]
-[ext_resource type="Texture2D" uid="uid://otxlau5leps4" path="res://Assets/mob/_external/oger_clothes_Image_2.png" id="3_kmu2o"]
-[ext_resource type="Texture2D" uid="uid://c04pvxy63giq5" path="res://Assets/mob/_external/oger_clothes_Image_3.png" id="4_48cp1"]
-[ext_resource type="Texture2D" uid="uid://dujmruefiba6h" path="res://Assets/mob/_external/oger_clothes_Image_19.png" id="5_tq7wx"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/oger_clothes_Image_0.png" id="1_bjij1"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/oger_clothes_Image_1.png" id="2_perdt"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/oger_clothes_Image_2.png" id="3_kmu2o"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/oger_clothes_Image_3.png" id="4_48cp1"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/oger_clothes_Image_19.png" id="5_tq7wx"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kxdth"]
 resource_name = "ogre-greenish-metal"

@@ -92,21 +92,21 @@ public static class MobConstants
             ["Body"] = new("body_mesh", "", SkinColors, BodyShapes),
             ["Head"] = new("head_mesh", "", null, HeadShapes),
             ["Eyes"] = new("eye_mesh", "", EyeColors),
-            ["Eyelashes"] = new("lashes_mesh", "res://Assets/Mob/face/lashes/",null, LashShapes),
-            ["Hair"] = new("hair_mesh", "res://Assets/Mob/hair/", HairColors),
-            ["Beard"] = new("beard_mesh", "res://Assets/Mob/face/beard/", null, BeardShapes),
+            ["Eyelashes"] = new("lashes_mesh", "res://Assets/Mob/Meshes/face/lashes/",null, LashShapes),
+            ["Hair"] = new("hair_mesh", "res://Assets/Mob/Meshes/hair/", HairColors),
+            ["Beard"] = new("beard_mesh", "res://Assets/Mob/Meshes/face/beard/", null, BeardShapes),
             ["Brows"] = new("brow_mesh", "", null, BrowShapes) 
         };
 
     public static readonly IReadOnlyDictionary<string, MobMeshInfo> EqMeshesInfo = new Dictionary<string, MobMeshInfo>
         {
-            ["Top"] = new("top_mesh", "res://Assets/Mob/top/", ClothesColors, BodyShapes),
-            ["Bottom"] = new("bottom_mesh", "res://Assets/Mob/bottom/", ClothesColors, BodyShapes),
-            ["Shoes"] = new("shoe_mesh", "res://Assets/Mob/shoes/", ClothesColors),
-            ["Hat"] = new("hat_mesh", "res://Assets/Mob/hat/", ClothesColors),
-            ["Right Hand"] = new("r_hand_mesh", "res://Assets/Mob/r_hand/"),
-            ["Left Hand"] = new("l_hand_mesh", "res://Assets/Mob/l_hand/"),
-            ["Accessory"] = new("accessory_mesh", "res://Assets/Mob/accessories/"),
+            ["Top"] = new("top_mesh", "res://Assets/Mob/Meshes/top/", ClothesColors, BodyShapes),
+            ["Bottom"] = new("bottom_mesh", "res://Assets/Mob/Meshes/bottom/", ClothesColors, BodyShapes),
+            ["Shoes"] = new("shoe_mesh", "res://Assets/Mob/Meshes/shoes/", ClothesColors),
+            ["Hat"] = new("hat_mesh", "res://Assets/Mob/Meshes/hat/", ClothesColors),
+            ["Right Hand"] = new("r_hand_mesh", "res://Assets/Mob/Meshes/r_hand/"),
+            ["Left Hand"] = new("l_hand_mesh", "res://Assets/Mob/Meshes/l_hand/"),
+            ["Accessory"] = new("accessory_mesh", "res://Assets/Mob/Meshes/accessories/"),
         };
     
     // helper functions

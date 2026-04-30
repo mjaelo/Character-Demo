@@ -1,7 +1,7 @@
-[gd_resource type="ArrayMesh" load_steps=7 format=3 uid="uid://mwsstej0a2hn"]
+[gd_resource type="ArrayMesh" load_steps=7 format=3]
 
-[ext_resource type="Texture2D" uid="uid://bf70wy81fb5k7" path="res://Assets/mob/_external/weapons_Wood_material.jpg" id="1_clm0y"]
-[ext_resource type="Texture2D" uid="uid://nvoclwh2n8bd" path="res://Assets/mob/_external/weapons_Material.png" id="2_s5gei"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/weapons_Wood_material.jpg" id="1_clm0y"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/weapons_Material.png" id="2_s5gei"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gw4up"]
 resource_name = "Metal_1"

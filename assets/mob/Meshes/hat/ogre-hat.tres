@@ -1,8 +1,8 @@
-[gd_resource type="ArrayMesh" load_steps=5 format=4 uid="uid://bv8cqte1nsyj"]
+[gd_resource type="ArrayMesh" load_steps=5 format=4]
 
-[ext_resource type="Texture2D" uid="uid://dov8q26tci8a7" path="res://Assets/mob/_external/oger_clothes_Image_4.png" id="1_eckwt"]
-[ext_resource type="Texture2D" uid="uid://dy2tpaw5126oe" path="res://Assets/mob/_external/oger_clothes_Image_5.png" id="2_4xq3o"]
-[ext_resource type="Texture2D" uid="uid://ptftldyk71ho" path="res://Assets/mob/_external/oger_clothes_Image_6.png" id="3_k0jp3"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/oger_clothes_Image_4.png" id="1_eckwt"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/oger_clothes_Image_5.png" id="2_4xq3o"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/oger_clothes_Image_6.png" id="3_k0jp3"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qn6f6"]
 resource_name = "ogre-skull"

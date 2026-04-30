@@ -1,4 +1,4 @@
-[gd_resource type="ArrayMesh" format=4 uid="uid://ch4133re37rsi"]
+[gd_resource type="ArrayMesh" format=4 uid="uid://0ca6bqicn1ts"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6p7y0"]
 resource_name = "smooth-line"

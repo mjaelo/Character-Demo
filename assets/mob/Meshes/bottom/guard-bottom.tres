@@ -1,9 +1,9 @@
-[gd_resource type="ArrayMesh" load_steps=9 format=3 uid="uid://b8506sr5ouyrg"]
+[gd_resource type="ArrayMesh" load_steps=9 format=3]
 
-[ext_resource type="Texture2D" uid="uid://b6ewgd1nwojyg" path="res://Assets/mob/_external/roles_clothes_Cota_de_malla_diffuse.png" id="1_7dscy"]
-[ext_resource type="Texture2D" uid="uid://1blppvxmgv6" path="res://Assets/mob/_external/roles_clothes_Cota_de_malla_specularGlossiness_3.png" id="2_rvy18"]
-[ext_resource type="Texture2D" uid="uid://dwerftuii80vc" path="res://Assets/mob/_external/roles_clothes_Cota_de_malla_normal.png" id="3_c662y"]
-[ext_resource type="Texture2D" uid="uid://dsekscfwr3l30" path="res://Assets/mob/_external/roles_clothes_Metal_1_specularGlossiness_5.png" id="4_seb2a"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/roles_clothes_Cota_de_malla_diffuse.png" id="1_7dscy"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/roles_clothes_Cota_de_malla_specularGlossiness_3.png" id="2_rvy18"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/roles_clothes_Cota_de_malla_normal.png" id="3_c662y"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/roles_clothes_Metal_1_specularGlossiness_5.png" id="4_seb2a"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dmdg0"]
 resource_name = "smooth-line"

@@ -1,4 +1,4 @@
-[gd_resource type="ArrayMesh" load_steps=2 format=4 uid="uid://yr3n8x4vn7qo"]
+[gd_resource type="ArrayMesh" load_steps=2 format=4]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gv4p1"]
 resource_name = "lashes"

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CharacterDemo.General;
 using Godot;
 
 namespace CharacterDemo.Mob.Services.Controllers;
@@ -28,7 +29,6 @@ public partial class IdleController : Node
     private enum IdleFaceAnims { FaceLookAround, FaceLookDown, FaceBlinking }
     private enum IdleBodyAnims { IdleLookAround, IdleStretchArms, IdleStretchNeck }
 
-    private static readonly Random Rng = new();
 
     public override void _Ready()
     {
@@ -49,14 +49,14 @@ public partial class IdleController : Node
     {
         _parentController.FaceBlend = 1;
         _parentController.FaceStateMachine.Travel("Idle");
-        _parentController.FaceIdleStateMachine.Travel(Enum.GetValues<IdleFaceAnims>().PickRandom().ToString());
+        _parentController.FaceIdleStateMachine.Travel(GeneralUtils.PickRandom(Enum.GetValues<IdleFaceAnims>()).ToString());
         PerformingEvent = true;
     }
 
     private void BodyIdle()
     {
         _parentController.BodyStateMachine.Travel("BodyIdles");
-        _parentController.BodyIdleStateMachine.Travel(Enum.GetValues<IdleBodyAnims>().PickRandom().ToString());
+        _parentController.BodyIdleStateMachine.Travel(GeneralUtils.PickRandom(Enum.GetValues<IdleBodyAnims>()).ToString());
         PerformingEvent = true;
     }
 
@@ -79,8 +79,8 @@ public partial class IdleController : Node
     private void HandleIdleEvent()
     {
         if (PerformingEvent) return;
-        if (Rng.NextDouble() < _faceIdleProbability) FacialIdle();
-        if (Rng.NextDouble() < _bodyIdleProbability) BodyIdle();
+        if (GeneralUtils.CheckRng(_faceIdleProbability)) FacialIdle();
+        if (GeneralUtils.CheckRng(_bodyIdleProbability)) BodyIdle();
     }
 
     public void OnAnimationFinished(string animName)
@@ -89,11 +89,5 @@ public partial class IdleController : Node
         if (isFaceAnim) _parentController.FaceBlend = 0;
         PerformingEvent = false;
     }
-}
-
-file static class ArrayExtensions
-{
-    private static readonly System.Random Rng = new();
-    public static T PickRandom<T>(this T[] arr) => arr[Rng.Next(arr.Length)];
 }
 

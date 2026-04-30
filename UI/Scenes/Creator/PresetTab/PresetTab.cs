@@ -23,7 +23,7 @@ public partial class PresetTab : TabBar
 	public void Initialize(Creator parent)
 	{
 		_parent = parent;
-		_startButton = GetNode<Button>("../../CreatorCameraManager/Start Game");
+		_startButton = GetNode<Button>("../../Right/Start Game");
 		_saveButton = GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Save Preset");
 		_deleteButton = GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Delete Preset");
 		_presetPicker = GetNode<SliderPickerComponent>("ScrollContainer/VBoxContainer/Preset");
@@ -31,7 +31,11 @@ public partial class PresetTab : TabBar
 		_racePicker = GetNode<SliderPickerComponent>("ScrollContainer/VBoxContainer/Race");
 		_genderPicker = GetNode<HSlider>("ScrollContainer/VBoxContainer/GenderContainer/EditGender");
 		_namePicker = GetNode<LineEdit>("ScrollContainer/VBoxContainer/NamePicker");
-		_cameraManager = GetNode<CreatorCameraManager.CreatorCameraManager>("../../CreatorCameraManager");
+		_cameraManager = GetNode<CreatorCameraManager.CreatorCameraManager>("../../Right/CreatorCameraManager");
+		
+		GetNode<Button>("ScrollContainer/VBoxContainer/Randomize All").Pressed += OnRandomizeAllPressed;
+		GetNode<Button>("ScrollContainer/VBoxContainer/HBoxContainer/RandomBody").Pressed += OnRandomBodyPressed;
+		GetNode<Button>("ScrollContainer/VBoxContainer/HBoxContainer/RandomClothes").Pressed += OnRandomClothesPressed;
 		
 		_presetPicker.Init([.. _presets.Keys], "Preset");
 		_presetPicker.VariableChanged += v => OnPresetChanged((string)v);
@@ -59,7 +63,6 @@ public partial class PresetTab : TabBar
 		if (!isNew && _presets.TryGetValue(mobName, out var md))
 		{
 			_parent.MobData = md;
-			_parent.TabBuilder.MobData = md;
 			MobSetter.SetMobDataToMob(md, _parent.Player);
 			_parent.UpdateAllPickers();
 		}
@@ -73,8 +76,8 @@ public partial class PresetTab : TabBar
 		if (gender != (int)MobEnums.Gender.NonBin)
 		{
 			var norms = new List<NormInfo>(MobConstants.GenderNorms[(MobEnums.Gender)gender]);
-			_parent.MobData.BodyData = MobAdjuster.AdjustBodyData(_parent.Skeleton, norms, _parent.MobData.BodyData);
-			_parent.MobData.EquipmentData = MobAdjuster.AdjustEquipmentData(_parent.Skeleton, norms, _parent.MobData.EquipmentData);
+			_parent.MobData.BodyData = MobAdjuster.AdjustBodyData(norms, _parent.MobData.BodyData);
+			_parent.MobData.EquipmentData = MobAdjuster.AdjustEquipmentData(norms, _parent.MobData.EquipmentData);
 		}
 		MobSetter.SetMobDataToMob(_parent.MobData, _parent.Player);
 		_parent.UpdateAllPickers();
@@ -97,8 +100,8 @@ public partial class PresetTab : TabBar
 		if (_parent.MobData.Race == race) return;
 		_parent.MobData.Race = race;
 		var norms = new List<NormInfo>(MobConstants.RaceNorms[race]);
-		_parent.MobData.BodyData = MobAdjuster.AdjustBodyData(_parent.Skeleton, norms, _parent.MobData.BodyData);
-		_parent.MobData.EquipmentData = MobAdjuster.AdjustEquipmentData(_parent.Skeleton, norms, _parent.MobData.EquipmentData);
+		_parent.MobData.BodyData = MobAdjuster.AdjustBodyData(norms, _parent.MobData.BodyData);
+		_parent.MobData.EquipmentData = MobAdjuster.AdjustEquipmentData(norms, _parent.MobData.EquipmentData);
 		MobSetter.SetMobDataToMob(_parent.MobData, _parent.Player);
 		_parent.SetMobDataToPickers(_parent.MobData);
 	}
@@ -114,7 +117,7 @@ public partial class PresetTab : TabBar
 	private void OnRandomBodyPressed()
 	{
 		var norms = MobGetter.GetRtgNorms(_parent.MobData.Race, _parent.MobData.Type, _parent.MobData.Gender);
-		_parent.MobData.BodyData = MobGetter.GetRandomBodyData(_parent.Skeleton, norms);
+		_parent.MobData.BodyData = MobGetter.GetRandomBodyData(norms);
 		MobSetter.SetBodyData(_parent.MobData.BodyData, _parent.Player);
 		_parent.SetMobDataToPickers(_parent.MobData);
 	}
@@ -122,7 +125,7 @@ public partial class PresetTab : TabBar
 	private void OnRandomClothesPressed()
 	{
 		var norms = MobGetter.GetRtgNorms(_parent.MobData.Race, _parent.MobData.Type, _parent.MobData.Gender);
-		_parent.MobData.EquipmentData = MobGetter.GetRandomEquipmentData(_parent.Skeleton, norms);
+		_parent.MobData.EquipmentData = MobGetter.GetRandomEquipmentData(norms);
 		MobSetter.SetEquipmentData(_parent.MobData.EquipmentData, _parent.Player);
 		_parent.SetMobDataToPickers(_parent.MobData);
 	}

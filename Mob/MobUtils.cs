@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using CharacterDemo.General;
 using CharacterDemo.General.Services;
 using CharacterDemo.Mob.DataFiles;
 using CharacterDemo.Mob.Scenes.Player;
@@ -11,10 +12,7 @@ namespace CharacterDemo.Mob;
 
 public static class MobUtils
 {
-    private static readonly Dictionary<string, List<string>>
-        CachedMeshShapeNames = new(); // TODO caches shouldnt be kept here
-
-    private static readonly Random Random = new();
+    private static readonly Dictionary<string, List<string>> CachedMeshShapeNames = new(); // TODO caches shouldnt be kept here
 
     //  SET MESH DATA 
     public static void SetMesh(string fileName, MeshInstance3D meshInstance, string path)
@@ -42,8 +40,7 @@ public static class MobUtils
             if (!newShapeNames.SequenceEqual(shapeNames))
             {
                 GD.Print(meshInstance.Mesh.ResourcePath, " has wrong shape order");
-                var shapeValues = Enumerable.Range(0, meshInstance.GetBlendShapeCount())
-                    .Select(i => meshInstance.GetBlendShapeValue(i)).ToArray();
+                var shapeValues = Enumerable.Range(0, meshInstance.GetBlendShapeCount()).Select(meshInstance.GetBlendShapeValue).ToArray();
                 for (int i = 0; i < shapeNames.Count; i++)
                 {
                     int id = meshInstance.FindBlendShapeByName(shapeNames[i]);
@@ -104,7 +101,7 @@ public static class MobUtils
             }
 
             baseMesh.Mesh = hatMesh.Mesh;
-            var baseMat = (StandardMaterial3D?)baseMesh.GetActiveMaterial(0);
+            var baseMat = baseMesh.GetActiveMaterial(0);
             if (baseMat != null) baseMat.RenderPriority = 2;
 
             foreach (MeshInstance3D hatHider in newHiderNode.GetChildren().OfType<MeshInstance3D>())
@@ -202,6 +199,8 @@ public static class MobUtils
     {
         materialNr = materialNr >= 0 ? materialNr : GetMainMaterial(meshInstance);
         if (meshInstance.Mesh == null) return new Color(-1, -1, -1);
+        int surfaceCount = meshInstance.Mesh.GetSurfaceCount();
+        if (materialNr >= surfaceCount) materialNr = surfaceCount > 0 ? surfaceCount - 1 : 0;
         var mat = meshInstance.GetSurfaceOverrideMaterial(materialNr) ?? meshInstance.MaterialOverride;
         return mat switch
         {
@@ -240,10 +239,8 @@ public static class MobUtils
         {
             var mob = (Scenes.Mob.Mob)scene.Instantiate();
             mob.Transform = mob.Transform with { Origin = mob.Transform.Origin + new Vector3(x * 3, 0, 5) };
-            var values = Enum.GetValues<MobEnums.MobRaces>();
-            var race = values[Random.Next(values.Length)];
-            var skeleton = mob.GetNode<Skeleton3D>("body/Armature/Skeleton3D");
-            MobSetter.SetMobDataToMob(MobGetter.GetRandomMobData(skeleton, race, MobEnums.MobTypes.Civilian), mob);
+            var race = GeneralUtils.PickRandom(Enum.GetValues<MobEnums.MobRaces>());
+            MobSetter.SetMobDataToMob(MobGetter.GetRandomMobData(race, MobEnums.MobTypes.Civilian), mob);
             (parent ?? mob.GetTree().CurrentScene).AddChild(mob);
         }
     }
@@ -268,4 +265,57 @@ public static class MobUtils
             if (mesh != null) SetMeshColor(hairColor, mesh);
         }
     }
+    
+    // Helpers to set mesh data on data objects by field name TODO are there no better options?
+    public static void SetDataToBodyDataField(BodyData bodyData, string fieldName, MeshData meshData)
+    {
+        switch (fieldName)
+        {
+            case "body_mesh": bodyData.BodyMesh = meshData; break;
+            case "head_mesh": bodyData.HeadMesh = meshData; break;
+            case "eye_mesh": bodyData.EyeMesh = meshData; break;
+            case "lashes_mesh": bodyData.LashesMesh = meshData; break;
+            case "hair_mesh": bodyData.HairMesh = meshData; break;
+            case "beard_mesh": bodyData.BeardMesh = meshData; break;
+            case "brow_mesh": bodyData.BrowMesh = meshData; break;
+        }
+    }
+
+    public static void SetDataToEqDataField(EquipmentData eqData, string fieldName, MeshData meshData)
+    {
+        switch (fieldName)
+        {
+            case "top_mesh": eqData.TopMesh = meshData; break;
+            case "bottom_mesh": eqData.BottomMesh = meshData; break;
+            case "shoe_mesh": eqData.ShoeMesh = meshData; break;
+            case "hat_mesh": eqData.HatMesh = meshData; break;
+            case "r_hand_mesh": eqData.RHandMesh = meshData; break;
+            case "l_hand_mesh": eqData.LHandMesh = meshData; break;
+            case "accessory_mesh": eqData.AccessoryMesh = meshData; break;
+        }
+    }
+
+    public static MeshData GetBodyDataFieldValue(BodyData bodyData, string fieldName) => fieldName switch
+    {
+        "body_mesh" => bodyData.BodyMesh,
+        "head_mesh" => bodyData.HeadMesh,
+        "eye_mesh" => bodyData.EyeMesh,
+        "lashes_mesh" => bodyData.LashesMesh,
+        "hair_mesh" => bodyData.HairMesh,
+        "beard_mesh" => bodyData.BeardMesh,
+        "brow_mesh" => bodyData.BrowMesh,
+        _ => new MeshData()
+    };
+
+    public static MeshData GetEqDataFieldValue(EquipmentData eqData, string fieldName) => fieldName switch
+    {
+        "top_mesh" => eqData.TopMesh,
+        "bottom_mesh" => eqData.BottomMesh,
+        "shoe_mesh" => eqData.ShoeMesh,
+        "hat_mesh" => eqData.HatMesh,
+        "r_hand_mesh" => eqData.RHandMesh,
+        "l_hand_mesh" => eqData.LHandMesh,
+        "accessory_mesh" => eqData.AccessoryMesh,
+        _ => new MeshData()
+    };
 }

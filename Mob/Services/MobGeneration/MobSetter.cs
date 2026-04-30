@@ -1,4 +1,4 @@
-﻿using CharacterDemo.Mob.DataFiles;
+using CharacterDemo.Mob.DataFiles;
 using Godot;
 
 namespace CharacterDemo.Mob.Services.MobGeneration;
@@ -24,7 +24,7 @@ public static class MobSetter
         var skeleton = mob.GetNode<Skeleton3D>("body/Armature/Skeleton3D");
         foreach (var (meshName, meshInfo) in MobConstants.BodyMeshesInfo)
         {
-            var meshData = MobGetter.GetBodyMeshData(bodyData, meshInfo.FieldName);
+            var meshData = MobUtils.GetBodyDataFieldValue(bodyData, meshInfo.FieldName);
             var meshInstance = MobUtils.GetMeshFromSkeleton(meshName, skeleton);
             if (meshInstance != null) SetMeshData(meshData, meshName, meshInstance);
         }
@@ -36,23 +36,22 @@ public static class MobSetter
         var skeleton = mob.GetNode<Skeleton3D>("body/Armature/Skeleton3D");
         foreach (var (meshName, meshInfo) in MobConstants.EqMeshesInfo)
         {
-            var meshData = MobGetter.GetEqMeshData(eqData, meshInfo.FieldName);
+            var meshData = MobUtils.GetEqDataFieldValue(eqData, meshInfo.FieldName);
             var meshInstance = MobUtils.GetMeshFromSkeleton(meshName, skeleton);
             if (meshInstance != null) SetMeshData(meshData, meshName, meshInstance);
         }
     }
 
-    public static void SetMeshData(MeshData meshData, string meshName, MeshInstance3D meshInstance)
+    private static void SetMeshData(MeshData meshData, string meshName, MeshInstance3D meshInstance)
     {
         bool isBody = MobConstants.BodyMeshesInfo.ContainsKey(meshName);
         var meshInfo = isBody ? MobConstants.BodyMeshesInfo[meshName] : MobConstants.EqMeshesInfo[meshName];
 
         if (!string.IsNullOrEmpty(meshData.MeshFile))
         {
-            if (!string.IsNullOrEmpty(meshInfo.FileFolder))
-                MobUtils.SetMesh(meshData.MeshFile, meshInstance, meshInfo.FileFolder);
-            else if (meshData.MeshFile == "empty")
-                meshInstance.Hide();
+            if (!string.IsNullOrEmpty(meshInfo.FileFolder)) MobUtils.SetMesh(meshData.MeshFile, meshInstance, meshInfo.FileFolder);
+            else if (meshData.MeshFile == "empty") meshInstance.Hide();
+            else meshInstance.Show();
         }
 
         if (meshData.MeshColor != new Color())
@@ -61,17 +60,17 @@ public static class MobSetter
             MobUtils.SetMeshColor(meshData.MeshColor, meshInstance, materialNr);
         }
 
-        if (meshData.MeshShape.Count > 0)
+        if (meshData.MeshShapes.Count > 0)
         {
             var shapeNames = MobUtils.GetShapeNamesFromMesh(meshInstance.Mesh);
-            if (meshData.MeshShape.Count != shapeNames.Count)
+            if (meshData.MeshShapes.Count != shapeNames.Count)
             {
                 GD.Print(meshName + " shapes differ in saved data and mesh");
                 return;
             }
-            var skel = (Skeleton3D)meshInstance.GetParent();
-            for (int i = 0; i < meshData.MeshShape.Count; i++)
-                MobUtils.SetSkeletonShapeKey(meshData.MeshShape[i], shapeNames[i], skel);
+            var skeleton = (Skeleton3D)meshInstance.GetParent();
+            for (int i = 0; i < meshData.MeshShapes.Count; i++)
+                MobUtils.SetSkeletonShapeKey(meshData.MeshShapes[i], shapeNames[i], skeleton);
         }
     }
 }

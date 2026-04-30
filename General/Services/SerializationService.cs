@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CharacterDemo.Mob;
@@ -14,7 +15,8 @@ public static class SerializationService
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         IncludeFields = true,
-        Converters = { new JsonStringEnumConverter(), new ColorConverter(), new Vector2Converter() }
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter(), new ColorListConverter(), new ColorConverter(), new Vector2Converter() }
     };
     
     public static string Serialize<T>(T obj) => JsonSerializer.Serialize(obj, SerializeOptions);
@@ -57,6 +59,35 @@ public static class SerializationService
         }
     }
 
+    private class ColorListConverter : JsonConverter<IReadOnlyList<Color>>
+    {
+        public override IReadOnlyList<Color> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            using var doc = JsonDocument.ParseValue(ref reader);
+            var result = new List<Color>();
+            foreach (var item in doc.RootElement.EnumerateArray())
+            {
+                var name = item.GetString()!;
+                var field = typeof(MobConstants).GetField(name, BindingFlags.Public | BindingFlags.Static);
+                if (field?.GetValue(null) is IReadOnlyList<Color> colors)
+                    result.AddRange(colors);
+            }
+            return result;
+        }
 
+        public override void Write(Utf8JsonWriter writer, IReadOnlyList<Color> value, JsonSerializerOptions options)
+        {
+            writer.WriteStartArray();
+            foreach (var c in value)
+            {
+                writer.WriteStartArray();
+                writer.WriteNumberValue(c.R);
+                writer.WriteNumberValue(c.G);
+                writer.WriteNumberValue(c.B);
+                writer.WriteNumberValue(c.A);
+                writer.WriteEndArray();
+            }
+            writer.WriteEndArray();
+        }
+    }
 }
-

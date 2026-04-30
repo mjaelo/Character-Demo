@@ -1,4 +1,5 @@
-﻿using Godot;
+﻿using System.Collections.Generic;
+using Godot;
 using Godot.Collections;
 using CharacterDemo.General.Services;
 

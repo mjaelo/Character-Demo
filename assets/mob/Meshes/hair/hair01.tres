@@ -1,4 +1,4 @@
-[gd_resource type="ArrayMesh" load_steps=2 format=3 uid="uid://cme0383e7w1ds"]
+[gd_resource type="ArrayMesh" load_steps=2 format=3]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ajdkq"]
 resource_name = "hair01"

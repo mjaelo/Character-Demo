@@ -1,11 +1,12 @@
-﻿using Godot;
+﻿using System;
+using Godot;
 
 namespace CharacterDemo.Mob.Services.Controllers;
 
 public partial class CombatController : Node
 {
     private Scenes.Mob.Mob _parent = null!;
-    private Services.Controllers.ActionHandler _parentController = null!;
+    private ActionHandler _parentController = null!;
     private Node3D _hipSlot = null!, _backSlot = null!, _rHandSlot = null!, _lHandSlot = null!;
     private MeshInstance3D _sword = null!, _shield = null!;
     private bool _weaponDrawn;
@@ -13,7 +14,7 @@ public partial class CombatController : Node
     public override void _Ready()
     {
         _parent = GetNode<Scenes.Mob.Mob>("../../");
-        _parentController = GetNode<Services.Controllers.ActionHandler>("../");
+        _parentController = GetNode<ActionHandler>("../");
         _hipSlot = GetNode<Node3D>("../../body/Armature/Skeleton3D/Hip/HipContainer");
         _backSlot = GetNode<Node3D>("../../body/Armature/Skeleton3D/Back/BackContainer");
         _rHandSlot = GetNode<Node3D>("../../body/Armature/Skeleton3D/Right Hand/HandContainer");
@@ -31,14 +32,14 @@ public partial class CombatController : Node
         item.RotationDegrees = Vector3.Zero;
     }
 
-    private void ExecuteAction(Services.Controllers.ActionHandler.CombatKeys type, string action)
+    private void ExecuteAction(ActionHandler.CombatKeys type, string action)
     {
         _parentController.ArmBlend = 1;
         _parentController.ArmStateMachine.Travel(type.ToString());
         var sm = type switch
         {
-            Services.Controllers.ActionHandler.CombatKeys.Attack => _parentController.AttackStateMachine,
-            Services.Controllers.ActionHandler.CombatKeys.Block => _parentController.BlockStateMachine,
+            ActionHandler.CombatKeys.Attack => _parentController.AttackStateMachine,
+            ActionHandler.CombatKeys.Block => _parentController.BlockStateMachine,
             _ => _parentController.DrawStateMachine
         };
         sm.Travel(action);
@@ -46,36 +47,36 @@ public partial class CombatController : Node
 
     private void ToggleWeapons()
     {
-        if (_sword.Visible) ExecuteAction(Services.Controllers.ActionHandler.CombatKeys.DrawWeapon, "DrawHip");
-        else if (_shield.Visible) ExecuteAction(Services.Controllers.ActionHandler.CombatKeys.DrawWeapon, "DrawBack");
+        if (_sword.Visible) ExecuteAction(ActionHandler.CombatKeys.DrawWeapon, "DrawHip");
+        else if (_shield.Visible) ExecuteAction(ActionHandler.CombatKeys.DrawWeapon, "DrawBack");
         else _parentController.ArmBlend = 0;
     }
 
     private void Block()
     {
-        if (_shield.Visible) { ExecuteAction(Services.Controllers.ActionHandler.CombatKeys.Block, "BlockShield"); _parent.CurrentSpeed = _parent.NormalSpeed * Services.Controllers.ActionHandler.HoldSpeedModifiers["Block"]; }
-        else if (_sword.Visible) { ExecuteAction(Services.Controllers.ActionHandler.CombatKeys.Block, "BlockSword"); _parent.CurrentSpeed = _parent.NormalSpeed * Services.Controllers.ActionHandler.HoldSpeedModifiers["Block"]; }
+        if (_shield.Visible) { ExecuteAction(ActionHandler.CombatKeys.Block, "BlockShield"); _parent.CurrentSpeed = _parent.NormalSpeed * ActionHandler.HoldSpeedModifiers["Block"]; }
+        else if (_sword.Visible) { ExecuteAction(ActionHandler.CombatKeys.Block, "BlockSword"); _parent.CurrentSpeed = _parent.NormalSpeed * ActionHandler.HoldSpeedModifiers["Block"]; }
         else _parentController.ArmBlend = 0;
     }
 
     private void Attack()
     {
-        ExecuteAction(Services.Controllers.ActionHandler.CombatKeys.Attack, "AttackSword");
-        _parent.CurrentSpeed = _parent.NormalSpeed * Services.Controllers.ActionHandler.PressSpeedModifiers["Attack"];
+        ExecuteAction(ActionHandler.CombatKeys.Attack, "AttackSword");
+        _parent.CurrentSpeed = _parent.NormalSpeed * ActionHandler.PressSpeedModifiers["Attack"];
     }
 
     public void OnActionPressed(string actionName)
     {
-        var actionId = System.Enum.Parse<Services.Controllers.ActionHandler.CombatKeys>(actionName);
+        var actionId = Enum.Parse<ActionHandler.CombatKeys>(actionName);
         if (!_weaponDrawn)
         {
-            if (actionId == Services.Controllers.ActionHandler.CombatKeys.Attack && !_sword.Visible) { AttachItemToBone(_rHandSlot, _sword); Attack(); }
+            if (actionId == ActionHandler.CombatKeys.Attack && !_sword.Visible) { AttachItemToBone(_rHandSlot, _sword); Attack(); }
             else ToggleWeapons();
         }
         else
         {
-            if (actionId == Services.Controllers.ActionHandler.CombatKeys.Attack) Attack();
-            else if (actionId == Services.Controllers.ActionHandler.CombatKeys.Block) Block();
+            if (actionId == ActionHandler.CombatKeys.Attack) Attack();
+            else if (actionId == ActionHandler.CombatKeys.Block) Block();
             else ToggleWeapons();
         }
     }
@@ -92,7 +93,7 @@ public partial class CombatController : Node
         {
             if (_parentController.DrawStateMachine.GetCurrentNode() == "ReturnHip")
                 AttachItemToBone(_weaponDrawn ? _hipSlot : _rHandSlot, _sword);
-            else { if (_shield.Visible) ExecuteAction(Services.Controllers.ActionHandler.CombatKeys.DrawWeapon, "PutBack"); else { _weaponDrawn = !_weaponDrawn; _parentController.ArmBlend = 0; } }
+            else { if (_shield.Visible) ExecuteAction(ActionHandler.CombatKeys.DrawWeapon, "PutBack"); else { _weaponDrawn = !_weaponDrawn; _parentController.ArmBlend = 0; } }
         }
         else if (animName.Contains("DrawBack"))
         {
@@ -107,7 +108,7 @@ public partial class CombatController : Node
     {
         if (body != _parent && body is Scenes.Mob.Mob mob && _parentController.AttackStateMachine.IsPlaying())
         {
-            mob.GetNode<Services.Controllers.ActionHandler>("ActionHandler").IdleStateMachine.Travel("Die");
+            mob.GetNode<ActionHandler>("ActionHandler").IdleStateMachine.Travel("Die");
             mob.GetNode<CollisionShape3D>("CollisionShape3D").QueueFree();
         }
     }

@@ -14,13 +14,13 @@ public partial class CreatorCameraManager : Control
 
 	public override void _Ready()
 	{
-		_playerCameraController = GetNode<Node3D>("../../Player/Controllers/CameraController");
-		_cameraSpring = GetNode<SpringArm3D>("../../Player/Controllers/CameraController/SpringArm3D");
-		_camera1P = GetNode<Camera3D>("../../Player/Controllers/CameraController/1PCamera");
+		_playerCameraController = GetNode<Node3D>("../../../Player/Controllers/CameraController");
+		_cameraSpring = GetNode<SpringArm3D>("../../../Player/Controllers/CameraController/SpringArm3D");
+		_camera1P = GetNode<Camera3D>("../../../Player/Controllers/CameraController/1PCamera");
 		_cameraHeight = GetNode<HSlider>("HBoxContainer/CameraHeight");
 
 		_playerCameraController.Call("set", "sensitivity", UiConstants.CreatorCameraSensitivity);
-		GetNode<Node3D>("../../Player/Mob/body").Rotation = Vector3.Zero;
+		GetNode<Node3D>("../../../Player/Mob/body").Rotation = Vector3.Zero;
 		_cameraSpring.Transform = _cameraSpring.Transform with
 		{
 			Origin = _cameraSpring.Transform.Origin + new Vector3(0, 0, UiConstants.CreatorCameraZoomOffset)

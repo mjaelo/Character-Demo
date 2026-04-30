@@ -1,15 +1,17 @@
 ﻿{
   "Male": [
-    { "tags": ["feminine"], "Forbidden": true },
-    { "shapes": {"Body": {"0": [0.0]}}, "Enforce": true },
-    { "shapes": {"Body": {"8": [-1.0]}, "Brows": {"0": [1.0]}} }
+    { "Tags": ["feminine"], "Forbidden": true },
+    { "MeshNames": ["Body"],"Shapes": {"0": [0.0]}, "Enforce": true },
+    { "MeshNames": ["Body"],"Shapes": {"8": [-1.0]} },
+    { "MeshNames": ["Brows"],"Shapes": {"0": [1.0] }}
   ],
   "NonBin": [],
   "Female": [
-    { "tags": ["masculine"], "Forbidden": true },
-    { "meshes": {"Beard": "empty"}, "Enforce": true },
-    { "meshes": {"Hair": "empty"}, "Forbidden": true, "Enforce": true },
-    { "shapes": {"Body": {"0": [0.5], "8": [1.0]}, "Brows": {"0": [0.0]}} }
+    { "Tags": ["masculine"], "Forbidden": true },
+    { "MeshNames": ["Beard"],"Files": ["empty"], "Enforce": true },
+    { "MeshNames": ["Hair"],"Files": ["empty"], "Forbidden": true, "Enforce": true },
+    { "MeshNames": ["Body"],"Shapes": {"0": [0.5], "8": [1.0]}},
+    { "MeshNames": ["Brows"],"Shapes": {"0": [0.0]} }
   ]
 }
 

@@ -1,6 +1,6 @@
-[gd_resource type="ArrayMesh" load_steps=3 format=3 uid="uid://bf7ryyw4aiqds"]
+[gd_resource type="ArrayMesh" load_steps=3 format=3]
 
-[ext_resource type="Texture2D" uid="uid://bfhm2j5x34r8" path="res://Assets/mob/_external/roles_clothes_set4_0_baseColor.png" id="1_y5ox1"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/roles_clothes_set4_0_baseColor.png" id="1_y5ox1"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qif3u"]
 resource_name = "farmer-pants"

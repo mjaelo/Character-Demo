@@ -16,19 +16,19 @@ public partial class Creator : Control
 	private PresetTab.PresetTab _presetTab = null!;
 	private Button _startButton = null!;
 
-	public Player Player { get; private set; } = null!;
-	public Skeleton3D Skeleton { get; private set; } = null!;
-	public MobData MobData { get; set; } = new();
-	public TabBuilder TabBuilder { get; private set; } = null!;
+	public Player Player = null!;
+	private Skeleton3D _skeleton  = null!;
+	public MobData MobData  = new();
+	private TabBuilder TabBuilder { get; set; } = null!;
 
 	public void Initialize(Player player, Skeleton3D skeleton)
 	{
 		Player = player;
-		Skeleton = skeleton;
+		_skeleton = skeleton;
 		TabBuilder = new TabBuilder(skeleton, MobData);
 		_presetTab = GetNode<PresetTab.PresetTab>("TabContainer/Preset");
 		_tabContainer = GetNode<TabContainer>("TabContainer");
-		_startButton = GetNode<Button>("CreatorCameraManager/Start Game");
+		_startButton = GetNode<Button>("Right/Start Game");
 		_presetTab.Initialize(this);
 
 		foreach (var (tabName, pickers) in UiConstants.CreatorMenuData)
@@ -49,9 +49,8 @@ public partial class Creator : Control
 
 	public void RandomizeCreatorValues()
 	{
-		MobData = MobGetter.GetRandomMobData(Skeleton, MobEnums.MobRaces.Human, MobEnums.MobTypes.Civilian);
+		MobData = MobGetter.GetRandomMobData(MobEnums.MobRaces.Human, MobEnums.MobTypes.Civilian);
 		MobData.MobName = "";
-		TabBuilder.MobData = MobData;
 		MobSetter.SetMobDataToMob(MobData, Player);
 		_presetTab.SetMobDataToPresetPickers(MobData);
 		SetMobDataToPickers(MobData);
@@ -59,7 +58,6 @@ public partial class Creator : Control
 
 	public void UpdateAllPickers()
 	{
-		TabBuilder.MobData = MobData;
 		_presetTab.SetMobDataToPresetPickers(MobData);
 		SetMobDataToPickers(MobData);
 	}
@@ -67,9 +65,9 @@ public partial class Creator : Control
 	public void SetMobDataToPickers(MobData mobData)
 	{
 		foreach (var (meshName, meshInfo) in MobConstants.BodyMeshesInfo)
-			SetMeshDataToPickers(MobGetter.GetBodyMeshData(mobData.BodyData, meshInfo.FieldName), meshName);
+			SetMeshDataToPickers(MobUtils.GetBodyDataFieldValue(mobData.BodyData, meshInfo.FieldName), meshName);
 		foreach (var (meshName, meshInfo) in MobConstants.EqMeshesInfo)
-			SetMeshDataToPickers(MobGetter.GetEqMeshData(mobData.EquipmentData, meshInfo.FieldName), meshName);
+			SetMeshDataToPickers(MobUtils.GetEqDataFieldValue(mobData.EquipmentData, meshInfo.FieldName), meshName);
 	}
 
 	private void SetMeshDataToPickers(MeshData meshData, string meshName)
@@ -82,12 +80,17 @@ public partial class Creator : Control
 				FindPickerAndSetValue(meshData.MeshFile, tabName, meshName);
 			if (meshData.MeshColor != new Color() && info.HasColorPicker)
 				FindPickerAndSetValue(meshData.MeshColor, tabName, meshName + "Color");
-			if (meshData.MeshShape.Count <= 0 || !info.HasShapePicker) continue;
-			var mi = Skeleton.HasNode(meshName) ? Skeleton.GetNode<MeshInstance3D>(meshName) : null;
+			if (meshData.MeshShapes.Count <= 0 || !info.HasShapePicker) continue;
+			var mi = _skeleton.HasNode(meshName) ? _skeleton.GetNode<MeshInstance3D>(meshName) : null;
 			if (mi == null) continue;
 			var shapeNames = MobUtils.GetShapeNamesFromMesh(mi.Mesh);
-			for (int j = 0; j < meshData.MeshShape.Count; j++)
-				FindPickerAndSetValue(meshData.MeshShape[j], tabName, shapeNames[j]);
+			if (shapeNames.Count < meshData.MeshShapes.Count)
+			{
+				GD.Print("SetMeshDataToPickers ",meshName," wrong shape count. from mesh: ",shapeNames.Count," expected: ",meshData.MeshShapes.Count);
+				continue;
+			}
+			for (int j = 0; j < meshData.MeshShapes.Count; j++)
+				FindPickerAndSetValue(meshData.MeshShapes[j], tabName, shapeNames[j]);
 		}
 	}
 

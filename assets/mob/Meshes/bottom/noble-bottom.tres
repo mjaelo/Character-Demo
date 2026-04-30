@@ -1,7 +1,7 @@
-[gd_resource type="ArrayMesh" load_steps=4 format=3 uid="uid://brpegdfg8wjal"]
+[gd_resource type="ArrayMesh" load_steps=4 format=3]
 
-[ext_resource type="Texture2D" uid="uid://clipo1qtskjcj" path="res://Assets/mob/_external/roles_clothes_Other_baseColor.png" id="1_ecgu0"]
-[ext_resource type="Texture2D" uid="uid://bd15lrjk4bxck" path="res://Assets/mob/_external/roles_clothes_Other_normal.png" id="2_2hbff"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/roles_clothes_Other_baseColor.png" id="1_ecgu0"]
+[ext_resource type="Texture2D" path="res://Assets/mob/_external/roles_clothes_Other_normal.png" id="2_2hbff"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nqwnw"]
 resource_name = "black-cloth"
