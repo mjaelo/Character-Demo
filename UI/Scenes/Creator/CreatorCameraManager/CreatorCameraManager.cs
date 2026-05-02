@@ -1,82 +1,144 @@
 using System.Collections.Generic;
 using CharacterDemo.Mob;
+using CharacterDemo.Mob.Services.Controllers;
 using Godot;
 
 namespace CharacterDemo.UI.Scenes.Creator.CreatorCameraManager;
 
+// TODO  have a common CameraManager for both player and Creator?
 public partial class CreatorCameraManager : Control
 {
-	private Node3D _playerCameraController = null!;
+	// player variables
+	public CameraController PlayerCameraController = null!; // used only for changing camera rotation TODO handle it more elegantly?
 	private SpringArm3D _cameraSpring = null!;
 	private Camera3D _camera1P = null!;
-	private HSlider _cameraHeight = null!;
-	private InputEventMouse? _propagatedEvent;
+	private Node3D _playerBody = null!;
+
+	// Creator variables
+	private VSlider _cameraHeightSlider = null!;
+	private Button _zoomInButton = null!;
+	private Button _zoomOutButton = null!;
+	private TextureButton _rotateLeftButton = null!;
+	private TextureButton _rotateRightButton = null!;
+	private TextureButton _rotateUpButton = null!;
+	private TextureButton _rotateDownButton = null!;
+	private TextureButton _rotateResetButton = null!;
+
+	// process variables
+	private bool _isDragging;
+	private Vector2 _holdRotateDir;
+	private float _holdZoomDir;
 
 	public override void _Ready()
 	{
-		_playerCameraController = GetNode<Node3D>("../../../Player/Controllers/CameraController");
-		_cameraSpring = GetNode<SpringArm3D>("../../../Player/Controllers/CameraController/SpringArm3D");
-		_camera1P = GetNode<Camera3D>("../../../Player/Controllers/CameraController/1PCamera");
-		_cameraHeight = GetNode<HSlider>("HBoxContainer/CameraHeight");
-
-		_playerCameraController.Call("set", "sensitivity", UiConstants.CreatorCameraSensitivity);
-		GetNode<Node3D>("../../../Player/Mob/body").Rotation = Vector3.Zero;
-		_cameraSpring.Transform = _cameraSpring.Transform with
-		{
-			Origin = _cameraSpring.Transform.Origin + new Vector3(0, 0, UiConstants.CreatorCameraZoomOffset)
-		};
-		_cameraHeight.MaxValue = UiConstants.CameraMaxHeight;
-		_cameraHeight.Value = MobConstants.RaceCamHeights.GetValueOrDefault(MobEnums.MobRaces.Human, MobConstants.RaceCamHeightDefault);
-		
-	}
-	
-	public void  SetCameraByRace(MobEnums.MobRaces race)
-	{
-		_cameraHeight.SetValue(MobConstants.RaceCamHeights.GetValueOrDefault(race, MobConstants.RaceCamHeightDefault));
+		SetupNodes();
+		SetupUiSignals();
 	}
 
 	public override void _Process(double delta)
 	{
-		if (_propagatedEvent != null)
-			_playerCameraController.Call("HandleInput", _propagatedEvent);
+		var dt = (float)delta;
+		if (_holdRotateDir != Vector2.Zero)
+			RotateCamera(_holdRotateDir, UiConstants.ButtonRotateStep);
+		if (_holdZoomDir != 0)
+			CameraZoom(_holdZoomDir * UiConstants.ButtonZoomStep * dt);
 	}
 
-	public override void _UnhandledInput(InputEvent @event)
+	public override void _Input(InputEvent @event)
 	{
-		if (@event is InputEventMouseButton || @event is InputEventMouseMotion && Input.IsMouseButtonPressed(MouseButton.Right))
-			_playerCameraController.Call("HandleInput", @event);
+		switch (@event)
+		{
+			case InputEventMouseButton { ButtonIndex: MouseButton.Right } mb:
+				_isDragging = mb.Pressed;
+				break;
+
+			case InputEventMouseMotion motion when _isDragging:
+				RotateCamera(-motion.Relative, UiConstants.MouseRotateStep);
+				GetViewport().SetInputAsHandled();
+				break;
+
+			case InputEventMouseButton { ButtonIndex: MouseButton.WheelUp }:
+				CameraZoom(-UiConstants.MouseZoomStep);
+				GetViewport().SetInputAsHandled();
+				break;
+
+			case InputEventMouseButton { ButtonIndex: MouseButton.WheelDown }:
+				CameraZoom(UiConstants.MouseZoomStep);
+				GetViewport().SetInputAsHandled();
+				break;
+		}
 	}
 
-	private void OnCameraHeightValueChanged(float value)
+	public void SetCameraHeightByRace(MobEnums.MobRaces race)
 	{
-		var origin = _cameraSpring.Transform.Origin;
-		origin.Y = value;
-		_cameraSpring.Transform = _cameraSpring.Transform with { Origin = origin };
-		var origin1Person = _camera1P.Transform.Origin;
-		origin1Person.Y = value;
-		_camera1P.Transform = _camera1P.Transform with { Origin = origin1Person };
+		var height = MobConstants.RaceCamHeights.GetValueOrDefault(race, MobConstants.RaceCamHeightDefault);
+		_cameraHeightSlider.Value = height;
+		OnCameraHeightSliderChanged(height);
 	}
 
-	private void OnRotateResetPressed() => _playerCameraController.Rotation = Vector3.Zero;
-
-	private void OnStartGamePressed()
+	// Setup
+	private void SetupNodes()
 	{
-		_playerCameraController.Call("set", "sensitivity", UiConstants.GameCameraSensitivity);
-		MobConstants.RaceCamHeights.GetValueOrDefault(GetParent<Creator>().MobData.Race, MobConstants.RaceCamHeightDefault);
-		GetParent<Creator>().StartGame();
+		PlayerCameraController = GetNode<CameraController>("../../../Player/Controllers/CameraController");
+		_cameraSpring = PlayerCameraController.GetNode<SpringArm3D>("SpringArm3D");
+		_camera1P = PlayerCameraController.GetNode<Camera3D>("1PCamera");
+		_playerBody = GetNode<Node3D>("../../../Player/Mob/body");
+
+		_cameraHeightSlider = GetNode<VSlider>("HBoxContainer/CameraHeight");
+		_zoomInButton = GetNode<Button>("HBoxContainer/VBoxContainer2/Zoom/ZoomIn");
+		_zoomOutButton = GetNode<Button>("HBoxContainer/VBoxContainer2/Zoom/ZoomOut");
+		_rotateLeftButton = GetNode<TextureButton>("HBoxContainer/VBoxContainer2/Rotation/Rotation/RotateLeft");
+		_rotateRightButton = GetNode<TextureButton>("HBoxContainer/VBoxContainer2/Rotation/Rotation/RotateRight");
+		_rotateUpButton = GetNode<TextureButton>("HBoxContainer/VBoxContainer2/Rotation/RotateUp");
+		_rotateDownButton = GetNode<TextureButton>("HBoxContainer/VBoxContainer2/Rotation/RotateDown");
+		_rotateResetButton = GetNode<TextureButton>("HBoxContainer/VBoxContainer2/Rotation/Rotation/RotateReset");
+
+		_playerBody.Rotation = Vector3.Zero;
+		_cameraHeightSlider.MaxValue = UiConstants.CameraMaxHeight; // TODO whats the point of that here?
+		SetCameraHeightByRace(MobEnums.MobRaces.Human);
 	}
 
-	private void OnZoomButtonDown(int buttonId)
+	private void SetupUiSignals()
 	{
-		var e = new InputEventMouseButton { ButtonIndex = (MouseButton)buttonId };
-		_propagatedEvent = e;
+		_cameraHeightSlider.ValueChanged += OnCameraHeightSliderChanged;
+		_zoomInButton.ButtonDown += () => _holdZoomDir = -1f;
+		_zoomInButton.ButtonUp += () => _holdZoomDir = 0;
+		_zoomOutButton.ButtonDown += () => _holdZoomDir = 1f;
+		_zoomOutButton.ButtonUp += () => _holdZoomDir = 0;
+		_rotateDownButton.ButtonDown += () => _holdRotateDir = new Vector2(0, 1);
+		_rotateDownButton.ButtonUp += () => _holdRotateDir = Vector2.Zero;
+		_rotateUpButton.ButtonDown += () => _holdRotateDir = new Vector2(0, -1);
+		_rotateUpButton.ButtonUp += () => _holdRotateDir = Vector2.Zero;
+		_rotateLeftButton.ButtonDown += () => _holdRotateDir = new Vector2(-1, 0);
+		_rotateLeftButton.ButtonUp += () => _holdRotateDir = Vector2.Zero;
+		_rotateRightButton.ButtonDown += () => _holdRotateDir = new Vector2(1, 0);
+		_rotateRightButton.ButtonUp += () => _holdRotateDir = Vector2.Zero;
+		_rotateResetButton.Pressed += () => PlayerCameraController.Rotation = Vector3.Zero;
 	}
 
-	private void OnRotateButtonDown(Vector2 dir)
+	// buttons clicked
+	private void RotateCamera(Vector2 direction, float sensitivity)
 	{
-		var e = new InputEventMouseMotion { Relative = dir };
-		_propagatedEvent = e;
+		var rotationX = PlayerCameraController.Rotation.X + direction.Y * sensitivity;
+		var rotationY = PlayerCameraController.Rotation.Y + direction.X * sensitivity;
+		PlayerCameraController.Rotation = new Vector3(rotationX, rotationY, 0);
 	}
 
-	private void OnCameraButtonUp() => _propagatedEvent = null;
+	private void CameraZoom(float amount)
+	{
+		var springLen = _cameraSpring.SpringLength + amount;
+		if (springLen is >= UiConstants.ZoomMin and <= UiConstants.ZoomMax) _cameraSpring.SpringLength = springLen;
+	}
+
+	private void OnCameraHeightSliderChanged(double value)
+	{
+		var v = (float)value;
+		var springTransform = _cameraSpring.Transform;
+		springTransform.Origin = new Vector3(springTransform.Origin.X, v, springTransform.Origin.Z);
+		_cameraSpring.Transform = springTransform;
+
+		var cameraTransform = _camera1P.Transform;
+		cameraTransform.Origin = new Vector3(cameraTransform.Origin.X, v, cameraTransform.Origin.Z);
+		_camera1P.Transform = cameraTransform;
+	}
 }

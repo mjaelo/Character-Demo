@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CharacterDemo.General;
 using CharacterDemo.General.Services;
 using CharacterDemo.Mob;
 using CharacterDemo.Mob.DataFiles;
@@ -33,7 +34,7 @@ public partial class PresetTab : TabBar
 		_namePicker = GetNode<LineEdit>("ScrollContainer/VBoxContainer/NamePicker");
 		_cameraManager = GetNode<CreatorCameraManager.CreatorCameraManager>("../../Right/CreatorCameraManager");
 		
-		GetNode<Button>("ScrollContainer/VBoxContainer/Randomize All").Pressed += OnRandomizeAllPressed;
+		GetNode<TextureButton>("ScrollContainer/VBoxContainer/CharacterName/RandomName").Pressed += OnRandomNamePressed;
 		GetNode<Button>("ScrollContainer/VBoxContainer/HBoxContainer/RandomBody").Pressed += OnRandomBodyPressed;
 		GetNode<Button>("ScrollContainer/VBoxContainer/HBoxContainer/RandomClothes").Pressed += OnRandomClothesPressed;
 		
@@ -43,6 +44,8 @@ public partial class PresetTab : TabBar
 		_typePicker.VariableChanged += v => OnTypeChanged((string)v);
 		_racePicker.Init(System.Enum.GetNames<MobEnums.MobRaces>(), "Race");
 		_racePicker.VariableChanged += v => OnRaceChanged((string)v);
+		_genderPicker.ValueChanged += v => OnGenderChanged((int)v);
+		_namePicker.TextChanged += OnMobNameChanged;
 		
 		UiUtils.DisableEdit(GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Save Preset"), string.IsNullOrEmpty(parent.MobData.MobName));
 		UiUtils.DisableEdit(GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Delete Preset"), true);
@@ -96,7 +99,7 @@ public partial class PresetTab : TabBar
 	private void OnRaceChanged(string raceV)
 	{
 		var race = System.Enum.Parse<MobEnums.MobRaces>(raceV);
-		_cameraManager.SetCameraByRace(race);
+		_cameraManager.SetCameraHeightByRace(race);
 		if (_parent.MobData.Race == race) return;
 		_parent.MobData.Race = race;
 		var norms = new List<NormInfo>(MobConstants.RaceNorms[race]);
@@ -112,6 +115,14 @@ public partial class PresetTab : TabBar
 		if (_parent.MobData.Type == type) return;
 		_parent.MobData.Type = type;
 		OnRandomClothesPressed();
+	}
+
+	private void OnRandomNamePressed()
+	{
+		var possibleNames = MobConstants.MobNames[_parent.MobData.Gender];
+		var newName = GeneralUtils.PickRandom(possibleNames);
+		_namePicker.Text = newName;
+		OnMobNameChanged(newName);
 	}
 
 	private void OnRandomBodyPressed()
@@ -130,5 +141,4 @@ public partial class PresetTab : TabBar
 		_parent.SetMobDataToPickers(_parent.MobData);
 	}
 
-	private void OnRandomizeAllPressed() => _parent.RandomizeCreatorValues();
 }

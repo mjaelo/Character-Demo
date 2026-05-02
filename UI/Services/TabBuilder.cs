@@ -19,19 +19,26 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
         var tab = new TabBar { Name = tabName };
         var scroll = new ScrollContainer();
         scroll.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        var margin = new MarginContainer
+        {
+            SizeFlagsHorizontal = Control.SizeFlags.Fill | Control.SizeFlags.Expand,
+            SizeFlagsVertical = Control.SizeFlags.Fill | Control.SizeFlags.Expand
+        };
+        var padding = (int)UiConstants.PickerPadding;
+        margin.AddThemeConstantOverride("margin_top", padding);
+        margin.AddThemeConstantOverride("margin_bottom", padding);
+        margin.AddThemeConstantOverride("margin_left", padding);
+        margin.AddThemeConstantOverride("margin_right", padding);
         var vbox = new VBoxContainer
         {
             SizeFlagsHorizontal = Control.SizeFlags.Fill | Control.SizeFlags.Expand,
             SizeFlagsVertical = Control.SizeFlags.Fill | Control.SizeFlags.Expand
         };
-        scroll.AddChild(vbox);
+        margin.AddChild(vbox);
+        scroll.AddChild(margin);
         tab.AddChild(scroll);
         foreach (var info in pickers)
             CreatePickersForMesh(info, vbox);
-        var style = scroll.GetThemeStylebox("panel")?.Duplicate() as StyleBoxFlat ?? new StyleBoxFlat();
-        style.ContentMarginTop = style.ContentMarginBottom =
-            style.ContentMarginLeft = style.ContentMarginRight = UiConstants.PickerPadding;
-        scroll.AddThemeStyleboxOverride("panel", style);
         return tab;
     }
 

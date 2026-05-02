@@ -15,33 +15,41 @@ public partial class Creator : Control
 	private TabContainer _tabContainer = null!;
 	private PresetTab.PresetTab _presetTab = null!;
 	private Button _startButton = null!;
+	private CreatorCameraManager.CreatorCameraManager _cameraManager = null!;
+
 
 	public Player Player = null!;
-	private Skeleton3D _skeleton  = null!;
 	public MobData MobData  = new();
-	private TabBuilder TabBuilder { get; set; } = null!;
+	private Skeleton3D _skeleton  = null!;
+	private TabBuilder _tabBuilder = null!;
 
 	public void Initialize(Player player, Skeleton3D skeleton)
 	{
 		Player = player;
 		_skeleton = skeleton;
-		TabBuilder = new TabBuilder(skeleton, MobData);
+		_tabBuilder = new TabBuilder(skeleton, MobData);
 		_presetTab = GetNode<PresetTab.PresetTab>("TabContainer/Preset");
 		_tabContainer = GetNode<TabContainer>("TabContainer");
 		_startButton = GetNode<Button>("Right/Start Game");
+		_startButton.Pressed += StartGame;
+		_cameraManager = GetNode<CreatorCameraManager.CreatorCameraManager>("Right/CreatorCameraManager");
+
 		_presetTab.Initialize(this);
 
 		foreach (var (tabName, pickers) in UiConstants.CreatorMenuData)
-			_tabContainer.AddChild(TabBuilder.CreateTab(pickers, tabName));
+			_tabContainer.AddChild(_tabBuilder.CreateTab(pickers, tabName));
 
 		RandomizeCreatorValues();
 		MobUtils.TogglePlayerControl(false, player);
 		UiUtils.DisableEdit(_startButton, string.IsNullOrEmpty(MobData.MobName));
 	}
 
-	public void StartGame()
+	private void StartGame()
 	{
 		GD.Print("starting game with ", MobData.MobName);
+		_cameraManager.PlayerCameraController.Sensitivity = UiConstants.GameCameraSensitivity;
+		_cameraManager.SetCameraHeightByRace(MobData.Race);
+		
 		MobUtils.SpawnOpponent(GetParent());
 		MobUtils.TogglePlayerControl(true, Player);
 		QueueFree();
