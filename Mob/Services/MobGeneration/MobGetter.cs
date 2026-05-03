@@ -24,7 +24,6 @@ public static class MobGetter
             ? Gender.NonBin
             : (GeneralUtils.CheckRng(0.5f) ? Gender.Male : Gender.Female);
 
-        GD.Print("GetRandomMobData with: ", mobData.Race+" "+ mobData.Type+" "+  mobData.Gender);
         var norms = GetRtgNorms(mobData.Race, mobData.Type, mobData.Gender);
         mobData.BodyData = GetRandomBodyData(norms, mobData.BodyData);
         mobData.EquipmentData = GetRandomEquipmentData(norms, mobData.EquipmentData);
@@ -47,7 +46,7 @@ public static class MobGetter
         bodyData ??= new BodyData();
         foreach (var (meshName, meshInfo) in MobConstants.BodyMeshesInfo)
         {
-            var meshNorms = norms.Where(n => n.MeshNames.Contains(meshName) || n.Tags.Any()).ToList();
+            var meshNorms = norms.Where(norm => !norm.MeshNames.Any() || norm.MeshNames.Contains(meshName) || norm.MeshNames.Contains("BodyBulk")).ToList();
             MobUtils.SetDataToBodyDataField(bodyData, meshInfo.FieldName, GetRandomMeshData(meshName, meshInfo, meshNorms));
         }
         MobUtils.PropagateHairColor(bodyData);
@@ -59,7 +58,7 @@ public static class MobGetter
         eqData ??= new EquipmentData();
         foreach (var (meshName, meshInfo) in MobConstants.EqMeshesInfo)
         {
-            var meshNorms = norms.Where(n => n.MeshNames.Contains(meshName) || n.Tags.Any()).ToList();
+            var meshNorms = norms.Where(norm => !norm.MeshNames.Any() || norm.MeshNames.Contains(meshName) || norm.MeshNames.Contains("EquipmentBulk")).ToList();
             MobUtils.SetDataToEqDataField(eqData, meshInfo.FieldName, GetRandomMeshData(meshName, meshInfo, meshNorms));
         }
         return eqData;
@@ -85,6 +84,10 @@ public static class MobGetter
         
         var fileTags = FileService.LoadJson<Dictionary<string, List<string>>>(fileFolder + "tag_info.json") ?? new();
         var allFiles = GetAllFileNames(meshName, fileFolder);
+        
+        // adding empty option if required but missing (for skeleton: lashes, top, shoes) TODO why not bottom? somethings wrong here... handle it in GetAllFileNames?
+        if (!allFiles.Contains("empty") && fileNorms.Any(n => n.Enforce && !n.Forbidden && n.Files.Contains("empty")))
+            allFiles.Insert(0, "empty");
         
         if (allFiles.Count == 0) { GD.Print("No files for ", fileFolder); return "empty"; }
         var possibleFiles= FilterValidMeshFile(allFiles, fileTags, tagNorms, fileNorms);
@@ -124,7 +127,7 @@ public static class MobGetter
         if (MobConstants.HalfEmptyNames.Contains(meshName) && GeneralUtils.CheckRng(0.5f))
             return ["empty"];
         var files = new List<string>(FileService.GetFileNames(fileFolder));
-        if (!MobConstants.NonEmptyNames.Contains(meshName) && !string.IsNullOrEmpty(fileFolder))
+        if (!MobConstants.NonEmptyNames.Contains(meshName) || string.IsNullOrEmpty(fileFolder))
             files.Insert(0, "empty");
         return files;
     }
@@ -160,7 +163,7 @@ public static class MobGetter
         var possibleColors = new List<Color>(allColors);
         foreach (var norm in colorNorms)
         {
-            var filteredColors = possibleColors.Where(color => norm.Forbidden ? !norm.Colors.Contains(color) : norm.Colors.Contains(color)).ToList();
+            List<Color> filteredColors = norm.Forbidden ? possibleColors.Where(color => !norm.Colors.Contains(color)).ToList() : norm.Colors.ToList();
             if (filteredColors.Count > 0) possibleColors = filteredColors;
         }
         return possibleColors;

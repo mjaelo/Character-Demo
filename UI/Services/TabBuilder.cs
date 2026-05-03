@@ -69,7 +69,7 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
     {
         var node = (SliderPickerComponent)UiConstants.SliderPickerScene.Instantiate();
         node.Name = meshName;
-        var all = new List<string> { "empty" };
+        List<string> all = ["empty"];
         all.AddRange(fileNames);
         node.Init(all, meshName);
         if (meshInstance == null || all.Count < 2)
@@ -129,8 +129,7 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
             MobUtils.GetBodyDataFieldValue(mobData.BodyData, bmi.FieldName).MeshColor = value;
         else if (MobConstants.EqMeshesInfo.TryGetValue(meshName, out var emi))
             MobUtils.GetEqDataFieldValue(mobData.EquipmentData, emi.FieldName).MeshColor = value;
-        int nr = meshName == "Body" ? 0 : -1;
-        MobUtils.SetMeshColor(value, meshInstance, nr);
+        MobUtils.SetMeshColor(value, meshInstance);
         if (meshName == "Hair") MobUtils.PropagateHairColor(mobData.BodyData, skeleton);
     }
 

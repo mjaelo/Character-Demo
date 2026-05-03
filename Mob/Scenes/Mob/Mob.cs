@@ -1,14 +1,18 @@
 using CharacterDemo.General;
 using CharacterDemo.Mob.DataFiles;
-using CharacterDemo.Mob.Services.Controllers;
+using CharacterDemo.Mob.Services.ActionManagers;
 using Godot;
 using static CharacterDemo.Mob.MobEnums;
 
 namespace CharacterDemo.Mob.Scenes.Mob;
 
+/// <summary>
+/// Base class for all mobs (players, NPCs). ActionManager is a plain class instantiated here.
+/// No manager nodes needed in the scene tree.
+/// </summary>
 public partial class Mob : CharacterBody3D
 {
-	// MobData
+	//  Data 
 	public string MobName = "";
 	public MobRaces Race;
 	public MobTypes Type;
@@ -24,22 +28,25 @@ public partial class Mob : CharacterBody3D
 	public float Gravity = GeneralConstants.DefaultGravity;
 	public float SpeedLimit = GeneralConstants.DefaultSpeedLimit;
 
-	private ActionHandler _actionHandler = null!;
+	// Action Management
+	public ActionManager Actions = null!;
 
 	public override void _Ready()
 	{
-		_actionHandler = GetNode<ActionHandler>("ActionHandler");
+		Actions = new ActionManager(this);
 	}
 
 	public override void _PhysicsProcess(double delta)
-	{
-		// trigger combat / body action action on a frame
-		_actionHandler.CheckFrame();
-		_actionHandler.IdleController.HandleIdle((float)delta);
-		HandleInput((float)delta);
+	{ 
+		if (!IsOnFloor()) Actions.HandleFalling((float)delta);
+		else if (Actions.IdleStateMachine.GetCurrentNode() == "Fall") Actions.IdleStateMachine.Travel("Idle");
+		
+		if (!Actions.IsInputBlocked()) HandleInput((float)delta);
+		
 		MoveAndSlide();
 	}
 
-	// Override in Player for player-specific input handling
-	protected virtual void HandleInput(float delta) { }
+	protected virtual void HandleInput(float delta) { } // implemented by player
+
+	public void OnWeaponBodyEntered(Node3D body) => Actions.Combat.OnWeaponBodyEntered(body);
 }

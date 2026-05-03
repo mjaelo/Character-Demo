@@ -13,8 +13,8 @@ public partial class Main : Node3D
 	public override void _Ready()
 	{
 		_creator = GetNode<Creator>("Creator");
-		_player = GetNode<Player>("Player/Mob");
-		_skeleton = GetNode<Skeleton3D>("Player/Mob/body/Armature/Skeleton3D");
+		_player = GetNode<Player>("Player");
+		_skeleton = GetNode<Skeleton3D>("Player/body/Armature/Skeleton3D");
 		_creator.Initialize(_player, _skeleton);
 	}
 }

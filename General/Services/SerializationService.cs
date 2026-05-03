@@ -61,16 +61,29 @@ public static class SerializationService
 
     private class ColorListConverter : JsonConverter<IReadOnlyList<Color>>
     {
+        public override bool CanConvert(Type typeToConvert)
+            => typeToConvert == typeof(IReadOnlyList<Color>) || typeToConvert == typeof(List<Color>);
+
         public override IReadOnlyList<Color> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             using var doc = JsonDocument.ParseValue(ref reader);
             var result = new List<Color>();
             foreach (var item in doc.RootElement.EnumerateArray())
             {
-                var name = item.GetString()!;
-                var field = typeof(MobConstants).GetField(name, BindingFlags.Public | BindingFlags.Static);
-                if (field?.GetValue(null) is IReadOnlyList<Color> colors)
-                    result.AddRange(colors);
+                if (item.ValueKind == JsonValueKind.String)
+                {
+                    // resolve named color list from MobConstants
+                    var name = item.GetString()!;
+                    var field = typeof(MobConstants).GetField(name, BindingFlags.Public | BindingFlags.Static);
+                    if (field?.GetValue(null) is IReadOnlyList<Color> colors)
+                        result.AddRange(colors);
+                }
+                else if (item.ValueKind == JsonValueKind.Array)
+                {
+                    // inline [r, g, b, a] array
+                    var arr = item.EnumerateArray().Select(x => x.GetSingle()).ToList();
+                    result.Add(new Color(arr[0], arr[1], arr[2], arr.Count > 3 ? arr[3] : 1f));
+                }
             }
             return result;
         }

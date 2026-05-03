@@ -16,5 +16,8 @@ public static class GeneralConstants
     public const float DefaultSpeed = 10.0f;
     public const float DefaultJumpImpulse = 21.0f;
     public const float DefaultSpeedLimit = 100.0f;
+    
+    // general
+    public const float FloatPrecition = 0.01f;
 }
 

@@ -1,49 +1,47 @@
-using CharacterDemo.Mob.Services.Controllers;
+using CharacterDemo.Mob.Services;
 using Godot;
 
 namespace CharacterDemo.Mob.Scenes.Player;
 
+/// <summary>
+/// Player-specific logic: input handling, camera, body rotation.
+/// </summary>
 public partial class Player : Mob.Mob
 {
-	private CameraController _cameraController = null!;
-	private ActionHandler _actionHandler = null!;
+	public PlayerCameraManager CameraManager = null!;
+	public Node3D Body = null!;
 
 	public override void _Ready()
 	{
 		base._Ready();
-		_actionHandler = GetNode<ActionHandler>("ActionHandler");
-		_cameraController = GetNode<CameraController>("../Controllers/CameraController");
-	}
-
-	public override void _UnhandledInput(InputEvent @event)
-	{
-		if (@event is InputEventMouse || Input.IsActionPressed("Switch Camera"))
-			_cameraController.HandleInput(@event);
+		Body = GetNode<Node3D>("body");
+		CameraManager = GetNode<PlayerCameraManager>("CameraManager");
 	}
 
 	protected override void HandleInput(float delta)
 	{
-		_actionHandler.MovementController.HandleMovement(delta);
-		if (Velocity != Vector3.Zero) RotatePlayerBody();
-
-		foreach (var action in System.Enum.GetNames<ActionHandler.ActionKeys>())
-		{
-			if (Input.IsActionJustPressed(action)) { _actionHandler.ActionController.OnActionPressed(action); return; }
-			if (Input.IsActionJustReleased(action)) return;
-		}
-		foreach (var action in System.Enum.GetNames<ActionHandler.CombatKeys>())
-		{
-			if (Input.IsActionJustPressed(action)) { _actionHandler.CombatController.OnActionPressed(action); return; }
-			if (Input.IsActionJustReleased(action)) { _actionHandler.CombatController.OnActionReleased(action); return; }
-		}
+		var inputDir = GetMovementInputDirection();
+		var isMoving = inputDir != Vector3.Zero;
+		Actions.HandleInput(inputDir, isMoving);
+		if (isMoving) RotateBody();
 	}
 
-	private void RotatePlayerBody()
+	private Vector3 GetMovementInputDirection()
 	{
-		if (Direction == Vector3.Zero || !(CurrentSpeed > 0) || _cameraController.CurrentCamera == _cameraController.Camera1P) return;
-		float yaw = Mathf.Atan2(
-			_cameraController.GlobalTransform.Basis.Z.X,
-			_cameraController.GlobalTransform.Basis.Z.Z);
-		GetNode<Node3D>("body").Rotation = new Vector3(0, yaw + Mathf.Pi, 0);
+		var dir = Vector3.Zero;
+		if (Input.IsActionPressed("Up")) dir -= CameraManager.GlobalTransform.Basis.Z;
+		if (Input.IsActionPressed("Down")) dir += CameraManager.GlobalTransform.Basis.Z;
+		if (Input.IsActionPressed("Left")) dir -= CameraManager.GlobalTransform.Basis.X;
+		if (Input.IsActionPressed("Right")) dir += CameraManager.GlobalTransform.Basis.X;
+		return dir.LengthSquared() > 0 ? dir.Normalized() : dir;
 	}
+	private void RotateBody()
+	{
+		if (Direction == Vector3.Zero || !(CurrentSpeed > 0) || CameraManager.CurrentCamera == CameraManager.Camera1P) return;
+		float yaw = Mathf.Atan2(
+			CameraManager.GlobalTransform.Basis.Z.X,
+			CameraManager.GlobalTransform.Basis.Z.Z);
+		Body.Rotation = new Vector3(0, yaw + Mathf.Pi, 0);
+	}
+
 }

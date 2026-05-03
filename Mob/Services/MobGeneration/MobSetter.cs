@@ -1,3 +1,4 @@
+using System;
 using CharacterDemo.Mob.DataFiles;
 using Godot;
 
@@ -13,7 +14,7 @@ public static class MobSetter
         mob.Gender = mobData.Gender;
         mob.EquipmentData = mobData.EquipmentData;
         mob.BodyData = mobData.BodyData;
-        MobAdjuster.AdjustMobToRace(mob, mobData.Race);
+        MobAdjuster.AdjustRaceExtraFeatures(mob, mobData.Race);
         SetBodyData(mobData.BodyData, mob);
         SetEquipmentData(mobData.EquipmentData, mob);
     }
@@ -50,7 +51,23 @@ public static class MobSetter
         if (!string.IsNullOrEmpty(meshData.MeshFile))
         {
             if (!string.IsNullOrEmpty(meshInfo.FileFolder)) MobUtils.SetMesh(meshData.MeshFile, meshInstance, meshInfo.FileFolder);
-            else if (meshData.MeshFile == "empty") meshInstance.Hide();
+            else if (meshData.MeshFile == "empty")
+            {
+                switch (meshName)
+                {
+                    case "Top":
+                        MobUtils.SetMesh("torso", meshInstance, "res://Assets/Mob/Meshes/body");
+                        meshInstance.Show();
+                        break;
+                    case "Bottom":
+                        MobUtils.SetMesh("legs", meshInstance, "res://Assets/Mob/Meshes/body");
+                        meshInstance.Show();
+                        break;
+                    default:
+                        meshInstance.Hide();
+                        break;
+                }
+            }
             else meshInstance.Show();
         }
 
@@ -60,16 +77,13 @@ public static class MobSetter
             MobUtils.SetMeshColor(meshData.MeshColor, meshInstance, materialNr);
         }
 
-        if (meshData.MeshShapes.Count > 0)
+        if (meshData.MeshShapes.Count > 0 && MobConstants.BodyMeshesInfo.ContainsKey(meshName))
         {
             var shapeNames = MobUtils.GetShapeNamesFromMesh(meshInstance.Mesh);
-            if (meshData.MeshShapes.Count != shapeNames.Count)
-            {
-                GD.Print(meshName + " shapes differ in saved data and mesh");
-                return;
-            }
+            int count = Math.Min(meshData.MeshShapes.Count, shapeNames.Count);
+            if (meshData.MeshShapes.Count != shapeNames.Count)  GD.Print(meshName + " shapes differ in meshData and mesh");
             var skeleton = (Skeleton3D)meshInstance.GetParent();
-            for (int i = 0; i < meshData.MeshShapes.Count; i++)
+            for (int i = 0; i < count; i++)
                 MobUtils.SetSkeletonShapeKey(meshData.MeshShapes[i], shapeNames[i], skeleton);
         }
     }

@@ -31,9 +31,10 @@ public partial class Creator : Control
 		_presetTab = GetNode<PresetTab.PresetTab>("TabContainer/Preset");
 		_tabContainer = GetNode<TabContainer>("TabContainer");
 		_startButton = GetNode<Button>("Right/Start Game");
-		_startButton.Pressed += StartGame;
 		_cameraManager = GetNode<CreatorCameraManager.CreatorCameraManager>("Right/CreatorCameraManager");
+		_cameraManager.Initialize(Player);
 
+		_startButton.Pressed += StartGame;
 		_presetTab.Initialize(this);
 
 		foreach (var (tabName, pickers) in UiConstants.CreatorMenuData)
@@ -47,7 +48,6 @@ public partial class Creator : Control
 	private void StartGame()
 	{
 		GD.Print("starting game with ", MobData.MobName);
-		_cameraManager.PlayerCameraController.Sensitivity = UiConstants.GameCameraSensitivity;
 		_cameraManager.SetCameraHeightByRace(MobData.Race);
 		
 		MobUtils.SpawnOpponent(GetParent());
@@ -115,7 +115,12 @@ public partial class Creator : Control
 		var picker = tab.FindChild(pickerName, true, false);
 		switch (picker)
 		{
-			case SliderPickerComponent sp: sp.SetValue(value.ToString() ?? ""); break;
+			case SliderPickerComponent sp:
+				var str = value is float f
+					? f.ToString(System.Globalization.CultureInfo.InvariantCulture)
+					: value.ToString() ?? "";
+				sp.SetValue(str);
+				break;
 			case ColorPickerComponent cp when value is Color c: cp.SetValue(c); break;
 			case null: GD.Print("Couldn't find " + pickerName + " in " + tabName); break;
 		}

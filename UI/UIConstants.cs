@@ -11,18 +11,6 @@ public static class UiConstants
     public const string OverrideWarning = "Overriding preset with the same name";
     public const string DefaultPresetName = "New Character"; // TODO not needed?
 
-    // camera
-    public const float ZoomInitial = 3f; // TODO use
-    public const float ZoomMin = -1.0f;
-    public const float ZoomMax = 5f;
-    public const float MouseZoomStep = 0.05f;
-    public const float ButtonZoomStep = 5.0f;
-    public const float MouseRotateStep = 0.001f;
-    public const float ButtonRotateStep = 0.01f;
-
-    public const float GameCameraSensitivity = 5f;
-    public const float CameraMaxHeight = 10.0f;
-
     // styling
     public const float PickerPadding = 10.0f;
 

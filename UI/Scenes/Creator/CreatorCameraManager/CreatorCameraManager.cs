@@ -1,18 +1,19 @@
-using System.Collections.Generic;
 using CharacterDemo.Mob;
-using CharacterDemo.Mob.Services.Controllers;
+using CharacterDemo.Mob.Scenes.Player;
+using CharacterDemo.Mob.Services;
 using Godot;
+using PlayerCameraManager = CharacterDemo.Mob.Services.PlayerCameraManager;
 
 namespace CharacterDemo.UI.Scenes.Creator.CreatorCameraManager;
 
-// TODO  have a common CameraManager for both player and Creator?
+/// <summary>
+///  Camera manager for Creator
+/// </summary>
 public partial class CreatorCameraManager : Control
 {
 	// player variables
-	public CameraController PlayerCameraController = null!; // used only for changing camera rotation TODO handle it more elegantly?
-	private SpringArm3D _cameraSpring = null!;
-	private Camera3D _camera1P = null!;
-	private Node3D _playerBody = null!;
+	public PlayerCameraManager PlayerCameraManager = null!;
+	private CameraService _camera = null!;
 
 	// Creator variables
 	private VSlider _cameraHeightSlider = null!;
@@ -29,9 +30,14 @@ public partial class CreatorCameraManager : Control
 	private Vector2 _holdRotateDir;
 	private float _holdZoomDir;
 
-	public override void _Ready()
+	public void Initialize(Player player)
 	{
 		SetupNodes();
+		PlayerCameraManager = player.CameraManager;
+		_camera = PlayerCameraManager.Camera;
+		player.Body.Rotation = Vector3.Zero;
+		_camera.Zoom(MobConstants.ZoomInitialCreator - PlayerCameraManager.GetNode<SpringArm3D>("SpringArm3D").SpringLength);
+		SetCameraHeightByRace(MobEnums.MobRaces.Human);
 		SetupUiSignals();
 	}
 
@@ -39,9 +45,9 @@ public partial class CreatorCameraManager : Control
 	{
 		var dt = (float)delta;
 		if (_holdRotateDir != Vector2.Zero)
-			RotateCamera(_holdRotateDir, UiConstants.ButtonRotateStep);
+			_camera.Rotate(_holdRotateDir, MobConstants.RotateStepButtonCreator);
 		if (_holdZoomDir != 0)
-			CameraZoom(_holdZoomDir * UiConstants.ButtonZoomStep * dt);
+			_camera.Zoom(_holdZoomDir * MobConstants.ZoomStepButtonCreator * dt);
 	}
 
 	public override void _Input(InputEvent @event)
@@ -53,17 +59,17 @@ public partial class CreatorCameraManager : Control
 				break;
 
 			case InputEventMouseMotion motion when _isDragging:
-				RotateCamera(-motion.Relative, UiConstants.MouseRotateStep);
+				_camera.Rotate(-motion.Relative, MobConstants.RotateStepMouseCreator);
 				GetViewport().SetInputAsHandled();
 				break;
 
 			case InputEventMouseButton { ButtonIndex: MouseButton.WheelUp }:
-				CameraZoom(-UiConstants.MouseZoomStep);
+				_camera.Zoom(-MobConstants.ZoomStepMouseCreator);
 				GetViewport().SetInputAsHandled();
 				break;
 
 			case InputEventMouseButton { ButtonIndex: MouseButton.WheelDown }:
-				CameraZoom(UiConstants.MouseZoomStep);
+				_camera.Zoom(MobConstants.ZoomStepMouseCreator);
 				GetViewport().SetInputAsHandled();
 				break;
 		}
@@ -71,19 +77,14 @@ public partial class CreatorCameraManager : Control
 
 	public void SetCameraHeightByRace(MobEnums.MobRaces race)
 	{
-		var height = MobConstants.RaceCamHeights.GetValueOrDefault(race, MobConstants.RaceCamHeightDefault);
+		var height = MobConstants.RaceCamHeights.TryGetValue(race, out var h) ? h : MobConstants.RaceCamHeightDefault;
 		_cameraHeightSlider.Value = height;
-		OnCameraHeightSliderChanged(height);
+		_camera.SetHeight(height);
 	}
 
 	// Setup
 	private void SetupNodes()
 	{
-		PlayerCameraController = GetNode<CameraController>("../../../Player/Controllers/CameraController");
-		_cameraSpring = PlayerCameraController.GetNode<SpringArm3D>("SpringArm3D");
-		_camera1P = PlayerCameraController.GetNode<Camera3D>("1PCamera");
-		_playerBody = GetNode<Node3D>("../../../Player/Mob/body");
-
 		_cameraHeightSlider = GetNode<VSlider>("HBoxContainer/CameraHeight");
 		_zoomInButton = GetNode<Button>("HBoxContainer/VBoxContainer2/Zoom/ZoomIn");
 		_zoomOutButton = GetNode<Button>("HBoxContainer/VBoxContainer2/Zoom/ZoomOut");
@@ -92,15 +93,11 @@ public partial class CreatorCameraManager : Control
 		_rotateUpButton = GetNode<TextureButton>("HBoxContainer/VBoxContainer2/Rotation/RotateUp");
 		_rotateDownButton = GetNode<TextureButton>("HBoxContainer/VBoxContainer2/Rotation/RotateDown");
 		_rotateResetButton = GetNode<TextureButton>("HBoxContainer/VBoxContainer2/Rotation/Rotation/RotateReset");
-
-		_playerBody.Rotation = Vector3.Zero;
-		_cameraHeightSlider.MaxValue = UiConstants.CameraMaxHeight; // TODO whats the point of that here?
-		SetCameraHeightByRace(MobEnums.MobRaces.Human);
 	}
 
 	private void SetupUiSignals()
 	{
-		_cameraHeightSlider.ValueChanged += OnCameraHeightSliderChanged;
+		_cameraHeightSlider.ValueChanged += v => _camera.SetHeight((float)v);
 		_zoomInButton.ButtonDown += () => _holdZoomDir = -1f;
 		_zoomInButton.ButtonUp += () => _holdZoomDir = 0;
 		_zoomOutButton.ButtonDown += () => _holdZoomDir = 1f;
@@ -113,32 +110,10 @@ public partial class CreatorCameraManager : Control
 		_rotateLeftButton.ButtonUp += () => _holdRotateDir = Vector2.Zero;
 		_rotateRightButton.ButtonDown += () => _holdRotateDir = new Vector2(1, 0);
 		_rotateRightButton.ButtonUp += () => _holdRotateDir = Vector2.Zero;
-		_rotateResetButton.Pressed += () => PlayerCameraController.Rotation = Vector3.Zero;
+		_rotateResetButton.Pressed += _camera.ResetRotation;
 	}
 
 	// buttons clicked
-	private void RotateCamera(Vector2 direction, float sensitivity)
-	{
-		var rotationX = PlayerCameraController.Rotation.X + direction.Y * sensitivity;
-		var rotationY = PlayerCameraController.Rotation.Y + direction.X * sensitivity;
-		PlayerCameraController.Rotation = new Vector3(rotationX, rotationY, 0);
-	}
-
-	private void CameraZoom(float amount)
-	{
-		var springLen = _cameraSpring.SpringLength + amount;
-		if (springLen is >= UiConstants.ZoomMin and <= UiConstants.ZoomMax) _cameraSpring.SpringLength = springLen;
-	}
-
-	private void OnCameraHeightSliderChanged(double value)
-	{
-		var v = (float)value;
-		var springTransform = _cameraSpring.Transform;
-		springTransform.Origin = new Vector3(springTransform.Origin.X, v, springTransform.Origin.Z);
-		_cameraSpring.Transform = springTransform;
-
-		var cameraTransform = _camera1P.Transform;
-		cameraTransform.Origin = new Vector3(cameraTransform.Origin.X, v, cameraTransform.Origin.Z);
-		_camera1P.Transform = cameraTransform;
-	}
+	private void CameraZoom(float amount) => _camera.Zoom(amount);
+	private void RotateCamera(Vector2 direction, float sensitivity) => _camera.Rotate(direction, sensitivity);
 }

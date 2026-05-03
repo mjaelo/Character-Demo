@@ -133,5 +133,6 @@ stretch_mode = 4
 
 [node name="CameraHeight" type="VSlider" parent="HBoxContainer" unique_id=123518484]
 layout_mode = 2
+max_value = 10.0
 
 [connection signal="pressed" from="HBoxContainer/VBoxContainer2/Rotation/Rotation/RotateReset" to="." method="_on_rotate_reset_pressed"]

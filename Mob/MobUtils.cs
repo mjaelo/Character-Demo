@@ -10,7 +10,7 @@ using Godot;
 
 namespace CharacterDemo.Mob;
 
-public static class MobUtils
+public static class MobUtils // TODO move GET SET ADJUST functions to MobGeneration services?
 {
     private static readonly Dictionary<string, List<string>> CachedMeshShapeNames = new(); // TODO caches shouldnt be kept here
 
@@ -72,7 +72,17 @@ public static class MobUtils
         }
     }
 
-    public static void AdjustHairHider(Skeleton3D skeleton)
+    public static void SetSkeletonShapeKey(float value, string shapeName, Skeleton3D skel)
+    {
+        foreach (var child in skel.GetChildren().OfType<MeshInstance3D>())
+            if (child.GetBlendShapeCount() > 0)
+                SetMeshShapeKey(value, shapeName, child);
+
+        if (MobConstants.HipMovers.Contains(shapeName))
+            AdjustHip(skel);
+    }
+
+    private static void AdjustHairHider(Skeleton3D skeleton)
     {
         var hatMesh = skeleton.GetNode<MeshInstance3D>("Hat");
         var hairMesh = skeleton.GetNode<MeshInstance3D>("Hair");
@@ -91,8 +101,8 @@ public static class MobUtils
         if (hatMesh.Visible && hairMesh.Visible)
         {
             hiderNode.Show();
-            var baseMesh = hiderNode.GetNode<MeshInstance3D>("Controller/HatHairHider");
-            var newHiderNode = hiderNode.GetNode<Node3D>("Controller/NewHiders");
+            var baseMesh = hiderNode.GetNode<MeshInstance3D>("Manager/HatHairHider");
+            var newHiderNode = hiderNode.GetNode<Node3D>("Manager/NewHiders");
 
             if (hairMaterial != null)
             {
@@ -122,19 +132,9 @@ public static class MobUtils
         }
     }
 
-    public static void SetSkeletonShapeKey(float value, string shapeName, Skeleton3D skel)
-    {
-        foreach (var child in skel.GetChildren().OfType<MeshInstance3D>())
-            if (child.GetBlendShapeCount() > 0)
-                SetMeshShapeKey(value, shapeName, child);
-
-        if (MobConstants.HipMovers.Contains(shapeName))
-            AdjustHip(skel);
-    }
-
     private static void AdjustHip(Skeleton3D skel)
     {
-        var hipController = skel.GetNode<Node3D>("Hip/HipContainer");
+        var hipManager = skel.GetNode<Node3D>("Hip/HipContainer");
         var bodyMesh = skel.GetNode<MeshInstance3D>("Top");
         float addedAmount = 0;
         for (int i = 0; i < MobConstants.HipMovers.Length; i++)
@@ -146,9 +146,9 @@ public static class MobUtils
             addedAmount += val * multiplier;
         }
 
-        var origin = hipController.Transform.Origin;
+        var origin = hipManager.Transform.Origin;
         origin.X = 17 + addedAmount;
-        hipController.Transform = hipController.Transform with { Origin = origin };
+        hipManager.Transform = hipManager.Transform with { Origin = origin };
     }
 
     private static void SetMeshShapeKey(float value, string shapeName, MeshInstance3D mesh)
@@ -163,9 +163,7 @@ public static class MobUtils
         if (meshInstance.Mesh == null) return;
         if (materialNr >= meshInstance.Mesh.GetSurfaceCount()) materialNr = 0;
 
-        var material =
-            (meshInstance.MaterialOverride ?? meshInstance.Mesh.SurfaceGetMaterial(materialNr)) as StandardMaterial3D;
-        if (material != null)
+        if ((meshInstance.MaterialOverride ?? meshInstance.Mesh.SurfaceGetMaterial(materialNr)) is StandardMaterial3D material)
         {
             material = (StandardMaterial3D)material.Duplicate();
             material.AlbedoColor = value;
@@ -176,18 +174,19 @@ public static class MobUtils
         }
 
         if (meshInstance.Name != "Body" || materialNr != 0) return;
-        foreach (var name in MobConstants.MeshesWithSkin)
-            if (name != "Body")
-            {
-                var sibling = meshInstance.GetParent().GetNodeOrNull<MeshInstance3D>(name);
-                if (sibling != null) SetMeshColor(value, sibling, materialNr);
-            }
+        foreach (var meshName in MobConstants.MeshesWithSkin)
+        {
+            if (meshName == "Body") continue;
+            var sibling = meshInstance.GetParent().GetNodeOrNull<MeshInstance3D>(meshName);
+            if (sibling != null) SetMeshColor(value, sibling, materialNr);
+        }
     }
 
     //  GET MESH DATA 
     private static int GetMainMaterial(MeshInstance3D meshInstance)
     {
         if (meshInstance.Name == "Eyes") return 1;
+        if (meshInstance.Name == "Body") return 0;
         if (meshInstance.Mesh == null) return MobConstants.MeshesWithSkin.Contains((string)meshInstance.Name) ? 1 : 0;
         foreach (var (meshName, idx) in MobConstants.MainMaterials)
             if (meshInstance.Mesh.ResourcePath.Contains(meshName))
@@ -232,6 +231,7 @@ public static class MobUtils
         return names;
     }
 
+    // GENERAL MOB HELPERS
     public static void SpawnOpponent(Node? parent = null)
     {
         var scene = ResourceLoader.Load<PackedScene>(MobConstants.MobScenePath);
@@ -247,6 +247,7 @@ public static class MobUtils
 
     public static void TogglePlayerControl(bool hasControl, Player mob)
     {
+        mob.CameraManager.needsDrag = !hasControl;
         mob.SetProcessUnhandledInput(hasControl);
         mob.SetPhysicsProcess(hasControl);
     }
@@ -318,4 +319,12 @@ public static class MobUtils
         "accessory_mesh" => eqData.AccessoryMesh,
         _ => new MeshData()
     };
+    
+    public static void AttachItemToBone(Node3D newSlot, Node3D item)
+    {
+        item.GetParent().RemoveChild(item);
+        newSlot.AddChild(item);
+        item.Position = Vector3.Zero;
+        item.RotationDegrees = Vector3.Zero;
+    }
 }
