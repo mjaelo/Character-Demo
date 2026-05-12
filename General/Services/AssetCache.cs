@@ -21,6 +21,9 @@ public class AssetCache<T> where T : class
     {
         if (_cache.TryGetValue(path, out var cachedObj))
             if (cachedObj is T cached) return cached;
+        
+        if (!ResourceLoader.Exists(path))
+            return null;
 
         var asset = ResourceLoader.Load<T>(path);
         if (asset == null) return null;

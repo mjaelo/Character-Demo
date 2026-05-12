@@ -14,18 +14,6 @@ public static class MobAdjuster
     public static void AdjustRaceExtraFeatures(Scenes.Mob.Mob mob, MobRaces race) // TODO store values externally? f.e. json, in norms
     {
         var skeleton = mob.GetNode<Skeleton3D>("body/Armature/Skeleton3D");
-
-        // show monster body, hide normal body TODO should be done by norms, monster body as body file name. (new skeleton bottom & top meshes?)
-        bool showMonsterBody = race == MobRaces.Skeleton;
-        foreach (var child in skeleton.GetChildren().OfType<MeshInstance3D>())
-        {
-            if (MobConstants.HandNames.Contains(child.Name.ToString()) ||
-                (!MobConstants.BodyMeshesInfo.Keys.Contains(child.Name.ToString()) &&
-                 !MobConstants.EqMeshesInfo.Keys.Contains(child.Name.ToString())))
-                continue;
-            child.Visible = showMonsterBody == (child.Name == "monster-body");
-        }
-
         // mob scale
         mob.Scale = Vector3.One * race switch { MobRaces.Spirit => MobConstants.SpiritScale, MobRaces.Ogre => MobConstants.OgreScale, _ => 1 };
 
@@ -34,39 +22,15 @@ public static class MobAdjuster
         var material = (StandardMaterial3D?)topMesh.GetActiveMaterial(0);
         if (material != null)
             material.AlbedoTextureMsdf = race is MobRaces.Statue or MobRaces.Spirit;
-
-        // eye secondary colors TODO keep all colors in MeshData? add to norms?
-        var eyesMesh = skeleton.GetNode<MeshInstance3D>("Eyes");
-        var eyePupilColor =  race switch
-        {
-            MobRaces.Statue => MobConstants.ColorStatueGrey,
-            MobRaces.Spirit => MobConstants.SpiritEyeWhitesColor,
-            _ => Colors.Black
-        };
-        MobUtils.SetMeshColor(eyePupilColor, eyesMesh, 2);
-        
-        var eyeWhiteColor = race switch
-        {
-            MobRaces.Statue => MobConstants.ColorStatueGrey, 
-            MobRaces.Spirit => MobConstants.SpiritEyeWhitesColor,
-            MobRaces.Ogre => MobConstants.OgreEyeWhitesColor,
-            MobRaces.Demon => MobConstants.DemonEyeWhitesColor,
-            _ => Colors.White
-        };
-        MobUtils.SetMeshColor(eyeWhiteColor, eyesMesh, 0);
-        
-        // lashes color
-        var lashesMesh = skeleton.GetNode<MeshInstance3D>("Eyelashes");
-        var lashesColor = race == MobRaces.Statue ? MobConstants.ColorStatueGrey : Colors.Black;
-        MobUtils.SetMeshColor(lashesColor, lashesMesh, 0);
     }
     
     public static BodyData AdjustBodyData(List<NormInfo> norms, BodyData bodyData)
     {
         foreach (var (meshName, meshInfo) in MobConstants.BodyMeshesInfo)
         {
+            var meshNorms = norms.Where(norm => !norm.MeshNames.Any() || norm.MeshNames.Contains(meshName) || norm.MeshNames.Contains("BodyBulk")).ToList();
             var current = MobUtils.GetBodyDataFieldValue(bodyData, meshInfo.FieldName);
-            var adjusted = AdjustMeshData(meshName, meshInfo, norms, current);
+            var adjusted = AdjustMeshData(meshName, meshInfo, meshNorms, current);
             MobUtils.SetDataToBodyDataField(bodyData, meshInfo.FieldName, adjusted);
         }
         MobUtils.PropagateHairColor(bodyData);
@@ -76,8 +40,9 @@ public static class MobAdjuster
     {
         foreach (var (meshName, meshInfo) in MobConstants.EqMeshesInfo)
         {
+            var meshNorms = norms.Where(norm => !norm.MeshNames.Any() || norm.MeshNames.Contains(meshName) || norm.MeshNames.Contains("EquipmentBulk")).ToList();
             var current = MobUtils.GetEqDataFieldValue(eqData, meshInfo.FieldName);
-            var adjusted = AdjustMeshData(meshName, meshInfo, norms, current);
+            var adjusted = AdjustMeshData(meshName, meshInfo, meshNorms, current);
             MobUtils.SetDataToEqDataField(eqData, meshInfo.FieldName, adjusted);
         }
         return eqData;
@@ -85,7 +50,7 @@ public static class MobAdjuster
     private static MeshData AdjustMeshData(string meshName, MobMeshInfo meshInfo, List<NormInfo> norms, MeshData meshData)
     {
         meshData.MeshFile = MobGetter.GetRandomMeshFile(meshName, norms, meshInfo.FileFolder, meshData.MeshFile);
-        meshData.MeshColor = MobGetter.GetRandomMeshColor(norms, meshInfo.Colors, meshData.MeshColor);
+        meshData.MeshColors = MobGetter.GetRandomMeshColor(norms, meshInfo, meshData.MeshColors);
         meshData.MeshShapes = MobGetter.GetRandomMeshShapes(norms, meshInfo.Shapes, meshData.MeshShapes);
         return meshData;
     }

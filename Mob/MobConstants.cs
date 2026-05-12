@@ -47,7 +47,7 @@ public static class MobConstants
     //  Mob mesh name groups 
     public static readonly string[] MeshesWithSkin = ["Top", "Bottom", "Head"];
     public static readonly string[] HandNames = ["Right Hand", "Left Hand"];
-    public static readonly string[] NonEmptyNames = ["Top", "Bottom", "Shoes", "Eyelashes"];
+    public static readonly string[] NonEmptyNames = ["Top", "Bottom", "Shoes", "Eyelashes","Head","Eyes","Brows"];
     public static readonly string[] HairLinkedNames = ["Brows", "Beard"];
     public static readonly string[] HairAdjustingNames = ["Hair", "Hat"];
     public static readonly string[] HalfEmptyNames = ["Hat", "Beard"];
@@ -57,17 +57,25 @@ public static class MobConstants
     public static readonly Color ColorStatueGrey = new(0.3f, 0.3f, 0.3f, 0f);
     public static readonly Color SpiritEyeWhitesColor = new(100, 100, 100);
     public static readonly Color OgreEyeWhitesColor = Colors.Orange;
+    public static readonly Color WhiteColor = Colors.White;
+    public static readonly Color BlackColor = Colors.Black;
     public static readonly Color DemonEyeWhitesColor = Colors.Black;
     private static readonly IReadOnlyList<Color>  HairColors = GetColorsFromColorRange(new Vector2(0, .2f), new Vector2(.1f, .4f), new Vector2(0, .7f));
     private static readonly IReadOnlyList<Color>  ClothesColors = GetColorsFromColorRange(new Vector2(0f, .27f), new Vector2(0f, .3f), new Vector2(.2f, .6f));
     private static readonly IReadOnlyList<Color>  EyeColors = GetColorsFromColorRange(new Vector2(.1f, .6f), new Vector2(.2f, .5f), new Vector2(.3f, .8f));
     private static readonly IReadOnlyList<Color> SkinColors = GetColorsFromColorRange(new Vector2(.01f, .08f), new Vector2(.2f, .3f), new Vector2(.3f, .95f));
+    
+    public static readonly IReadOnlyList<Color> SkeletonSkinColors  = [Colors.Gray, Colors.Burlywood, Colors.AntiqueWhite];
     public static readonly IReadOnlyList<Color> DemonSkinColors  = [Colors.DarkRed];
     public static readonly IReadOnlyList<Color> DemonClothesColors  = [Colors.Black];
     public static readonly IReadOnlyList<Color> StatueColors  = [ColorStatueGrey];
     public static readonly IReadOnlyList<Color> OgreColors  = [Colors.DarkOliveGreen];
     public static readonly IReadOnlyList<Color> SpiritEyesColors  = [new(10, 10, 10, 5f)];
     public static readonly IReadOnlyList<Color> SpiritSkinColors  = GetColorsFromColorRange(new Vector2(.1f, .6f), new Vector2(.2f, .5f), new Vector2(.3f, .8f), new Vector2(5, 5));
+    
+    // Default colors per material index for specific meshes
+    public static readonly IReadOnlyDictionary<int, IReadOnlyList<Color>> DefaultEyeColors = new Dictionary<int, IReadOnlyList<Color>> { [0] = [Colors.White],     [1] = EyeColors,      [2] = [Colors.Black]     };
+    public static readonly IReadOnlyDictionary<int, IReadOnlyList<Color>> DefaultLashColors = new Dictionary<int, IReadOnlyList<Color>> { [0] = [Colors.Black] };
   
     //  Norms 
     public static readonly IReadOnlyDictionary<Gender, IReadOnlyList<NormInfo>> GenderNorms = LoadNorms<Gender>(GenderNormsPath);
@@ -83,21 +91,20 @@ public static class MobConstants
     
     public static  readonly IReadOnlyDictionary<string, MobMeshInfo> BodyMeshesInfo = new Dictionary<string, MobMeshInfo>
         {
-            ["Body"] = new("body_mesh", "", SkinColors, BodyShapes),
-            ["Head"] = new("head_mesh", "", null, HeadShapes),
-            ["Eyes"] = new("eye_mesh", "", EyeColors),
-            ["Eyelashes"] = new("lashes_mesh", "res://Assets/Mob/Meshes/face/lashes/",null, LashShapes),
-            ["Hair"] = new("hair_mesh", "res://Assets/Mob/Meshes/hair/", HairColors),
+            ["Head"] = new("head_mesh", "res://Assets/Mob/Meshes/head/", new Dictionary<int, IReadOnlyList<Color>> { [0] = SkinColors }, HeadShapes),
+            ["Eyes"] = new("eye_mesh", "res://Assets/Mob/Meshes/face/eyes/", DefaultEyeColors),
+            ["Eyelashes"] = new("lashes_mesh", "res://Assets/Mob/Meshes/face/lashes/", DefaultLashColors, LashShapes),
+            ["Hair"] = new("hair_mesh", "res://Assets/Mob/Meshes/hair/", new Dictionary<int, IReadOnlyList<Color>> { [0] = HairColors }),
             ["Beard"] = new("beard_mesh", "res://Assets/Mob/Meshes/face/beard/", null, BeardShapes),
-            ["Brows"] = new("brow_mesh", "", null, BrowShapes) 
+            ["Brows"] = new("brow_mesh", "res://Assets/Mob/Meshes/face/brows/", null, BrowShapes) 
         };
 
     public static readonly IReadOnlyDictionary<string, MobMeshInfo> EqMeshesInfo = new Dictionary<string, MobMeshInfo>
         {
-            ["Top"] = new("top_mesh", "res://Assets/Mob/Meshes/top/", ClothesColors),
-            ["Bottom"] = new("bottom_mesh", "res://Assets/Mob/Meshes/bottom/", ClothesColors),
-            ["Shoes"] = new("shoe_mesh", "res://Assets/Mob/Meshes/shoes/", ClothesColors),
-            ["Hat"] = new("hat_mesh", "res://Assets/Mob/Meshes/hat/", ClothesColors),
+            ["Top"] = new("top_mesh", "res://Assets/Mob/Meshes/top/", new Dictionary<int, IReadOnlyList<Color>> { [0] = SkinColors, [1] = ClothesColors }, BodyShapes),
+            ["Bottom"] = new("bottom_mesh", "res://Assets/Mob/Meshes/bottom/", new Dictionary<int, IReadOnlyList<Color>> { [0] = SkinColors, [1] = ClothesColors }, BodyShapes),
+            ["Shoes"] = new("shoe_mesh", "res://Assets/Mob/Meshes/shoes/", new Dictionary<int, IReadOnlyList<Color>> { [0] = ClothesColors }),
+            ["Hat"] = new("hat_mesh", "res://Assets/Mob/Meshes/hat/", new Dictionary<int, IReadOnlyList<Color>> { [0] = ClothesColors }),
             ["Right Hand"] = new("r_hand_mesh", "res://Assets/Mob/Meshes/r_hand/"),
             ["Left Hand"] = new("l_hand_mesh", "res://Assets/Mob/Meshes/l_hand/"),
             ["Accessory"] = new("accessory_mesh", "res://Assets/Mob/Meshes/accessories/"),

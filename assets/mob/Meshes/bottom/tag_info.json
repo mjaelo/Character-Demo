@@ -1,6 +1,7 @@
 {
 	"farmer-bottom": ["Farmer"],
 	"guard-bottom": ["Guard"],
+	"skelly-bottom": ["Skeleton"],
 	"merchant-bottom": ["Merchant"],
 	"noble-bottom": ["Noble"],
 	"ogre-belt": ["Ogre"]

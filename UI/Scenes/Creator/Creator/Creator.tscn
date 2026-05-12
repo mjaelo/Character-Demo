@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://klqaekdm4u3l"]
 
-[ext_resource type="Script" uid="uid://dk5qsli3dxump" path="res://UI/Scenes/Creator/Creator.cs" id="1_yntgj"]
-[ext_resource type="PackedScene" uid="uid://2yx7df26g7uj" path="res://UI/Scenes/Creator/PresetTab/PresetTab.tscn" id="2_lka5l"]
-[ext_resource type="PackedScene" uid="uid://dkebf5g513vk3" path="res://UI/Scenes/Creator/CreatorCameraManager/CreatorCameraManager.tscn" id="5_us56g"]
+[ext_resource type="Script" path="res://UI/Scenes/Creator/Creator/Creator.cs" id="1_yntgj"]
+[ext_resource type="PackedScene" path="res://UI/Scenes/Creator/PresetTab/PresetTab.tscn" id="2_lka5l"]
+[ext_resource type="PackedScene" path="res://UI/Scenes/Creator/CreatorCameraManager/CreatorCameraManager.tscn" id="5_us56g"]
 
 [node name="Creator" type="HBoxContainer" unique_id=733556647]
 anchors_preset = 15

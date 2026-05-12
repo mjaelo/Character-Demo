@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://dkebf5g513vk3"]
 
-[ext_resource type="Script" uid="uid://brbcmuoxn21ti" path="res://UI/Scenes/Creator/CreatorCameraManager/CreatorCameraManager.cs" id="1_opu4t"]
-[ext_resource type="Texture2D" uid="uid://bjnr6icv2kwia" path="res://Assets/UI/UiIcons/arrow.png" id="2_tabp0"]
-[ext_resource type="Texture2D" uid="uid://d0jcvbqypg2y5" path="res://Assets/UI/UiIcons/circle.png" id="3_0v2r7"]
-[ext_resource type="Texture2D" uid="uid://blu68dxcto41s" path="res://Assets/UI/UiIcons/arrow-click.png" id="3_vdech"]
-[ext_resource type="Texture2D" uid="uid://d4gw0xiopwjw5" path="res://Assets/UI/UiIcons/arrow-hover.png" id="4_dcrma"]
-[ext_resource type="Texture2D" uid="uid://b2vlyjd11rwrg" path="res://Assets/UI/UiIcons/circle-click.png" id="6_8co8s"]
-[ext_resource type="Texture2D" uid="uid://dnf6g1jmqspwy" path="res://Assets/UI/UiIcons/circle-hover.png" id="7_krv6e"]
+[ext_resource type="Script" path="res://UI/Scenes/Creator/CreatorCameraManager/CreatorCameraManager.cs" id="1_opu4t"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UiIcons/arrow.png" id="2_tabp0"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UiIcons/circle.png" id="3_0v2r7"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UiIcons/arrow-click.png" id="3_vdech"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UiIcons/arrow-hover.png" id="4_dcrma"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UiIcons/circle-click.png" id="6_8co8s"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UiIcons/circle-hover.png" id="7_krv6e"]
 
 [node name="Right-Creator" type="VBoxContainer" unique_id=1681164499]
 anchors_preset = 15

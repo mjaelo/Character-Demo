@@ -14,7 +14,7 @@ namespace CharacterDemo.UI.Services;
 
 public class TabBuilder(Skeleton3D skeleton, MobData mobData)
 {
-    public TabBar CreateTab(MeshPickerInfo[] pickers, string tabName)
+    public TabBar GetCreatorTab(MeshPickerInfo[] pickers, string tabName)
     {
         var tab = new TabBar { Name = tabName };
         var scroll = new ScrollContainer();
@@ -38,34 +38,47 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
         scroll.AddChild(margin);
         tab.AddChild(scroll);
         foreach (var info in pickers)
-            CreatePickersForMesh(info, vbox);
+        foreach (var pickerSectionNode in GetMeshPickerSection(info, tabName))
+            vbox.AddChild(pickerSectionNode);
         return tab;
     }
 
-    private void CreatePickersForMesh(MeshPickerInfo info, VBoxContainer vbox)
+    private List<Control> GetMeshPickerSection(MeshPickerInfo info, string tabName)
     {
+        var pickers = new List<Control>();
         var meshName = info.MeshName;
         var meshInstance = MobUtils.GetMeshFromSkeleton(meshName, skeleton);
-        MobMeshInfo? meshInfo = MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi) ? bmi : MobConstants.EqMeshesInfo.GetValueOrDefault(meshName);
+        MobMeshInfo? meshInfo = MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi)
+            ? bmi
+            : MobConstants.EqMeshesInfo.GetValueOrDefault(meshName);
 
-        vbox.AddChild(new Label { Text = meshName });
-        if (meshInfo == null) return;
+        if (tabName != "Body") pickers.Add(new Label { Text = meshName });
+        if (meshInfo == null) return pickers;
 
         if (info.HasFilePicker)
-        {
-            var options = FileService.GetFileNames(meshInfo.FileFolder);
-            vbox.AddChild(CreateMeshPicker(meshName, options, meshInstance, meshInfo.FileFolder));
-        }
+            pickers.Add(GetFilePicker(
+                meshName,
+                FileService.GetFileNames(meshInfo.FileFolder),
+                meshInstance,
+                meshInfo.FileFolder));
 
-        if (info.HasColorPicker) vbox.AddChild(CreateColorPicker(meshName, meshInfo.Colors, meshInstance));
+
+        if (info.ColorPickers?.Count > 0)
+            for (int i = 0; i < info.ColorPickers.Count; i++)
+                if (info.ColorPickers[i])
+                    pickers.Add(GetColorPicker(meshName, meshInfo.Colors, meshInstance, i));
+
+
         if (info.HasShapePicker)
             foreach (var shapeInfo in meshInfo.Shapes)
-                vbox.AddChild(CreateShapePicker(meshName, shapeInfo.Values, meshInstance, shapeInfo.ShapeName));
+                pickers.Add(GetShapePicker(meshName, shapeInfo.Values, meshInstance, shapeInfo.ShapeName));
 
-        vbox.AddChild(new Control { CustomMinimumSize = new Vector2(0, UiConstants.PickerPadding) });
+        pickers.Add(new Control { CustomMinimumSize = new Vector2(0, UiConstants.PickerPadding) });
+        return pickers;
     }
 
-    private SliderPickerComponent CreateMeshPicker(string meshName, List<string> fileNames, MeshInstance3D? meshInstance, string fileFolder)
+    private SliderPickerComponent GetFilePicker(string meshName, List<string> fileNames, MeshInstance3D? meshInstance,
+        string fileFolder)
     {
         var node = (SliderPickerComponent)UiConstants.SliderPickerScene.Instantiate();
         node.Name = meshName;
@@ -82,22 +95,27 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
         return node;
     }
 
-    private ColorPickerComponent CreateColorPicker(string meshName, IReadOnlyList<Color> colors, MeshInstance3D? meshInstance)
+    private ColorPickerComponent GetColorPicker(string meshName, IReadOnlyDictionary<int, IReadOnlyList<Color>> colorsDict, MeshInstance3D? meshInstance, int materialNr)
     {
         var node = (ColorPickerComponent)UiConstants.ColorPickerScene.Instantiate();
-        node.Name = meshName + "Color";
-        node.Init(colors.ToList(), meshName + " Color");
+        node.Name = meshName + "Color" + materialNr;
+        
+        // Get colors for this specific material
+        var colors = colorsDict.TryGetValue(materialNr, out var c) ? c : new List<Color> { Colors.White };
+        node.Init(colors.ToList(), meshName + " Color " + materialNr);
+        
         if (meshInstance == null || colors.Count < 1)
         {
             node.Disabled = true;
             return node;
         }
 
-        node.VariableChanged += c => OnColorPickerChanged(c, meshInstance, meshName);
+        node.VariableChanged += c => OnColorPickerChanged(c, meshInstance, meshName, materialNr);
         return node;
     }
 
-    private SliderPickerComponent CreateShapePicker(string meshName, IReadOnlyList<float> shapeValues, MeshInstance3D? meshInstance, string shapeName)
+    private SliderPickerComponent GetShapePicker(string meshName, IReadOnlyList<float> shapeValues,
+        MeshInstance3D? meshInstance, string shapeName)
     {
         var node = (SliderPickerComponent)UiConstants.SliderPickerScene.Instantiate();
         node.Name = shapeName;
@@ -120,20 +138,38 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
             MobUtils.GetBodyDataFieldValue(mobData.BodyData, bmi.FieldName).MeshFile = value;
         else if (MobConstants.EqMeshesInfo.TryGetValue(meshName, out var emi))
             MobUtils.GetEqDataFieldValue(mobData.EquipmentData, emi.FieldName).MeshFile = value;
-        MobUtils.SetMesh(value, meshInstance, fileFolder);
+        MobUtils.SetMeshFile(value, meshInstance, fileFolder);
     }
 
-    private void OnColorPickerChanged(Color value, MeshInstance3D meshInstance, string meshName)
+    private void OnColorPickerChanged(Color value, MeshInstance3D meshInstance, string meshName, int materialNr = -1)
     {
+        materialNr = materialNr >= 0 ? materialNr : MobUtils.GetMainMaterial(meshInstance);
+        
         if (MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi))
-            MobUtils.GetBodyDataFieldValue(mobData.BodyData, bmi.FieldName).MeshColor = value;
+        {
+            var meshData = MobUtils.GetBodyDataFieldValue(mobData.BodyData, bmi.FieldName);
+            var newColors = meshData.MeshColors.ToList();
+            while (newColors.Count <= materialNr) newColors.Add(new Color());
+            newColors[materialNr] = value;
+            meshData.MeshColors = newColors;
+        }
         else if (MobConstants.EqMeshesInfo.TryGetValue(meshName, out var emi))
-            MobUtils.GetEqDataFieldValue(mobData.EquipmentData, emi.FieldName).MeshColor = value;
-        MobUtils.SetMeshColor(value, meshInstance);
+        {
+            var meshData = MobUtils.GetEqDataFieldValue(mobData.EquipmentData, emi.FieldName);
+            var newColors = meshData.MeshColors.ToList();
+            while (newColors.Count <= materialNr) newColors.Add(new Color());
+            newColors[materialNr] = value;
+            meshData.MeshColors = newColors;
+        }
+
+        MobUtils.SetMeshColor(value, meshInstance, materialNr);
         if (meshName == "Hair") MobUtils.PropagateHairColor(mobData.BodyData, skeleton);
+        if (MobConstants.MeshesWithSkin.Contains(meshName) && materialNr == 0)
+            MobUtils.PropagateSkinColor(value, meshInstance);
     }
 
-    private void OnShapePickerChanged(float value, MeshInstance3D meshInstance, string meshName, int shapeId, string shapeName)
+    private void OnShapePickerChanged(float value, MeshInstance3D meshInstance, string meshName, int shapeId,
+        string shapeName)
     {
         if (MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi))
         {

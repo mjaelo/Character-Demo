@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Folder Include=".godot\mono\" />
+    <Folder Include="UI\Scenes\Creator\Creator\" />
   </ItemGroup>
 </Project>
 

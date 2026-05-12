@@ -15,16 +15,8 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
     private static readonly Dictionary<string, List<string>> CachedMeshShapeNames = new(); // TODO caches shouldnt be kept here
 
     //  SET MESH DATA 
-    public static void SetMesh(string fileName, MeshInstance3D meshInstance, string path)
+    public static void SetMeshFile(string fileName, MeshInstance3D meshInstance, string path)
     {
-        if (fileName is "empty" or "")
-        {
-            meshInstance.Hide();
-            if (!MobConstants.HairAdjustingNames.Contains(meshInstance.Name.ToString())) return;
-            AdjustHairHider((Skeleton3D)meshInstance.GetParent());
-            return;
-        }
-
         var filePath = path + fileName + ".tres";
         var newMesh = FileService.LoadMesh(filePath);
         if (newMesh != null)
@@ -50,26 +42,18 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
         }
         else
         {
-            meshInstance.Hide();
-            if (fileName != "empty") GD.Print(filePath, " not found");
+            meshInstance.Hide();            
+            if (fileName is not ("empty" or "")) GD.Print(filePath, " not found");
         }
 
-        if (MobConstants.HairAdjustingNames.Contains(meshInstance.Name.ToString()))
-        {
-            AdjustHairHider((Skeleton3D)meshInstance.GetParent());
-        }
+        // update hair hider and sword col shape
+        if (MobConstants.HairAdjustingNames.Contains(meshInstance.Name.ToString())) AdjustHairHider((Skeleton3D)meshInstance.GetParent());
 
-        if (meshInstance.Name == "Sword")
-        {
-            var colShape = meshInstance.GetNode<CollisionShape3D>("StaticBody3D/CollisionShape3D");
-            if (meshInstance.Visible)
-                colShape.Shape = meshInstance.Mesh.CreateConvexShape();
-            else
-            {
-                var sphere = new SphereShape3D { Radius = 10 };
-                colShape.Shape = sphere;
-            }
-        }
+        if (meshInstance.Name != "Sword") return;
+        var swordCollision = meshInstance.GetNode<CollisionShape3D>("StaticBody3D/CollisionShape3D");
+        swordCollision.Shape = meshInstance.Visible
+            ? meshInstance.Mesh.CreateConvexShape()
+            : new SphereShape3D { Radius = 10 };
     }
 
     public static void SetSkeletonShapeKey(float value, string shapeName, Skeleton3D skel)
@@ -136,10 +120,14 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
     {
         var hipManager = skel.GetNode<Node3D>("Hip/HipContainer");
         var bodyMesh = skel.GetNode<MeshInstance3D>("Top");
+        if (bodyMesh.Mesh is not ArrayMesh arrayMesh || arrayMesh.GetBlendShapeCount() == 0)
+            return; // Mesh has no blend shapes (e.g., skeleton variants)
+        
         float addedAmount = 0;
         for (int i = 0; i < MobConstants.HipMovers.Length; i++)
         {
-            var shapeId = ((ArrayMesh)bodyMesh.Mesh).GetBlendShapeName(i) == MobConstants.HipMovers[i] ? i : -1;
+            if (i >= arrayMesh.GetBlendShapeCount()) break; // Safety check
+            var shapeId = arrayMesh.GetBlendShapeName(i) == MobConstants.HipMovers[i] ? i : -1;
             if (shapeId < 0) continue;
             float val = bodyMesh.GetBlendShapeValue(shapeId);
             float multiplier = i == 0 ? 4f : 7f;
@@ -172,26 +160,34 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
             else
                 meshInstance.SetSurfaceOverrideMaterial(materialNr, material);
         }
+        
+    }
 
-        if (meshInstance.Name != "Body" || materialNr != 0) return;
+    public static void PropagateSkinColor(Color value, MeshInstance3D sourceMesh)
+    {
+        var parent = sourceMesh.GetParent();
         foreach (var meshName in MobConstants.MeshesWithSkin)
         {
-            if (meshName == "Body") continue;
-            var sibling = meshInstance.GetParent().GetNodeOrNull<MeshInstance3D>(meshName);
-            if (sibling != null) SetMeshColor(value, sibling, materialNr);
+            if (meshName == sourceMesh.Name.ToString()) continue;
+            var sibling = parent.GetNodeOrNull<MeshInstance3D>(meshName);
+            if (sibling != null)
+            {
+                SetMeshColor(value, sibling, 0);
+            }
         }
     }
 
     //  GET MESH DATA 
-    private static int GetMainMaterial(MeshInstance3D meshInstance)
+    public static int GetMainMaterial(MeshInstance3D meshInstance) // TODO add as a property toMobMeshInfo?
     {
         if (meshInstance.Name == "Eyes") return 1;
-        if (meshInstance.Name == "Body") return 0;
-        if (meshInstance.Mesh == null) return MobConstants.MeshesWithSkin.Contains((string)meshInstance.Name) ? 1 : 0;
+        if (meshInstance.Name == "Top") return 1;
+        if (meshInstance.Name == "Bottom") return 1;
+        if (meshInstance.Name == "Head") return 0;
         foreach (var (meshName, idx) in MobConstants.MainMaterials)
             if (meshInstance.Mesh.ResourcePath.Contains(meshName))
                 return idx;
-        return MobConstants.MeshesWithSkin.Contains((string)meshInstance.Name) ? 1 : 0;
+        return 0;
     }
 
     private static Color GetMeshColor(MeshInstance3D meshInstance, int materialNr = -1)
@@ -255,12 +251,12 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
     public static void PropagateHairColor(BodyData bodyData, Skeleton3D? skeleton = null)
     {
         if (bodyData.HairMesh == new MeshData()) return;
-        var hairColor = bodyData.HairMesh.MeshColor;
+        var hairColor = bodyData.HairMesh.MeshColors[0];
         foreach (var linkedName in MobConstants.HairLinkedNames)
         {
             string fieldName = MobConstants.BodyMeshesInfo[linkedName].FieldName;
             if (typeof(BodyData).GetProperty(fieldName)?.GetValue(bodyData) is MeshData meshData)
-                meshData.MeshColor = hairColor;
+                meshData.MeshColors = [hairColor];
             if (skeleton == null) continue;
             var mesh = GetMeshFromSkeleton(linkedName, skeleton);
             if (mesh != null) SetMeshColor(hairColor, mesh);
@@ -272,7 +268,6 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
     {
         switch (fieldName)
         {
-            case "body_mesh": bodyData.BodyMesh = meshData; break;
             case "head_mesh": bodyData.HeadMesh = meshData; break;
             case "eye_mesh": bodyData.EyeMesh = meshData; break;
             case "lashes_mesh": bodyData.LashesMesh = meshData; break;
@@ -298,7 +293,6 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
 
     public static MeshData GetBodyDataFieldValue(BodyData bodyData, string fieldName) => fieldName switch
     {
-        "body_mesh" => bodyData.BodyMesh,
         "head_mesh" => bodyData.HeadMesh,
         "eye_mesh" => bodyData.EyeMesh,
         "lashes_mesh" => bodyData.LashesMesh,

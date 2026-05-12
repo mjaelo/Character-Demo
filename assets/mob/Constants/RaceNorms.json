@@ -3,36 +3,48 @@
     { "Tags": ["Skeleton", "Ogre", "Spirit", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
     { "MeshNames": ["Accessory"], "Files": ["empty"], "Enforce": true },
     { "MeshNames": ["Top","Bottom"], "Files": ["empty"], "Forbidden": true, "Enforce": true },
-    { "MeshNames": ["Body"], "Shapes": { "1": [0.0] } }
+    { "MeshNames": ["Top", "Bottom"], "Shapes": { "1": [0.0] } }
   ],
   "Demon": [
     { "Tags": ["Demon"], "Enforce": true },
-    { "MeshNames": ["Body", "Head"], "Colors": ["DemonSkinColors"], "Enforce": true },
-    { "MeshNames": ["EquipmentBulk"], "Colors": ["DemonClothesColors"], "Enforce": true },
-    { "MeshNames": ["Body"], "Shapes": { "1": [0.0] } }
+    { "Tags": ["Skeleton", "Ogre", "Spirit", "Statue"], "Forbidden": true, "Enforce": true },
+    { "MeshNames": ["Top", "Bottom", "Head"], "Colors": { "0": ["DemonSkinColors"] }, "Enforce": true },
+    { "MeshNames": ["EquipmentBulk"], "Colors": { "0": ["DemonClothesColors"] }, "Enforce": true },
+    { "MeshNames": ["Top", "Bottom"], "Shapes": { "1": [0.0] } },
+    { "MeshNames": ["Top","Bottom"], "Files": ["empty"], "Forbidden": true, "Enforce": true },
+    { "MeshNames": ["Eyes"], "Colors": { "0": ["DemonEyeWhitesColor"] }, "Enforce": true }
   ],
   "Ogre": [
     { "Tags": ["Ogre"], "Enforce": true },
+    { "Tags": ["Skeleton", "Spirit", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
     { "MeshNames": ["Hair", "Eyelashes", "Beard", "Brows", "Shoes"], "Files": ["empty"], "Enforce": true },
-    { "MeshNames": ["Body", "Head"], "Colors": ["OgreColors"], "Enforce": true },
-    { "MeshNames": ["Body"], "Shapes": { "1": [1.0] }, "Enforce": true }
+    { "MeshNames": ["Top", "Bottom", "Head"], "Colors": { "0": ["OgreColors"] }, "Enforce": true },
+    { "MeshNames": ["Top", "Bottom"], "Shapes": { "1": [1.0] }, "Enforce": true },
+    { "MeshNames": ["Top","Bottom"], "Files": ["empty"], "Forbidden": true, "Enforce": true },
+    { "MeshNames": ["Eyes"], "Colors": { "0": ["OgreEyeWhitesColor"] }, "Enforce": true }
   ],
   "Statue": [
     { "MeshNames": ["Hat", "Accessory"], "Files": ["empty"] },
-    { "MeshNames": ["EquipmentBulk", "BodyBulk"], "Colors": ["StatueColors"], "Enforce": true },
-    { "MeshNames": ["Body"], "Shapes": { "1": [0.0] } }
+    { "Tags": ["Skeleton", "Ogre", "Spirit", "Demon"], "Forbidden": true, "Enforce": true },
+    { "MeshNames": ["EquipmentBulk", "BodyBulk"], "Colors": { "0": ["StatueColors"] }, "Enforce": true },
+    { "MeshNames": ["Top", "Bottom"], "Shapes": { "1": [0.0] } },
+    { "MeshNames": ["Eyes"], "Colors": { "0": ["StatueColors"], "2": ["StatueColors"] }, "Enforce": true },
+    { "MeshNames": ["Top","Bottom"], "Files": ["empty"], "Forbidden": true, "Enforce": true },
+    { "MeshNames": ["Eyelashes"], "Colors": { "0": ["StatueColors"] }, "Enforce": true }
   ],
   "Spirit": [
     { "Tags": ["Human", "Skeleton", "Ogre", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
     { "MeshNames": ["Hair", "Eyelashes", "Beard", "Brows", "Accessory"], "Files": ["empty"], "Enforce": true },
     { "MeshNames": ["EquipmentBulk"], "Files": ["empty"], "Enforce": true },
-    { "MeshNames": ["Body", "Head"], "Colors": ["SpiritSkinColors"], "Enforce": true },
-    { "MeshNames": ["Eyes"], "Colors": ["SpiritEyesColors"], "Enforce": true },
-    { "MeshNames": ["Body"], "Shapes": { "1": [0.0] } }
+    { "MeshNames": ["Top", "Bottom", "Head"], "Colors": { "0": ["SpiritSkinColors"] }, "Enforce": true },
+    { "MeshNames": ["Eyes"], "Colors": { "0": ["SpiritEyeWhitesColor"], "1": ["SpiritEyesColors"] }, "Enforce": true },
+    { "MeshNames": ["Top", "Bottom"], "Shapes": { "1": [0.0] } }
   ],
   "Skeleton": [
-    { "Tags": ["Human", "Ogre", "Spirit", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
-    { "MeshNames": ["EquipmentBulk"], "Files": ["empty"], "Enforce": true },
-    { "MeshNames": ["Eyelashes", "Hair", "Beard", "Brows"], "Files": ["empty"], "Enforce": true }
+    { "Tags": ["Skeleton"], "Enforce": true },
+    { "Tags": ["Ogre", "Spirit", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
+    { "MeshNames": ["Eyes", "Eyelashes", "Hair", "Beard", "Brows"], "Files": ["empty"], "Enforce": true },
+    { "MeshNames": ["Top", "Bottom", "Head"], "Colors": { "0": ["SkeletonSkinColors"] }, "Enforce": true },
+    { "MeshNames": ["Head"], "Files": ["skelly_head"], "Enforce": true }
   ]
 }

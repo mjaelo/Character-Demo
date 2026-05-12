@@ -6,21 +6,13 @@ namespace CharacterDemo.Mob.InfoFiles;
 /// Encodes one norm rule used during mob generation/adjustment.
 /// Forbidden whether value is forbidden or mandatory
 /// Enforce    whether this norm is always applied (ignores variation_chance).
-public class NormInfo(
-    bool forbidden = false,
-    bool enforce = false,
-    IReadOnlyList<string>? meshNames = null,
-    IReadOnlyList<string>? tags = null, // possible tags for any mesh
-    IReadOnlyList<string>? files = null, // possible file names for meshName
-    List<Color>? colors = null, // possible colors for meshName
-    IReadOnlyDictionary<int, float[]>? shapes = null // possible shape values for meshName
-)
+public class NormInfo
 {
-    public bool Forbidden = forbidden;
-    public bool Enforce = enforce;
-    public IReadOnlyList<string> MeshNames = meshNames ?? [];
-    public IReadOnlyList<string> Tags = tags ?? [];
-    public IReadOnlyList<string> Files = files ?? [];
-    public List<Color> Colors = colors ?? [];
-    public IReadOnlyDictionary<int, float[]> Shapes = shapes ?? new Dictionary<int, float[]>();
+    public bool Forbidden;
+    public bool Enforce;
+    public IReadOnlyList<string> MeshNames = [];
+    public IReadOnlyList<string> Tags = []; // possible tags for any mesh
+    public IReadOnlyList<string> Files = []; // possible file names for meshName
+    public IReadOnlyDictionary<int, List<Color>> Colors = new Dictionary<int, List<Color>>(); // possible colors per material index for meshName
+    public IReadOnlyDictionary<int, float[]> Shapes = new Dictionary<int, float[]>(); // possible shape values for meshName
 }

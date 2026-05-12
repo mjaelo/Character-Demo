@@ -69,7 +69,7 @@ public static class MobGetter
         var md = new MeshData
         {
             MeshFile = GetRandomMeshFile(meshName, meshNorms, meshInfo.FileFolder),
-            MeshColor = GetRandomMeshColor(meshNorms, meshInfo.Colors),
+            MeshColors = GetRandomMeshColor(meshNorms, meshInfo),
             MeshShapes = GetRandomMeshShapes(meshNorms, meshInfo.Shapes)
         };
         return md;
@@ -85,7 +85,7 @@ public static class MobGetter
         var fileTags = FileService.LoadJson<Dictionary<string, List<string>>>(fileFolder + "tag_info.json") ?? new();
         var allFiles = GetAllFileNames(meshName, fileFolder);
         
-        // adding empty option if required but missing (for skeleton: lashes, top, shoes) TODO why not bottom? somethings wrong here... handle it in GetAllFileNames?
+        // Ensure "empty" is available if any enforce file norm requires it, regardless of NonEmptyNames
         if (!allFiles.Contains("empty") && fileNorms.Any(n => n.Enforce && !n.Forbidden && n.Files.Contains("empty")))
             allFiles.Insert(0, "empty");
         
@@ -93,14 +93,53 @@ public static class MobGetter
         var possibleFiles= FilterValidMeshFile(allFiles, fileTags, tagNorms, fileNorms);
         return possibleFiles.Contains(defaultValue) ? defaultValue : GeneralUtils.PickRandom(possibleFiles);
     }
-
-    public static Color GetRandomMeshColor(List<NormInfo> meshNorms, IReadOnlyList<Color> allColors,Color defaultValue = new())
+    
+    public static IReadOnlyList<Color> GetRandomMeshColor(List<NormInfo> meshNorms, MobMeshInfo meshInfo, IReadOnlyList<Color>? defaultValues = null)
     {
-        if (allColors.Count == 0) return Colors.Black;
         bool ignoreNorms = GeneralUtils.CheckRng(MobConstants.VariationChance);
         var colorNorms = meshNorms.Where(n => n.Colors.Any() && !(ignoreNorms && !n.Enforce)).ToList();
-        var possibleColors= FilterValidMeshColor(allColors, colorNorms);
-        return possibleColors.Contains(defaultValue) ? defaultValue : GeneralUtils.PickRandom(possibleColors);
+        
+        // Get all material indices we need to generate colors for
+        var allIndices = meshInfo.Colors.Keys.ToList();
+        if (defaultValues?.Count > allIndices.Count)
+            allIndices = Enumerable.Range(0, defaultValues.Count).ToList();
+        if (allIndices.Count == 0 && defaultValues?.Count > 0)
+            allIndices = Enumerable.Range(0, defaultValues.Count).ToList();
+        if (allIndices.Count == 0)
+            allIndices = [0]; // At least material 0
+        
+        var result = new List<Color>();
+        foreach (var materialIdx in allIndices.OrderBy(x => x))
+        {
+            // Start with default colors for this material from meshInfo
+            var defaultColors = meshInfo.Colors.TryGetValue(materialIdx, out var dc) && dc.Count > 0 
+                ? dc 
+                : new List<Color> { defaultValues?.Count > materialIdx ? defaultValues[materialIdx] : Colors.White };
+            
+            // Apply norms that specify colors for this material index
+            var normsForThisMaterial = colorNorms.Where(n => n.Colors.ContainsKey(materialIdx)).ToList();
+            var possibleColors = FilterValidMeshColorForMaterial(defaultColors, normsForThisMaterial, materialIdx);
+            
+            var defaultVal = defaultValues?.Count > materialIdx ? defaultValues[materialIdx] : new Color();
+            var picked = possibleColors.Contains(defaultVal) ? defaultVal : GeneralUtils.PickRandom(possibleColors);
+            result.Add(picked);
+        }
+        
+        return result.Count > 0 ? result : [Colors.White];
+    }
+    
+    private static List<Color> FilterValidMeshColorForMaterial(IReadOnlyList<Color> defaultColors, List<NormInfo> colorNorms, int materialIdx)
+    {
+        var possibleColors = new List<Color>(defaultColors);
+        foreach (var norm in colorNorms)
+        {
+            if (!norm.Colors.TryGetValue(materialIdx, out var normColors)) continue;
+            List<Color> filteredColors = norm.Forbidden 
+                ? possibleColors.Where(color => !normColors.Contains(color)).ToList() 
+                : normColors.ToList();
+            if (filteredColors.Count > 0) possibleColors = filteredColors;
+        }
+        return possibleColors.Count > 0 ? possibleColors : defaultColors.ToList();
     }
 
     public static IReadOnlyList<float>  GetRandomMeshShapes(List<NormInfo> meshNorms, IReadOnlyList<MobShapeInfo> shapes,IReadOnlyList<float>?defaultValues = null)
@@ -156,17 +195,6 @@ public static class MobGetter
         }
 
         return possibleFiles;
-    }
-
-    private static List<Color> FilterValidMeshColor(IReadOnlyList<Color> allColors, List<NormInfo> colorNorms)
-    {
-        var possibleColors = new List<Color>(allColors);
-        foreach (var norm in colorNorms)
-        {
-            List<Color> filteredColors = norm.Forbidden ? possibleColors.Where(color => !norm.Colors.Contains(color)).ToList() : norm.Colors.ToList();
-            if (filteredColors.Count > 0) possibleColors = filteredColors;
-        }
-        return possibleColors;
     }
 
     private static List<float> FilterValidMeshShape(IReadOnlyList<float> allValues, int shapeId, List<NormInfo> shapeNorms)

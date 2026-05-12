@@ -2,7 +2,6 @@
 
 public class BodyData
 {
-    public MeshData BodyMesh = new();
     public MeshData HeadMesh = new();
     public MeshData EyeMesh = new();
     public MeshData LashesMesh = new();

@@ -38,7 +38,7 @@ public partial class Creator : Control
 		_presetTab.Initialize(this);
 
 		foreach (var (tabName, pickers) in UiConstants.CreatorMenuData)
-			_tabContainer.AddChild(_tabBuilder.CreateTab(pickers, tabName));
+			_tabContainer.AddChild(_tabBuilder.GetCreatorTab(pickers, tabName));
 
 		RandomizeCreatorValues();
 		MobUtils.TogglePlayerControl(false, player);
@@ -86,8 +86,13 @@ public partial class Creator : Control
 			if (info == null) continue;
 			if (!string.IsNullOrEmpty(meshData.MeshFile) && info.HasFilePicker)
 				FindPickerAndSetValue(meshData.MeshFile, tabName, meshName);
-			if (meshData.MeshColor != new Color() && info.HasColorPicker)
-				FindPickerAndSetValue(meshData.MeshColor, tabName, meshName + "Color");
+			if (meshData.MeshColors.Count > 0 && info.ColorPickers?.Count > 0)
+			{
+				// Set each color picker for each material
+				for (int i = 0; i < info.ColorPickers.Count && i < meshData.MeshColors.Count; i++)
+					if (info.ColorPickers[i])
+						FindPickerAndSetValue(meshData.MeshColors[i], tabName, meshName + "Color" + i);
+			}
 			if (meshData.MeshShapes.Count <= 0 || !info.HasShapePicker) continue;
 			var mi = _skeleton.HasNode(meshName) ? _skeleton.GetNode<MeshInstance3D>(meshName) : null;
 			if (mi == null) continue;
