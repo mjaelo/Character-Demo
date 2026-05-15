@@ -9,13 +9,13 @@ public static class UiConstants
 {
     // strings
     public const string OverrideWarning = "Overriding preset with the same name";
-    public const string DefaultPresetName = "New Character"; // TODO not needed?
+    public const string NewPresetName = "empty"; // not visible name of an default empty preset (randomized MD)
 
     // styling
     public const float PickerPadding = 10.0f;
 
     // assets
-    public const string WarningIconPath = "res://Assets/UI/UiIcons/WarningIcon.png";
+    public const string WarningIconPath = "res://Assets/UI/UiIcons/Warning.png";
     public const string PresetFile = "preset.json";
     public const string PresetPath = "res://UI/Scenes/Creator/";
     private const string CreatorMenuDataPath = "res://Assets/UI/InfoFiles/CreatorMenuData.json";

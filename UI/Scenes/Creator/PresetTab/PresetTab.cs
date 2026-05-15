@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using CharacterDemo.General;
 using CharacterDemo.General.Services;
 using CharacterDemo.Mob;
@@ -18,8 +19,9 @@ public partial class PresetTab : TabBar
 	private HSlider _genderPicker = null!;
 	private LineEdit _namePicker = null!;
 	private CreatorCameraManager.CreatorCameraManager _cameraManager = null!;
-	private readonly Dictionary<string, MobData> _presets = 
-		FileService.LoadJson<Dictionary<string, MobData>>(UiConstants.PresetPath + UiConstants.PresetFile) ?? new();
+	private readonly IDictionary<string, MobData> _presets =
+		FileService.LoadJson<IDictionary<string, MobData>>(UiConstants.PresetPath + UiConstants.PresetFile)
+		?? new Dictionary<string, MobData>();
 
 	public void Initialize(Creator parent)
 	{
@@ -38,7 +40,7 @@ public partial class PresetTab : TabBar
 		GetNode<Button>("ScrollContainer/VBoxContainer/HBoxContainer/RandomBody").Pressed += OnRandomBodyPressed;
 		GetNode<Button>("ScrollContainer/VBoxContainer/HBoxContainer/RandomClothes").Pressed += OnRandomClothesPressed;
 		
-		_presetPicker.Init([.. _presets.Keys], "Preset");
+		_presetPicker.Init((List<string>)[UiConstants.NewPresetName, .. _presets.Keys], "Preset");
 		_presetPicker.VariableChanged += v => OnPresetChanged((string)v);
 		_typePicker.Init(System.Enum.GetNames<MobEnums.MobTypes>(), "Mob Type");
 		_typePicker.VariableChanged += v => OnTypeChanged((string)v);
@@ -46,6 +48,8 @@ public partial class PresetTab : TabBar
 		_racePicker.VariableChanged += v => OnRaceChanged((string)v);
 		_genderPicker.ValueChanged += v => OnGenderChanged((int)v);
 		_namePicker.TextChanged += OnMobNameChanged;
+		_saveButton.Pressed += OnSavePresetPressed;
+		_deleteButton.Pressed += OnDeletePresetPressed;
 		
 		UiUtils.DisableEdit(GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Save Preset"), string.IsNullOrEmpty(parent.MobData.MobName));
 		UiUtils.DisableEdit(GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Delete Preset"), true);
@@ -61,15 +65,23 @@ public partial class PresetTab : TabBar
 
 	private void OnPresetChanged(string mobName)
 	{
-		bool isNew = mobName == UiConstants.DefaultPresetName;
+		bool isNew = mobName == UiConstants.NewPresetName;
+		GD.Print("disabling edit = ",isNew);
 		UiUtils.DisableEdit(_deleteButton, isNew);
+		UiUtils.DisableEdit(_saveButton, isNew);
 		if (!isNew && _presets.TryGetValue(mobName, out var md))
 		{
-			_parent.MobData = md;
-			MobSetter.SetMobDataToMob(md, _parent.Player);
+			UiUtils.ButtonShowWarning(_saveButton, UiConstants.OverrideWarning);
+			var newMobData = CopyMobData(md);
+			_parent.MobData = newMobData;
+			MobSetter.SetMobDataToMob(newMobData, _parent.Player);
 			_parent.UpdateAllPickers();
+			return;
 		}
-		else _parent.RandomizeCreatorValues();
+
+		GD.Print(mobName+" not found in presets");
+		_parent.RandomizeCreatorValues();
+
 	}
 
 	private void OnGenderChanged(int gender)
@@ -94,6 +106,28 @@ public partial class PresetTab : TabBar
 		UiUtils.DisableEdit(_saveButton, string.IsNullOrEmpty(newText));
 		if (_presets.ContainsKey(newText)) UiUtils.ButtonShowWarning(_saveButton, UiConstants.OverrideWarning);
 		else UiUtils.ButtonHideWarning(_saveButton);
+	}
+
+	private void OnSavePresetPressed()
+	{
+		var newData = CopyMobData(_parent.MobData);
+		_presets[newData.MobName] = newData;
+		_presetPicker.UpdateValues([UiConstants.NewPresetName, .. _presets.Keys]);
+		UiUtils.DisableEdit(_deleteButton, false);
+		UiUtils.ButtonShowWarning(_saveButton, UiConstants.OverrideWarning);
+		FileService.SaveJson(_presets, UiConstants.PresetPath + UiConstants.PresetFile);
+		_presetPicker.SetValue(newData.MobName);
+	}
+	
+	private void OnDeletePresetPressed()
+	{
+		var currentName = _parent.MobData.MobName;
+		_presets.Remove(currentName);
+		_presetPicker.UpdateValues([UiConstants.NewPresetName, .. _presets.Keys]);
+		_presetPicker.SetValue(UiConstants.NewPresetName);
+		UiUtils.DisableEdit(_deleteButton, true);
+		FileService.SaveJson(_presets, UiConstants.PresetPath + UiConstants.PresetFile);
+		_parent.RandomizeCreatorValues();
 	}
 
 	private void OnRaceChanged(string raceV)
@@ -140,5 +174,30 @@ public partial class PresetTab : TabBar
 		MobSetter.SetEquipmentData(_parent.MobData.EquipmentData, _parent.Player);
 		_parent.SetMobDataToPickers(_parent.MobData);
 	}
-
+	
+	private MobData CopyMobData(MobData md)
+	{
+		var newMobData = new MobData(md.Race, md.Type, md.MobName, md.Gender,
+			new BodyData
+			{
+				HeadMesh = CopyMeshData(md.BodyData.HeadMesh),
+				EyeMesh = CopyMeshData(md.BodyData.EyeMesh),
+				LashesMesh = CopyMeshData(md.BodyData.LashesMesh),
+				HairMesh = CopyMeshData(md.BodyData.HairMesh),
+				BeardMesh = CopyMeshData(md.BodyData.BeardMesh),
+				BrowMesh = CopyMeshData(md.BodyData.BrowMesh),
+			}, new EquipmentData
+			{
+				TopMesh = CopyMeshData(md.EquipmentData.TopMesh),
+				BottomMesh = CopyMeshData(md.EquipmentData.BottomMesh),
+				ShoeMesh = CopyMeshData(md.EquipmentData.ShoeMesh),
+				HatMesh = CopyMeshData(md.EquipmentData.HatMesh),
+				RHandMesh = CopyMeshData(md.EquipmentData.RHandMesh),
+				LHandMesh = CopyMeshData(md.EquipmentData.LHandMesh),
+				AccessoryMesh = CopyMeshData(md.EquipmentData.AccessoryMesh)
+			});
+		return newMobData;
+	}
+	
+	private MeshData CopyMeshData(MeshData md)=>  new (md.MeshColors.ToList(), md.MeshFile, md.MeshShapes.ToList());
 }

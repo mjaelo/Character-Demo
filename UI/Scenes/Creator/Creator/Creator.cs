@@ -27,7 +27,7 @@ public partial class Creator : Control
 	{
 		Player = player;
 		_skeleton = skeleton;
-		_tabBuilder = new TabBuilder(skeleton, MobData);
+		_tabBuilder = new TabBuilder(skeleton, this);
 		_presetTab = GetNode<PresetTab.PresetTab>("TabContainer/Preset");
 		_tabContainer = GetNode<TabContainer>("TabContainer");
 		_startButton = GetNode<Button>("Right/Start Game");

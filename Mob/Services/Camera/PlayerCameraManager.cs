@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Godot;
 
-namespace CharacterDemo.Mob.Services;
+namespace CharacterDemo.Mob.Services.Camera;
 
 public partial class PlayerCameraManager : Node3D
 {
@@ -12,8 +12,8 @@ public partial class PlayerCameraManager : Node3D
 
     private Scenes.Mob.Mob _mob = null!;
     private SpringArm3D _arm = null!;
-    private bool _RmbPressed;
-    public bool needsDrag = false;
+    private bool _rmbPressed;
+    public bool IsCreatorMode = false;
 
     private readonly Dictionary<string, bool> _headMeshVisibility = new()
     {
@@ -38,15 +38,15 @@ public partial class PlayerCameraManager : Node3D
     {
         switch (@event)
         {
-            case InputEventKey when Input.IsActionJustPressed("Switch Camera"):
+            case InputEventKey when Input.IsActionJustPressed("Switch Camera") && !IsCreatorMode:
                 SwitchCameras();
                 break;
 
             case InputEventMouseButton { ButtonIndex: MouseButton.Right } mb:
-                _RmbPressed = mb.Pressed;
+                _rmbPressed = mb.Pressed;
                 break;
 
-            case InputEventMouseMotion motion when _RmbPressed || !needsDrag:
+            case InputEventMouseMotion motion when _rmbPressed || !IsCreatorMode:
                 Camera.Rotate(-motion.Relative, MobConstants.RotateStepMouseGame);
                 if (CurrentCamera == Camera1P)
                     _mob.GetNode<Node3D>("body").Rotation = Rotation;

@@ -1,5 +1,6 @@
 using CharacterDemo.Mob.Services;
 using Godot;
+using PlayerCameraManager = CharacterDemo.Mob.Services.Camera.PlayerCameraManager;
 
 namespace CharacterDemo.Mob.Scenes.Player;
 

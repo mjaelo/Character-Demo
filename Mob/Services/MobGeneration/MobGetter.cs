@@ -163,7 +163,7 @@ public static class MobGetter
     //  INTERNAL HELPERS 
     private static List<string> GetAllFileNames(string meshName, string fileFolder)
     {
-        if (MobConstants.HalfEmptyNames.Contains(meshName) && GeneralUtils.CheckRng(0.5f))
+        if (MobConstants.EmptyMeshProbabilities.TryGetValue(meshName, out var emptyProbability) && GeneralUtils.CheckRng(emptyProbability))
             return ["empty"];
         var files = new List<string>(FileService.GetFileNames(fileFolder));
         if (!MobConstants.NonEmptyNames.Contains(meshName) || string.IsNullOrEmpty(fileFolder))

@@ -1,6 +1,6 @@
 ﻿using Godot;
 
-namespace CharacterDemo.Mob.Services;
+namespace CharacterDemo.Mob.Services.Camera;
 
 /// Shared camera manipulation logic used by both CameraManager (game) and CreatorCameraManager (creator).
 public class CameraService(Node3D pivot, SpringArm3D arm, Camera3D camera1P)

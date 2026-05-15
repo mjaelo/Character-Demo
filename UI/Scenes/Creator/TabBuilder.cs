@@ -3,16 +3,16 @@ using System.Globalization;
 using System.Linq;
 using CharacterDemo.General.Services;
 using CharacterDemo.Mob;
-using CharacterDemo.Mob.DataFiles;
 using CharacterDemo.Mob.InfoFiles;
 using CharacterDemo.UI.InfoFiles;
+using CharacterDemo.UI.Scenes.Creator;
 using Godot;
 using ColorPickerComponent = CharacterDemo.UI.Scenes.Utility.ColorPicker.ColorPickerComponent;
 using SliderPickerComponent = CharacterDemo.UI.Scenes.Utility.SliderPicker.SliderPickerComponent;
 
 namespace CharacterDemo.UI.Services;
 
-public class TabBuilder(Skeleton3D skeleton, MobData mobData)
+public class TabBuilder(Skeleton3D skeleton, Creator creator)
 {
     public TabBar GetCreatorTab(MeshPickerInfo[] pickers, string tabName)
     {
@@ -135,9 +135,9 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
     private void OnMeshPickerChanged(string value, MeshInstance3D meshInstance, string meshName, string fileFolder)
     {
         if (MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi))
-            MobUtils.GetBodyDataFieldValue(mobData.BodyData, bmi.FieldName).MeshFile = value;
+            MobUtils.GetBodyDataFieldValue(creator.MobData.BodyData, bmi.FieldName).MeshFile = value;
         else if (MobConstants.EqMeshesInfo.TryGetValue(meshName, out var emi))
-            MobUtils.GetEqDataFieldValue(mobData.EquipmentData, emi.FieldName).MeshFile = value;
+            MobUtils.GetEqDataFieldValue(creator.MobData.EquipmentData, emi.FieldName).MeshFile = value;
         MobUtils.SetMeshFile(value, meshInstance, fileFolder);
     }
 
@@ -147,7 +147,7 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
         
         if (MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi))
         {
-            var meshData = MobUtils.GetBodyDataFieldValue(mobData.BodyData, bmi.FieldName);
+            var meshData = MobUtils.GetBodyDataFieldValue(creator.MobData.BodyData, bmi.FieldName);
             var newColors = meshData.MeshColors.ToList();
             while (newColors.Count <= materialNr) newColors.Add(new Color());
             newColors[materialNr] = value;
@@ -155,7 +155,7 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
         }
         else if (MobConstants.EqMeshesInfo.TryGetValue(meshName, out var emi))
         {
-            var meshData = MobUtils.GetEqDataFieldValue(mobData.EquipmentData, emi.FieldName);
+            var meshData = MobUtils.GetEqDataFieldValue(creator.MobData.EquipmentData, emi.FieldName);
             var newColors = meshData.MeshColors.ToList();
             while (newColors.Count <= materialNr) newColors.Add(new Color());
             newColors[materialNr] = value;
@@ -163,7 +163,7 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
         }
 
         MobUtils.SetMeshColor(value, meshInstance, materialNr);
-        if (meshName == "Hair") MobUtils.PropagateHairColor(mobData.BodyData, skeleton);
+        if (meshName == "Hair") MobUtils.PropagateHairColor(creator.MobData.BodyData, skeleton);
         if (MobConstants.MeshesWithSkin.Contains(meshName) && materialNr == 0)
             MobUtils.PropagateSkinColor(value, meshInstance);
     }
@@ -173,7 +173,7 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
     {
         if (MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi))
         {
-            var bodyField = MobUtils.GetBodyDataFieldValue(mobData.BodyData, bmi.FieldName);
+            var bodyField = MobUtils.GetBodyDataFieldValue(creator.MobData.BodyData, bmi.FieldName);
             var newShapes = bodyField.MeshShapes.ToList();
             if (newShapes.Count <= shapeId) newShapes.Add(value);
             else newShapes[shapeId] = value;
@@ -181,7 +181,7 @@ public class TabBuilder(Skeleton3D skeleton, MobData mobData)
         }
         else if (MobConstants.EqMeshesInfo.TryGetValue(meshName, out var emi))
         {
-            var eqField = MobUtils.GetEqDataFieldValue(mobData.EquipmentData, emi.FieldName);
+            var eqField = MobUtils.GetEqDataFieldValue(creator.MobData.EquipmentData, emi.FieldName);
             var newShapes = eqField.MeshShapes.ToList();
             if (newShapes.Count <= shapeId) newShapes.Add(value);
             else newShapes[shapeId] = value;

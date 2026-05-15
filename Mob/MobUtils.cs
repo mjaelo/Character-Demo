@@ -148,19 +148,16 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
     public static void SetMeshColor(Color value, MeshInstance3D meshInstance, int materialNr = -1)
     {
         materialNr = materialNr >= 0 ? materialNr : GetMainMaterial(meshInstance);
-        if (meshInstance.Mesh == null) return;
-        if (materialNr >= meshInstance.Mesh.GetSurfaceCount()) materialNr = 0;
-
-        if ((meshInstance.MaterialOverride ?? meshInstance.Mesh.SurfaceGetMaterial(materialNr)) is StandardMaterial3D material)
-        {
-            material = (StandardMaterial3D)material.Duplicate();
-            material.AlbedoColor = value;
-            if (meshInstance.MaterialOverride != null)
-                meshInstance.MaterialOverride = material;
-            else
-                meshInstance.SetSurfaceOverrideMaterial(materialNr, material);
-        }
+        if (meshInstance.Mesh == null || materialNr >= meshInstance.Mesh.GetSurfaceCount()
+                                      || (meshInstance.MaterialOverride ?? meshInstance.Mesh.SurfaceGetMaterial(materialNr)) is not StandardMaterial3D material) return;
         
+        material = (StandardMaterial3D)material.Duplicate();
+        material.AlbedoColor = value;
+        if (meshInstance.MaterialOverride != null)
+            meshInstance.MaterialOverride = material;
+        else
+            meshInstance.SetSurfaceOverrideMaterial(materialNr, material);
+
     }
 
     public static void PropagateSkinColor(Color value, MeshInstance3D sourceMesh)
@@ -243,7 +240,7 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
 
     public static void TogglePlayerControl(bool hasControl, Player mob)
     {
-        mob.CameraManager.needsDrag = !hasControl;
+        mob.CameraManager.IsCreatorMode = !hasControl;
         mob.SetProcessUnhandledInput(hasControl);
         mob.SetPhysicsProcess(hasControl);
     }

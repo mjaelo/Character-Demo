@@ -32,6 +32,7 @@ public static class MobConstants
     public const float SpiritScale = 0.75f;
     public const float OgreScale = 1.5f;
     public static readonly IReadOnlyDictionary<Gender, string[]> MobNames = LoadMobNames(MobNamesPath);
+    public static readonly Dictionary<string, float> EmptyMeshProbabilities = new() { ["Hat"] = 0.75f, ["Beard"] = 0.5f };
     
     // Main material indices for specific mesh names (by resource path substring)
     public static readonly Dictionary<string, int> MainMaterials = new() { ["merchant-top"] = 2, ["merchant-hat"] = 2, ["guard-bottom"] = 1, ["guard-top"] = 2 };
@@ -50,7 +51,6 @@ public static class MobConstants
     public static readonly string[] NonEmptyNames = ["Top", "Bottom", "Shoes", "Eyelashes","Head","Eyes","Brows"];
     public static readonly string[] HairLinkedNames = ["Brows", "Beard"];
     public static readonly string[] HairAdjustingNames = ["Hair", "Hat"];
-    public static readonly string[] HalfEmptyNames = ["Hat", "Beard"];
     public static readonly string[] HipMovers = ["Body Shape", "Body Mass"];
     
     //  Colors
@@ -128,7 +128,11 @@ public static class MobConstants
             float s = Mathf.Lerp(sRange.X, sRange.Y, w);
             float v = Mathf.Lerp(vRange.X, vRange.Y, w);
             float a = Mathf.Lerp(aRange.X, aRange.Y, w);
-            colors.Add(Color.FromHsv(h, s, v, a));
+            var color = Color.FromHsv(h, s, v);
+            color.R *= a;
+            color.G *= a;
+            color.B *= a;
+            colors.Add(color);
         }
         return colors;
     }

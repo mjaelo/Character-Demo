@@ -31,6 +31,15 @@ public static class FileService
         return SerializationService.Deserialize<T>(json);
     }
 
+    // Serialize obj as JSON and write to filePath (res:// or absolute path).
+    public static void SaveJson<T>(T obj, string filePath)
+    {
+        string path = filePath.StartsWith("res://") ? ProjectSettings.GlobalizePath(filePath) : filePath;
+        string? dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+        File.WriteAllText(path, SerializationService.Serialize(obj));
+    }
+
     // Get file names (without extension) for all .tres files in a folder.
     public static List<string> GetFileNames(string folderPath)
     {
@@ -51,10 +60,4 @@ public static class FileService
         return names;
     }
 
-    // Save a text string to a file.
-    public static void SaveToFile(string text, string path = "res://", string fileName = "file.txt")
-    {
-        using var file = Godot.FileAccess.Open(path + fileName, Godot.FileAccess.ModeFlags.Write);
-        file?.StoreString(text);
-    }
 }

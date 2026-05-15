@@ -16,7 +16,7 @@ public static class SerializationService
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         IncludeFields = true,
         PropertyNameCaseInsensitive = true,
-        Converters = { new JsonStringEnumConverter(), new ColorListConverter(), new ColorConverter(), new Vector2Converter() }
+        Converters = { new JsonStringEnumConverter(), new ColorListConverter(), new ColorConverter(), new Vector2Converter(), new FloatListConverter() }
     };
     
     public static string Serialize<T>(T obj) => JsonSerializer.Serialize(obj, SerializeOptions);
@@ -55,6 +55,29 @@ public static class SerializationService
             writer.WriteNumberValue(value.G);
             writer.WriteNumberValue(value.B);
             writer.WriteNumberValue(value.A);
+            writer.WriteEndArray();
+        }
+    }
+
+    private class FloatListConverter : JsonConverter<IReadOnlyList<float>>
+    {
+        public override bool CanConvert(Type typeToConvert)
+            => typeToConvert == typeof(IReadOnlyList<float>) || typeToConvert == typeof(List<float>);
+
+        public override IReadOnlyList<float> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            using var doc = JsonDocument.ParseValue(ref reader);
+            var result = new List<float>();
+            foreach (var item in doc.RootElement.EnumerateArray())
+                result.Add(item.GetSingle());
+            return result;
+        }
+
+        public override void Write(Utf8JsonWriter writer, IReadOnlyList<float> value, JsonSerializerOptions options)
+        {
+            writer.WriteStartArray();
+            foreach (var f in value)
+                writer.WriteNumberValue(f);
             writer.WriteEndArray();
         }
     }

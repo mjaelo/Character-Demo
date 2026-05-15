@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Globalization;
 using Godot;
 
 namespace CharacterDemo.UI.Scenes.Utility.SliderPicker;
@@ -26,7 +25,7 @@ public partial class SliderPickerComponent : HBoxContainer
 		GetNode<TextureButton>("RandomButton").Pressed += OnRandomButtonPressed;
 		if (Values.Count < 2)
 		{
-			if (Values.Count == 1) OnPickerValueChanged(0); 
+			if (Values.Count == 1) OnPickerValueChanged(0);
 			Disabled = true; 
 			return;
 		}
@@ -44,6 +43,29 @@ public partial class SliderPickerComponent : HBoxContainer
 		int idx = Values.IndexOf(value);
 		if (idx >= 0 && Picker != null) Picker.Value = idx;
 		else GD.Print(Name + ": " + value + " not found in values");
+	}
+
+	public void UpdateValues(IEnumerable<string> values)
+	{
+		Values = [.. values];
+		if (Values.Count < 2)
+		{
+			Disabled = true;
+			if (Values.Count == 1) OnPickerValueChanged(0);
+			return;
+		}
+		Disabled = false;
+		if (Picker == null)
+		{
+			Picker = new HSlider { MaxValue = Values.Count - 1 };
+			Picker.ValueChanged += OnPickerValueChanged;
+			GetNode<VBoxContainer>("VBoxContainer").AddChild(Picker);
+		}
+		else
+		{
+			Picker.MaxValue = Values.Count - 1;
+			if (Picker.Value > Picker.MaxValue) Picker.Value = 0;
+		}
 	}
 
 	private void OnPickerValueChanged(double newIndex)
