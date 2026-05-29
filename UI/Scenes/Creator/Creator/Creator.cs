@@ -3,7 +3,6 @@ using CharacterDemo.Mob;
 using CharacterDemo.Mob.DataFiles;
 using CharacterDemo.Mob.Scenes.Player;
 using CharacterDemo.Mob.Services.MobGeneration;
-using CharacterDemo.UI.Services;
 using Godot;
 using ColorPickerComponent = CharacterDemo.UI.Scenes.Utility.ColorPicker.ColorPickerComponent;
 using SliderPickerComponent = CharacterDemo.UI.Scenes.Utility.SliderPicker.SliderPickerComponent;
@@ -13,7 +12,7 @@ namespace CharacterDemo.UI.Scenes.Creator;
 public partial class Creator : Control
 {
 	private TabContainer _tabContainer = null!;
-	private PresetTab.PresetTab _presetTab = null!;
+	private PresetTab _presetTab = null!;
 	private Button _startButton = null!;
 	private CreatorCameraManager.CreatorCameraManager _cameraManager = null!;
 
@@ -28,7 +27,7 @@ public partial class Creator : Control
 		Player = player;
 		_skeleton = skeleton;
 		_tabBuilder = new TabBuilder(skeleton, this);
-		_presetTab = GetNode<PresetTab.PresetTab>("TabContainer/Preset");
+		_presetTab = GetNode<PresetTab>("TabContainer/Preset");
 		_tabContainer = GetNode<TabContainer>("TabContainer");
 		_startButton = GetNode<Button>("Right/Start Game");
 		_cameraManager = GetNode<CreatorCameraManager.CreatorCameraManager>("Right/CreatorCameraManager");

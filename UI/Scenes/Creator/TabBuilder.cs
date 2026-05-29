@@ -5,12 +5,11 @@ using CharacterDemo.General.Services;
 using CharacterDemo.Mob;
 using CharacterDemo.Mob.InfoFiles;
 using CharacterDemo.UI.InfoFiles;
-using CharacterDemo.UI.Scenes.Creator;
 using Godot;
 using ColorPickerComponent = CharacterDemo.UI.Scenes.Utility.ColorPicker.ColorPickerComponent;
 using SliderPickerComponent = CharacterDemo.UI.Scenes.Utility.SliderPicker.SliderPickerComponent;
 
-namespace CharacterDemo.UI.Services;
+namespace CharacterDemo.UI.Scenes.Creator;
 
 public class TabBuilder(Skeleton3D skeleton, Creator creator)
 {
@@ -82,10 +81,9 @@ public class TabBuilder(Skeleton3D skeleton, Creator creator)
     {
         var node = (SliderPickerComponent)UiConstants.SliderPickerScene.Instantiate();
         node.Name = meshName;
-        List<string> all = ["empty"];
-        all.AddRange(fileNames);
-        node.Init(all, meshName);
-        if (meshInstance == null || all.Count < 2)
+        var allFiles = fileNames.Contains("empty") ? fileNames : ["empty", ..fileNames];
+        node.Init(allFiles, meshName);
+        if (meshInstance == null || allFiles.Count < 2)
         {
             node.Disabled = true;
             return node;

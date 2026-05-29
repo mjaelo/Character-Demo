@@ -91,23 +91,23 @@ public static class MobConstants
     
     public static  readonly IReadOnlyDictionary<string, MobMeshInfo> BodyMeshesInfo = new Dictionary<string, MobMeshInfo>
         {
-            ["Head"] = new("head_mesh", "res://Assets/Mob/Meshes/head/", new Dictionary<int, IReadOnlyList<Color>> { [0] = SkinColors }, HeadShapes),
-            ["Eyes"] = new("eye_mesh", "res://Assets/Mob/Meshes/face/eyes/", DefaultEyeColors),
-            ["Eyelashes"] = new("lashes_mesh", "res://Assets/Mob/Meshes/face/lashes/", DefaultLashColors, LashShapes),
-            ["Hair"] = new("hair_mesh", "res://Assets/Mob/Meshes/hair/", new Dictionary<int, IReadOnlyList<Color>> { [0] = HairColors }),
-            ["Beard"] = new("beard_mesh", "res://Assets/Mob/Meshes/face/beard/", null, BeardShapes),
-            ["Brows"] = new("brow_mesh", "res://Assets/Mob/Meshes/face/brows/", null, BrowShapes) 
+            ["Head"] = new("head_mesh", "res://Assets/Mob/Meshes/Body/Head/", new Dictionary<int, IReadOnlyList<Color>> { [0] = SkinColors }, HeadShapes),
+            ["Eyes"] = new("eye_mesh", "res://Assets/Mob/Meshes/Body/Eyes/", DefaultEyeColors),
+            ["Eyelashes"] = new("lashes_mesh", "res://Assets/Mob/Meshes/Body/Eyelashes/", DefaultLashColors, LashShapes),
+            ["Hair"] = new("hair_mesh", "res://Assets/Mob/Meshes/Body/Hair/", new Dictionary<int, IReadOnlyList<Color>> { [0] = HairColors }),
+            ["Beard"] = new("beard_mesh", "res://Assets/Mob/Meshes/Body/Beard/", null, BeardShapes),
+            ["Brows"] = new("brow_mesh", "res://Assets/Mob/Meshes/Body/Brows/", null, BrowShapes) 
         };
 
     public static readonly IReadOnlyDictionary<string, MobMeshInfo> EqMeshesInfo = new Dictionary<string, MobMeshInfo>
         {
-            ["Top"] = new("top_mesh", "res://Assets/Mob/Meshes/top/", new Dictionary<int, IReadOnlyList<Color>> { [0] = SkinColors, [1] = ClothesColors }, BodyShapes),
-            ["Bottom"] = new("bottom_mesh", "res://Assets/Mob/Meshes/bottom/", new Dictionary<int, IReadOnlyList<Color>> { [0] = SkinColors, [1] = ClothesColors }, BodyShapes),
-            ["Shoes"] = new("shoe_mesh", "res://Assets/Mob/Meshes/shoes/", new Dictionary<int, IReadOnlyList<Color>> { [0] = ClothesColors }),
-            ["Hat"] = new("hat_mesh", "res://Assets/Mob/Meshes/hat/", new Dictionary<int, IReadOnlyList<Color>> { [0] = ClothesColors }),
-            ["Right Hand"] = new("r_hand_mesh", "res://Assets/Mob/Meshes/r_hand/"),
-            ["Left Hand"] = new("l_hand_mesh", "res://Assets/Mob/Meshes/l_hand/"),
-            ["Accessory"] = new("accessory_mesh", "res://Assets/Mob/Meshes/accessories/"),
+            ["Top"] = new("top_mesh", "res://Assets/Mob/Meshes/Equipment/Top/", new Dictionary<int, IReadOnlyList<Color>> { [0] = SkinColors, [1] = ClothesColors }, BodyShapes),
+            ["Bottom"] = new("bottom_mesh", "res://Assets/Mob/Meshes/Equipment/Bottom/", new Dictionary<int, IReadOnlyList<Color>> { [0] = SkinColors, [1] = ClothesColors }, BodyShapes),
+            ["Shoes"] = new("shoe_mesh", "res://Assets/Mob/Meshes/Equipment/Shoes/", new Dictionary<int, IReadOnlyList<Color>> { [0] = ClothesColors }),
+            ["Hat"] = new("hat_mesh", "res://Assets/Mob/Meshes/Equipment/Hat/", new Dictionary<int, IReadOnlyList<Color>> { [0] = ClothesColors }),
+            ["Right Hand"] = new("r_hand_mesh", "res://Assets/Mob/Meshes/Equipment/Rhand/"),
+            ["Left Hand"] = new("l_hand_mesh", "res://Assets/Mob/Meshes/Equipment/Lhand/"),
+            ["Accessory"] = new("accessory_mesh", "res://Assets/Mob/Meshes/Equipment/Accessory/"),
         };
     
     // helper functions

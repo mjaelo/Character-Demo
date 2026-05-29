@@ -9,12 +9,12 @@ using CharacterDemo.Mob.Services.MobGeneration;
 using CharacterDemo.UI.Scenes.Utility.SliderPicker;
 using Godot;
 
-namespace CharacterDemo.UI.Scenes.Creator.PresetTab;
+namespace CharacterDemo.UI.Scenes.Creator;
 
 public partial class PresetTab : TabBar
 {
 	private Creator _parent = null!;
-	private Button _startButton = null!, _saveButton = null!, _deleteButton = null!;
+	private Button _startButton = null!, _savePresetButton = null!, _deletePresetButton = null!;
 	private SliderPickerComponent _presetPicker = null!, _typePicker = null!, _racePicker = null!;
 	private HSlider _genderPicker = null!;
 	private LineEdit _namePicker = null!;
@@ -27,8 +27,8 @@ public partial class PresetTab : TabBar
 	{
 		_parent = parent;
 		_startButton = GetNode<Button>("../../Right/Start Game");
-		_saveButton = GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Save Preset");
-		_deleteButton = GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Delete Preset");
+		_savePresetButton = GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Save Preset");
+		_deletePresetButton = GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Delete Preset");
 		_presetPicker = GetNode<SliderPickerComponent>("ScrollContainer/VBoxContainer/Preset");
 		_typePicker = GetNode<SliderPickerComponent>("ScrollContainer/VBoxContainer/MobType");
 		_racePicker = GetNode<SliderPickerComponent>("ScrollContainer/VBoxContainer/Race");
@@ -48,8 +48,8 @@ public partial class PresetTab : TabBar
 		_racePicker.VariableChanged += v => OnRaceChanged((string)v);
 		_genderPicker.ValueChanged += v => OnGenderChanged((int)v);
 		_namePicker.TextChanged += OnMobNameChanged;
-		_saveButton.Pressed += OnSavePresetPressed;
-		_deleteButton.Pressed += OnDeletePresetPressed;
+		_savePresetButton.Pressed += OnSavePresetPressed;
+		_deletePresetButton.Pressed += OnDeletePresetPressed;
 		
 		UiUtils.DisableEdit(GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Save Preset"), string.IsNullOrEmpty(parent.MobData.MobName));
 		UiUtils.DisableEdit(GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Delete Preset"), true);
@@ -67,11 +67,11 @@ public partial class PresetTab : TabBar
 	{
 		bool isNew = mobName == UiConstants.NewPresetName;
 		GD.Print("disabling edit = ",isNew);
-		UiUtils.DisableEdit(_deleteButton, isNew);
-		UiUtils.DisableEdit(_saveButton, isNew);
+		UiUtils.DisableEdit(_deletePresetButton, isNew);
+		UiUtils.DisableEdit(_savePresetButton, isNew);
 		if (!isNew && _presets.TryGetValue(mobName, out var md))
 		{
-			UiUtils.ButtonShowWarning(_saveButton, UiConstants.OverrideWarning);
+			UiUtils.ButtonShowWarning(_savePresetButton, UiConstants.OverrideWarning);
 			var newMobData = CopyMobData(md);
 			_parent.MobData = newMobData;
 			MobSetter.SetMobDataToMob(newMobData, _parent.Player);
@@ -103,9 +103,9 @@ public partial class PresetTab : TabBar
 		if (_parent.MobData.MobName == newText) return;
 		_parent.MobData.MobName = newText;
 		UiUtils.DisableEdit(_startButton, string.IsNullOrEmpty(newText));
-		UiUtils.DisableEdit(_saveButton, string.IsNullOrEmpty(newText));
-		if (_presets.ContainsKey(newText)) UiUtils.ButtonShowWarning(_saveButton, UiConstants.OverrideWarning);
-		else UiUtils.ButtonHideWarning(_saveButton);
+		UiUtils.DisableEdit(_savePresetButton, string.IsNullOrEmpty(newText));
+		if (_presets.ContainsKey(newText)) UiUtils.ButtonShowWarning(_savePresetButton, UiConstants.OverrideWarning);
+		else UiUtils.ButtonHideWarning(_savePresetButton);
 	}
 
 	private void OnSavePresetPressed()
@@ -113,8 +113,8 @@ public partial class PresetTab : TabBar
 		var newData = CopyMobData(_parent.MobData);
 		_presets[newData.MobName] = newData;
 		_presetPicker.UpdateValues([UiConstants.NewPresetName, .. _presets.Keys]);
-		UiUtils.DisableEdit(_deleteButton, false);
-		UiUtils.ButtonShowWarning(_saveButton, UiConstants.OverrideWarning);
+		UiUtils.DisableEdit(_deletePresetButton, false);
+		UiUtils.ButtonShowWarning(_savePresetButton, UiConstants.OverrideWarning);
 		FileService.SaveJson(_presets, UiConstants.PresetPath + UiConstants.PresetFile);
 		_presetPicker.SetValue(newData.MobName);
 	}
@@ -125,7 +125,7 @@ public partial class PresetTab : TabBar
 		_presets.Remove(currentName);
 		_presetPicker.UpdateValues([UiConstants.NewPresetName, .. _presets.Keys]);
 		_presetPicker.SetValue(UiConstants.NewPresetName);
-		UiUtils.DisableEdit(_deleteButton, true);
+		UiUtils.DisableEdit(_deletePresetButton, true);
 		FileService.SaveJson(_presets, UiConstants.PresetPath + UiConstants.PresetFile);
 		_parent.RandomizeCreatorValues();
 	}

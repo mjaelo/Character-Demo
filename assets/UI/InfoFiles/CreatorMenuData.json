@@ -1,26 +1,25 @@
 {
   "Body": [
-    { "MeshName": "Head",  "ColorPickers": [true] },
-    { "MeshName": "Top", "HasShapePicker": true }
+	{ "MeshName": "Head",  "ColorPickers": [true] },
+	{ "MeshName": "Top", "HasShapePicker": true }
   ],
   "Face": [
-    { "MeshName": "Eyes",  "ColorPickers": [false, true] },
-    { "MeshName": "Eyelashes", "HasFilePicker": true},
-    { "MeshName": "Head",  "HasShapePicker": true },
-    { "MeshName": "Accessory", "HasFilePicker": true }
+	{ "MeshName": "Eyes",  "ColorPickers": [false, true] },
+	{ "MeshName": "Eyelashes", "HasFilePicker": true},
+	{ "MeshName": "Head",  "HasShapePicker": true },
+	{ "MeshName": "Accessory", "HasFilePicker": true }
   ],
   "Hair": [
-    { "MeshName": "Hair", "HasFilePicker": true, "ColorPickers": [true] },
-    { "MeshName": "Brows",  "HasShapePicker": true },
-    { "MeshName": "Beard", "HasFilePicker": true }
+	{ "MeshName": "Hair", "HasFilePicker": true, "ColorPickers": [true] },
+	{ "MeshName": "Brows",  "HasShapePicker": true },
+	{ "MeshName": "Beard", "HasFilePicker": true }
   ],
   "Clothes": [
-    { "MeshName": "Top", "HasFilePicker": true, "ColorPickers": [false,true] },
-    { "MeshName": "Bottom", "HasFilePicker": true, "ColorPickers": [false,true] },
-    { "MeshName": "Shoes", "HasFilePicker": true, "ColorPickers": [true] },
-    { "MeshName": "Hat", "HasFilePicker": true, "ColorPickers": [true] },
-    { "MeshName": "Right Hand", "HasFilePicker": true },
-    { "MeshName": "Left Hand", "HasFilePicker": true }
+	{ "MeshName": "Top", "HasFilePicker": true, "ColorPickers": [false,true] },
+	{ "MeshName": "Bottom", "HasFilePicker": true, "ColorPickers": [false,true] },
+	{ "MeshName": "Shoes", "HasFilePicker": true, "ColorPickers": [true] },
+	{ "MeshName": "Hat", "HasFilePicker": true, "ColorPickers": [true] },
+	{ "MeshName": "Right Hand", "HasFilePicker": true },
+	{ "MeshName": "Left Hand", "HasFilePicker": true }
   ]
 }
-
