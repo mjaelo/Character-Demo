@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using CharacterDemo.General.Services;
 using CharacterDemo.Mob;
+using CharacterDemo.Mob.DataFiles;
 using CharacterDemo.Mob.InfoFiles;
 using CharacterDemo.UI.InfoFiles;
 using Godot;
@@ -132,11 +133,18 @@ public class TabBuilder(Skeleton3D skeleton, Creator creator)
     //  Callbacks 
     private void OnMeshPickerChanged(string value, MeshInstance3D meshInstance, string meshName, string fileFolder)
     {
-        if (MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi))
-            MobUtils.GetBodyDataFieldValue(creator.MobData.BodyData, bmi.FieldName).MeshFile = value;
-        else if (MobConstants.EqMeshesInfo.TryGetValue(meshName, out var emi))
-            MobUtils.GetEqDataFieldValue(creator.MobData.EquipmentData, emi.FieldName).MeshFile = value;
+        MeshData? meshData = MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi)
+            ? MobUtils.GetBodyDataFieldValue(creator.MobData.BodyData, bmi.FieldName)
+            : MobConstants.EqMeshesInfo.TryGetValue(meshName, out var emi)
+                ? MobUtils.GetEqDataFieldValue(creator.MobData.EquipmentData, emi.FieldName)
+                : null;
+        if (meshData == null) return;
+        
+        meshData.MeshFile = value;
+        var color = meshData.MeshColors[MobUtils.GetMainMaterial(meshInstance)];
+        
         MobUtils.SetMeshFile(value, meshInstance, fileFolder);
+        MobUtils.SetMeshColor(color, meshInstance);
     }
 
     private void OnColorPickerChanged(Color value, MeshInstance3D meshInstance, string meshName, int materialNr = -1)
@@ -163,7 +171,7 @@ public class TabBuilder(Skeleton3D skeleton, Creator creator)
         MobUtils.SetMeshColor(value, meshInstance, materialNr);
         if (meshName == "Hair") MobUtils.PropagateHairColor(creator.MobData.BodyData, skeleton);
         if (MobConstants.MeshesWithSkin.Contains(meshName) && materialNr == 0)
-            MobUtils.PropagateSkinColor(value, meshInstance);
+            MobUtils.PropagateSkinColorData(creator.MobData.EquipmentData, value, skeleton);
     }
 
     private void OnShapePickerChanged(float value, MeshInstance3D meshInstance, string meshName, int shapeId,

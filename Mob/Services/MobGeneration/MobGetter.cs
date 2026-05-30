@@ -26,7 +26,10 @@ public static class MobGetter
 
         var norms = GetRtgNorms(mobData.Race, mobData.Type, mobData.Gender);
         mobData.BodyData = GetRandomBodyData(norms, mobData.BodyData);
-        mobData.EquipmentData = GetRandomEquipmentData(norms, mobData.EquipmentData);
+        Color? skinColor = mobData.BodyData.HeadMesh.MeshColors.Count > 0
+            ? mobData.BodyData.HeadMesh.MeshColors[0]
+            : null;
+        mobData.EquipmentData = GetRandomEquipmentData(norms, mobData.EquipmentData, skinColor);
         var possibleNames = MobConstants.MobNames[mobData.Gender];
         mobData.MobName = mobName != "empty" ? mobName : GeneralUtils.PickRandom(possibleNames);
         return mobData;
@@ -53,7 +56,7 @@ public static class MobGetter
         return bodyData;
     }
 
-    public static EquipmentData GetRandomEquipmentData(List<NormInfo> norms, EquipmentData? eqData = null)
+    public static EquipmentData GetRandomEquipmentData(List<NormInfo> norms, EquipmentData? eqData = null, Color? skinColor = null)
     {
         eqData ??= new EquipmentData();
         foreach (var (meshName, meshInfo) in MobConstants.EqMeshesInfo)
@@ -61,6 +64,7 @@ public static class MobGetter
             var meshNorms = norms.Where(norm => !norm.MeshNames.Any() || norm.MeshNames.Contains(meshName) || norm.MeshNames.Contains("EquipmentBulk")).ToList();
             MobUtils.SetDataToEqDataField(eqData, meshInfo.FieldName, GetRandomMeshData(meshName, meshInfo, meshNorms));
         }
+        if (skinColor!=null) MobUtils.PropagateSkinColorData(eqData, skinColor.Value);
         return eqData;
     }
 

@@ -98,7 +98,8 @@ public partial class Creator : Control
 			var shapeNames = MobUtils.GetShapeNamesFromMesh(mi.Mesh);
 			if (shapeNames.Count < meshData.MeshShapes.Count)
 			{
-				GD.Print("SetMeshDataToPickers ",meshName," wrong shape count. from mesh: ",shapeNames.Count," expected: ",meshData.MeshShapes.Count);
+				if (!MobConstants.ShapelessFiles.Contains(meshData.MeshFile))
+					GD.Print("SetMeshDataToPickers ",meshName," wrong shape count. from mesh: ",shapeNames.Count," expected: ",meshData.MeshShapes.Count);
 				continue;
 			}
 			for (int j = 0; j < meshData.MeshShapes.Count; j++)

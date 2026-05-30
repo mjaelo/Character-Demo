@@ -170,7 +170,8 @@ public partial class PresetTab : TabBar
 	private void OnRandomClothesPressed()
 	{
 		var norms = MobGetter.GetRtgNorms(_parent.MobData.Race, _parent.MobData.Type, _parent.MobData.Gender);
-		_parent.MobData.EquipmentData = MobGetter.GetRandomEquipmentData(norms);
+		Color? skinColor = _parent.MobData.BodyData.HeadMesh.MeshColors.Count > 0 ? _parent.MobData.BodyData.HeadMesh.MeshColors[0] : null;
+		_parent.MobData.EquipmentData = MobGetter.GetRandomEquipmentData(norms, null,skinColor);
 		MobSetter.SetEquipmentData(_parent.MobData.EquipmentData, _parent.Player);
 		_parent.SetMobDataToPickers(_parent.MobData);
 	}

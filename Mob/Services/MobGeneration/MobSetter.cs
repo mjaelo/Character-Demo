@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using CharacterDemo.Mob.DataFiles;
 using Godot;
 
@@ -30,9 +31,8 @@ public static class MobSetter
             if (meshInstance != null) SetMeshData(meshData, meshName, meshInstance);
         }
         // Propagate skin color from Head to other meshes with skin
-        var headMesh = MobUtils.GetMeshFromSkeleton("Head", skeleton);
-        if (headMesh != null && bodyData.HeadMesh.MeshColors.Count > 0)
-            MobUtils.PropagateSkinColor(bodyData.HeadMesh.MeshColors[0], headMesh);
+        if (bodyData.HeadMesh.MeshColors.Count > 0)
+            MobUtils.PropagateSkinColorData(mob.EquipmentData, bodyData.HeadMesh.MeshColors[0], skeleton);
     }
 
     public static void SetEquipmentData(EquipmentData eqData, Scenes.Mob.Mob mob)
@@ -53,13 +53,13 @@ public static class MobSetter
         var meshInfo = isBody ? MobConstants.BodyMeshesInfo[meshName] : MobConstants.EqMeshesInfo[meshName];
 
         MobUtils.SetMeshFile(meshData.MeshFile, meshInstance, meshInfo.FileFolder);
-
-        if (meshData.MeshShapes.Count > 0 && meshInfo.Shapes.Count > 0)
+        
+        if (!MobConstants.ShapelessFiles.Contains(meshData.MeshFile) && meshData.MeshShapes.Count > 0 && meshInfo.Shapes.Count > 0)
         {
             var shapeNames = MobUtils.GetShapeNamesFromMesh(meshInstance.Mesh);
             int count = Math.Min(meshData.MeshShapes.Count, shapeNames.Count);
             if (meshData.MeshShapes.Count != shapeNames.Count)
-                GD.Print(meshName + " shapes differ in meshData and mesh");
+                GD.Print(meshName + " shapes differ in meshData and mesh ",string.Join(", ", meshData.MeshShapes), " vs ", string.Join(", ", shapeNames));
             var skeleton = (Skeleton3D)meshInstance.GetParent();
             for (int i = 0; i < count; i++)
                 MobUtils.SetSkeletonShapeKey(meshData.MeshShapes[i], shapeNames[i], skeleton);

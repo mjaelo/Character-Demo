@@ -26,15 +26,15 @@
   "Statue": [
     { "MeshNames": ["Hat", "Accessory"], "Files": ["empty"] },
     { "Tags": ["Skeleton", "Ogre", "Spirit", "Demon"], "Forbidden": true, "Enforce": true },
-    { "MeshNames": ["EquipmentBulk", "BodyBulk"], "Colors": { "0": ["StatueColors"] }, "Enforce": true },
+    { "MeshNames": ["EquipmentBulk", "BodyBulk"], "Colors": { "0": ["StatueColors"], "1": ["StatueColors"] }, "Enforce": true },
     { "MeshNames": ["Top", "Bottom"], "Shapes": { "1": [0.0] } },
-    { "MeshNames": ["Eyes"], "Colors": { "0": ["StatueColors"], "2": ["StatueColors"] }, "Enforce": true },
+    { "MeshNames": ["Eyes"], "Colors": { "0": ["StatueColors"], "1": ["StatueColors"], "2": ["StatueColors"] }, "Enforce": true },
     { "MeshNames": ["Top","Bottom"], "Files": ["empty"], "Forbidden": true, "Enforce": true },
     { "MeshNames": ["Eyelashes"], "Colors": { "0": ["StatueColors"] }, "Enforce": true }
   ],
   "Spirit": [
     { "Tags": ["Human", "Skeleton", "Ogre", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
-    { "MeshNames": ["Hair", "Eyelashes", "Beard", "Brows", "Accessory"], "Files": ["empty"], "Enforce": true },
+    { "MeshNames": ["Hair", "Hat", "Eyelashes", "Beard", "Brows", "Accessory"], "Files": ["empty"], "Enforce": true },
     { "MeshNames": ["EquipmentBulk"], "Files": ["empty"], "Enforce": true },
     { "MeshNames": ["Top", "Bottom", "Head"], "Colors": { "0": ["SpiritSkinColors"] }, "Enforce": true },
     { "MeshNames": ["Eyes"], "Colors": { "0": ["SpiritEyeWhitesColor"], "1": ["SpiritEyesColors"] }, "Enforce": true },
@@ -43,7 +43,7 @@
   "Skeleton": [
     { "Tags": ["Skeleton"], "Enforce": true },
     { "Tags": ["Ogre", "Spirit", "Demon", "Statue"], "Forbidden": true, "Enforce": true },
-    { "MeshNames": ["Eyes", "Eyelashes", "Hair", "Beard", "Brows"], "Files": ["empty"], "Enforce": true },
+    { "MeshNames": ["Eyes", "Eyelashes", "Hair", "Hat", "Beard", "Brows"], "Files": ["empty"], "Enforce": true },
     { "MeshNames": ["Top", "Bottom", "Head"], "Colors": { "0": ["SkeletonSkinColors"] }, "Enforce": true },
     { "MeshNames": ["Head"], "Files": ["skelly_head"], "Enforce": true }
   ]

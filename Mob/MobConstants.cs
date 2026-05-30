@@ -35,8 +35,8 @@ public static class MobConstants
     public static readonly Dictionary<string, float> EmptyMeshProbabilities = new() { ["Hat"] = 0.75f, ["Beard"] = 0.5f };
     
     // Main material indices for specific mesh names (by resource path substring)
-    public static readonly Dictionary<string, int> MainMaterials = new() { ["merchant-top"] = 2, ["merchant-hat"] = 2, ["guard-bottom"] = 1, ["guard-top"] = 2 };
-    public static readonly string[] FullHats = ["guard-hat"];
+    public static readonly string[] FullHats = ["guard-hat-full","guard-hat"];
+    public static readonly string[] ShapelessFiles = ["skelly_head", "skelly_top", "skelly-bottom"];
     
     //  Paths 
     public const string MobScenePath = "res://Mob/Scenes/Mob/Mob.tscn";
@@ -60,8 +60,8 @@ public static class MobConstants
     public static readonly Color WhiteColor = Colors.White;
     public static readonly Color BlackColor = Colors.Black;
     public static readonly Color DemonEyeWhitesColor = Colors.Black;
-    private static readonly IReadOnlyList<Color>  HairColors = GetColorsFromColorRange(new Vector2(0, .2f), new Vector2(.1f, .4f), new Vector2(0, .7f));
-    private static readonly IReadOnlyList<Color>  ClothesColors = GetColorsFromColorRange(new Vector2(0f, .27f), new Vector2(0f, .3f), new Vector2(.2f, .6f));
+    private static readonly IReadOnlyList<Color>  HairColors = GetColorsFromColorRange(new Vector2(0, .2f), new Vector2(0f, .4f), new Vector2(0, .7f));
+    private static readonly IReadOnlyList<Color>  ClothesColors = GetColorsFromColorRange(new Vector2(-.1f, .1f), new Vector2(0.1f, .4f), new Vector2(.2f, .5f));
     private static readonly IReadOnlyList<Color>  EyeColors = GetColorsFromColorRange(new Vector2(.1f, .6f), new Vector2(.2f, .5f), new Vector2(.3f, .8f));
     private static readonly IReadOnlyList<Color> SkinColors = GetColorsFromColorRange(new Vector2(.01f, .08f), new Vector2(.2f, .3f), new Vector2(.3f, .95f));
     
@@ -87,7 +87,7 @@ public static class MobConstants
     private static readonly IReadOnlyList<MobShapeInfo> HeadShapes = [new("Lips Width"), new("Lips Thickness"), new("Lip Corner"), new("Jaw Shape"), new("Face Length"), new("Eye Lower Lid Height"),  new("Eye Upper Lid Height"), new("Eye Edge Height") ];
     private static readonly IReadOnlyList<MobShapeInfo> BrowShapes = [new("Brow Thickness",GeneralUtils.GetFloatRange(0)), new("Brow Inner Height",GeneralUtils.GetFloatRange(0)), new("Brow Outer Height",GeneralUtils.GetFloatRange(0)) ];
     private static readonly IReadOnlyList<MobShapeInfo> LashShapes = [new("Eye Lower Lid Height"), new("Eye Upper Lid Height"), new("Eye Edge Height")];
-    private static readonly IReadOnlyList<MobShapeInfo> BeardShapes = [new("Jaw Shape"), new("Face Length")];
+    private static readonly IReadOnlyList<MobShapeInfo> BeardShapes = [new("Body Mass"),new("Jaw Shape"), new("Face Length")];
     
     public static  readonly IReadOnlyDictionary<string, MobMeshInfo> BodyMeshesInfo = new Dictionary<string, MobMeshInfo>
         {
@@ -128,11 +128,8 @@ public static class MobConstants
             float s = Mathf.Lerp(sRange.X, sRange.Y, w);
             float v = Mathf.Lerp(vRange.X, vRange.Y, w);
             float a = Mathf.Lerp(aRange.X, aRange.Y, w);
-            var color = Color.FromHsv(h, s, v);
-            color.R *= a;
-            color.G *= a;
-            color.B *= a;
-            colors.Add(color);
+            var hsv = Color.FromHsv(h, s, v); // R,G,B in [0,1]
+            colors.Add(new Color(hsv.R * a, hsv.G * a, hsv.B * a, a));
         }
         return colors;
     }

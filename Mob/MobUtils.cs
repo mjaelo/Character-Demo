@@ -21,24 +21,8 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
         var newMesh = FileService.LoadMesh(filePath);
         if (newMesh != null)
         {
-            var color = GetMeshColor(meshInstance);
-            var shapeNames = GetShapeNamesFromMesh(meshInstance.Mesh);
-
             meshInstance.Show();
             meshInstance.Mesh = newMesh;
-            SetMeshColor(color, meshInstance);
-
-            var newShapeNames = GetShapeNamesFromMesh(meshInstance.Mesh);
-            if (!newShapeNames.SequenceEqual(shapeNames))
-            {
-                GD.Print(meshInstance.Mesh.ResourcePath, " has wrong shape order");
-                var shapeValues = Enumerable.Range(0, meshInstance.GetBlendShapeCount()).Select(meshInstance.GetBlendShapeValue).ToArray();
-                for (int i = 0; i < shapeNames.Count; i++)
-                {
-                    int id = meshInstance.FindBlendShapeByName(shapeNames[i]);
-                    if (id > -1) meshInstance.SetBlendShapeValue(id, shapeValues[i]);
-                }
-            }
         }
         else
         {
@@ -75,14 +59,12 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
         var mob = skeleton.GetNode<Scenes.Mob.Mob>("../../../");
         if (mob.BodyData == new BodyData() || mob.EquipmentData == new EquipmentData()) return;
 
-        var bodyData = mob.BodyData;
-        var eqData = mob.EquipmentData;
+        bool isHairBald = mob.BodyData.HairMesh.MeshFile == "empty";
+        bool hasHat = mob.EquipmentData.HatMesh.MeshFile is not ("empty" or "");
+        bool isFullHat = MobConstants.FullHats.Any(h => mob.EquipmentData.HatMesh.MeshFile == h);
+        hairMesh.Visible = !isHairBald && !(hasHat && isFullHat);
 
-        bool isHairBald = bodyData.HairMesh.MeshFile == "empty";
-        bool isFullHat = MobConstants.FullHats.Any(h => eqData.HatMesh.MeshFile == h);
-        hairMesh.Visible = !isHairBald && !(hatMesh.Visible && isFullHat);
-
-        if (hatMesh.Visible && hairMesh.Visible)
+        if (hasHat && hairMesh.Visible)
         {
             hiderNode.Show();
             var baseMesh = hiderNode.GetNode<MeshInstance3D>("Manager/HatHairHider");
@@ -160,17 +142,22 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
 
     }
 
-    public static void PropagateSkinColor(Color value, MeshInstance3D sourceMesh)
+    public static void PropagateSkinColorData(EquipmentData eqData, Color skinColor, Skeleton3D? skeleton = null)
     {
-        var parent = sourceMesh.GetParent();
         foreach (var meshName in MobConstants.MeshesWithSkin)
         {
-            if (meshName == sourceMesh.Name.ToString()) continue;
-            var sibling = parent.GetNodeOrNull<MeshInstance3D>(meshName);
-            if (sibling != null)
-            {
-                SetMeshColor(value, sibling, 0);
-            }
+            if (!MobConstants.EqMeshesInfo.ContainsKey(meshName)) continue;
+            var fieldName = MobConstants.EqMeshesInfo[meshName].FieldName;
+            var meshData = GetEqDataFieldValue(eqData, fieldName);
+            if (meshData.MeshColors.Count == 0) continue;
+            var colors = meshData.MeshColors.ToList();
+            colors[0] = skinColor;
+            meshData.MeshColors = colors;
+            
+            if (skeleton == null) continue;
+            MeshInstance3D? skelMesh = GetMeshFromSkeleton(meshName, skeleton);
+            if (skelMesh == null) continue;
+            SetMeshColor(skinColor, skelMesh, 0);
         }
     }
 
@@ -180,26 +167,7 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
         if (meshInstance.Name == "Eyes") return 1;
         if (meshInstance.Name == "Top") return 1;
         if (meshInstance.Name == "Bottom") return 1;
-        if (meshInstance.Name == "Head") return 0;
-        foreach (var (meshName, idx) in MobConstants.MainMaterials)
-            if (meshInstance.Mesh.ResourcePath.Contains(meshName))
-                return idx;
         return 0;
-    }
-
-    private static Color GetMeshColor(MeshInstance3D meshInstance, int materialNr = -1)
-    {
-        materialNr = materialNr >= 0 ? materialNr : GetMainMaterial(meshInstance);
-        if (meshInstance.Mesh == null) return new Color(-1, -1, -1);
-        int surfaceCount = meshInstance.Mesh.GetSurfaceCount();
-        if (materialNr >= surfaceCount) materialNr = surfaceCount > 0 ? surfaceCount - 1 : 0;
-        var mat = meshInstance.GetSurfaceOverrideMaterial(materialNr) ?? meshInstance.MaterialOverride;
-        return mat switch
-        {
-            StandardMaterial3D sm => sm.AlbedoColor,
-            ShaderMaterial sh => sh.GetShaderParameter("color").As<Color>(),
-            _ => new Color(-1, -1, -1)
-        };
     }
 
     public static MeshInstance3D? GetMeshFromSkeleton(string meshName, Skeleton3D skeleton)
@@ -252,8 +220,7 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
         foreach (var linkedName in MobConstants.HairLinkedNames)
         {
             string fieldName = MobConstants.BodyMeshesInfo[linkedName].FieldName;
-            if (typeof(BodyData).GetProperty(fieldName)?.GetValue(bodyData) is MeshData meshData)
-                meshData.MeshColors = [hairColor];
+            GetBodyDataFieldValue(bodyData, fieldName).MeshColors = [hairColor];
             if (skeleton == null) continue;
             var mesh = GetMeshFromSkeleton(linkedName, skeleton);
             if (mesh != null) SetMeshColor(hairColor, mesh);
