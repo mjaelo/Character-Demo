@@ -1,6 +1,6 @@
 ﻿namespace CharacterDemo.Mob.DataFiles;
 
-public class PlayerData : MobData
+public record PlayerData : MobData
 {
 }
 

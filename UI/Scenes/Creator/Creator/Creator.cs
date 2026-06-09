@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using CharacterDemo.Mob;
 using CharacterDemo.Mob.DataFiles;
@@ -14,10 +15,12 @@ public partial class Creator : Control
 	private TabContainer _tabContainer = null!;
 	private PresetTab _presetTab = null!;
 	private Button _startButton = null!;
+	private TextureButton _undoButton = null!;
 	private CreatorCameraManager.CreatorCameraManager _cameraManager = null!;
 
 
 	public Player Player = null!;
+	private MobData? _prevData;
 	public MobData MobData  = new();
 	private Skeleton3D _skeleton  = null!;
 	private TabBuilder _tabBuilder = null!;
@@ -30,10 +33,12 @@ public partial class Creator : Control
 		_presetTab = GetNode<PresetTab>("TabContainer/Preset");
 		_tabContainer = GetNode<TabContainer>("TabContainer");
 		_startButton = GetNode<Button>("Right/Start Game");
+		_undoButton = GetNode<TextureButton>("UndoButton");
 		_cameraManager = GetNode<CreatorCameraManager.CreatorCameraManager>("Right/CreatorCameraManager");
 		_cameraManager.Initialize(Player);
 
 		_startButton.Pressed += StartGame;
+		_undoButton.Pressed += UndoChange;
 		_presetTab.Initialize(this);
 
 		foreach (var (tabName, pickers) in UiConstants.CreatorMenuData)
@@ -42,6 +47,23 @@ public partial class Creator : Control
 		RandomizeCreatorValues();
 		MobUtils.TogglePlayerControl(false, player);
 		UiUtils.DisableEdit(_startButton, string.IsNullOrEmpty(MobData.MobName));
+		UiUtils.DisableEdit(_undoButton, true);
+	}
+
+	private void UndoChange()
+	{
+		if (_prevData == null) return;
+		MobData = _prevData.Duplicate();
+		MobSetter.SetMobDataToMob(MobData, Player);
+		UpdateAllPickers();
+		_presetTab.SetMobDataToPresetPickers(MobData);
+		UiUtils.DisableEdit(_undoButton, true);
+	}
+
+	public void UpdatePrevMobData()
+	{
+		_prevData = MobData.Duplicate();
+		UiUtils.DisableEdit(_undoButton, false);
 	}
 
 	private void StartGame()
@@ -122,7 +144,7 @@ public partial class Creator : Control
 		{
 			case SliderPickerComponent sp:
 				var str = value is float f
-					? f.ToString(System.Globalization.CultureInfo.InvariantCulture)
+					? f.ToString(CultureInfo.InvariantCulture)
 					: value.ToString() ?? "";
 				sp.SetValue(str);
 				break;

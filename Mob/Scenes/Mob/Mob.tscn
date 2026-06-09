@@ -16,7 +16,7 @@
 [ext_resource type="AnimationLibrary" uid="uid://ryqsfwwefulb" path="res://Assets/Mob/Animations/GeneralAnimations.res" id="9_eaciy"]
 [ext_resource type="ArrayMesh" uid="uid://dkrdhomf3msv1" path="res://Assets/Mob/Meshes/Equipment/Rhand/_Sword_Shield_0.tres" id="12_d3c5e"]
 [ext_resource type="ArrayMesh" uid="uid://cjc2pbca5j1ol" path="res://Assets/Mob/Meshes/Equipment/Lhand/Shield_Shield_001_0.tres" id="13_cr83l"]
-[ext_resource type="ArrayMesh" uid="uid://csrf535kwo2ot" path="res://Assets/Mob/Meshes/Body/Beard/full-beard.tres" id="14_u2gd2"]
+[ext_resource type="ArrayMesh" path="res://Assets/Mob/Meshes/Body/Beard/full-beard.tres" id="14_u2gd2"]
 [ext_resource type="ArrayMesh" uid="uid://ub6y7su5umjv" path="res://Assets/Mob/Meshes/Equipment/Accessory/demon-horns.tres" id="15_vwt3n"]
 [ext_resource type="Shape3D" uid="uid://1s5ena8vaydf" path="res://Assets/Mob/Meshes/sword_collision.tres" id="18_qhhat"]
 

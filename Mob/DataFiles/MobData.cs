@@ -2,18 +2,39 @@
 
 namespace CharacterDemo.Mob.DataFiles;
 
-public class MobData(
-    MobRaces race = MobRaces.Human,
-    MobTypes type = MobTypes.Civilian,
-    string mobName = "",
-    Gender gender = Gender.NonBin,
-    BodyData? bodyData = null,
-    EquipmentData? equipmentData = null)
+public record MobData
 {
-    public MobRaces Race = race;
-    public MobTypes Type = type;
-    public string MobName = mobName;
-    public Gender Gender = gender;
-    public BodyData BodyData = bodyData ?? new BodyData();
-    public EquipmentData EquipmentData = equipmentData ?? new EquipmentData();
+    public MobRaces Race;
+    public MobTypes Type;
+    public string MobName = "";
+    public Gender Gender;
+    public BodyData BodyData = new();
+    public EquipmentData EquipmentData = new();
+
+    public MobData Duplicate()
+    {
+        return new MobData
+        {
+            Race = Race, Type = Type, MobName = MobName, Gender = Gender,
+            BodyData = new BodyData
+            {
+                HeadMesh = BodyData.HeadMesh.Duplicate(),
+                EyeMesh = BodyData.EyeMesh.Duplicate(),
+                LashesMesh = BodyData.LashesMesh.Duplicate(),
+                HairMesh = BodyData.HairMesh.Duplicate(),
+                BeardMesh = BodyData.BeardMesh.Duplicate(),
+                BrowMesh = BodyData.BrowMesh.Duplicate()
+            },
+            EquipmentData = new EquipmentData
+            {
+                TopMesh = EquipmentData.TopMesh.Duplicate(),
+                BottomMesh = EquipmentData.BottomMesh.Duplicate(),
+                ShoeMesh = EquipmentData.ShoeMesh.Duplicate(),
+                HatMesh = EquipmentData.HatMesh.Duplicate(),
+                RHandMesh = EquipmentData.RHandMesh.Duplicate(),
+                LHandMesh = EquipmentData.LHandMesh.Duplicate(),
+                AccessoryMesh = EquipmentData.AccessoryMesh.Duplicate()
+            }
+        };
+    }
 }

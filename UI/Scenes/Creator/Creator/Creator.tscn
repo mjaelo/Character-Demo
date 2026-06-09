@@ -1,8 +1,10 @@
 [gd_scene format=3 uid="uid://klqaekdm4u3l"]
 
-[ext_resource type="Script" path="res://UI/Scenes/Creator/Creator/Creator.cs" id="1_yntgj"]
-[ext_resource type="PackedScene" path="res://UI/Scenes/Creator/PresetTab/PresetTab.tscn" id="2_lka5l"]
-[ext_resource type="PackedScene" path="res://UI/Scenes/Creator/CreatorCameraManager/CreatorCameraManager.tscn" id="5_us56g"]
+[ext_resource type="Script" uid="uid://ys1itxx2m2p2" path="res://UI/Scenes/Creator/Creator/Creator.cs" id="1_yntgj"]
+[ext_resource type="PackedScene" uid="uid://2yx7df26g7uj" path="res://UI/Scenes/Creator/PresetTab/PresetTab.tscn" id="2_lka5l"]
+[ext_resource type="Texture2D" uid="uid://d2bw1hytqh1ql" path="res://Assets/UI/UiIcons/undo.png" id="3_g75g4"]
+[ext_resource type="Texture2D" uid="uid://b8uvgn16eeh7p" path="res://Assets/UI/UiIcons/undo-hover.png" id="4_fu5r6"]
+[ext_resource type="PackedScene" uid="uid://dkebf5g513vk3" path="res://UI/Scenes/Creator/CreatorCameraManager/CreatorCameraManager.tscn" id="5_us56g"]
 
 [node name="Creator" type="HBoxContainer" unique_id=733556647]
 anchors_preset = 15
@@ -17,13 +19,24 @@ grow_vertical = 2
 script = ExtResource("1_yntgj")
 
 [node name="TabContainer" type="TabContainer" parent="." unique_id=1004451143]
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(350, 0)
 layout_mode = 2
 current_tab = 0
 
 [node name="Preset" parent="TabContainer" unique_id=250273077 instance=ExtResource("2_lka5l")]
 layout_mode = 2
 metadata/_tab_index = 0
+
+[node name="UndoButton" type="TextureButton" parent="." unique_id=928840274]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+tooltip_text = "Randomize"
+texture_normal = ExtResource("3_g75g4")
+texture_hover = ExtResource("4_fu5r6")
+ignore_texture_size = true
+stretch_mode = 4
 
 [node name="Padding" type="Control" parent="." unique_id=1093923857]
 custom_minimum_size = Vector2(0, 10)

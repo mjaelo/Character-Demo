@@ -1,6 +1,6 @@
 ﻿namespace CharacterDemo.Mob.DataFiles;
 
-public class BodyData
+public record BodyData
 {
     public MeshData HeadMesh = new();
     public MeshData EyeMesh = new();

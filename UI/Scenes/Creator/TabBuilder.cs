@@ -133,6 +133,7 @@ public class TabBuilder(Skeleton3D skeleton, Creator creator)
     //  Callbacks 
     private void OnMeshPickerChanged(string value, MeshInstance3D meshInstance, string meshName, string fileFolder)
     {
+        creator.UpdatePrevMobData();
         MeshData? meshData = MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi)
             ? MobUtils.GetBodyDataFieldValue(creator.MobData.BodyData, bmi.FieldName)
             : MobConstants.EqMeshesInfo.TryGetValue(meshName, out var emi)
@@ -149,6 +150,7 @@ public class TabBuilder(Skeleton3D skeleton, Creator creator)
 
     private void OnColorPickerChanged(Color value, MeshInstance3D meshInstance, string meshName, int materialNr = -1)
     {
+        creator.UpdatePrevMobData();
         materialNr = materialNr >= 0 ? materialNr : MobUtils.GetMainMaterial(meshInstance);
         
         if (MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi))
@@ -177,6 +179,7 @@ public class TabBuilder(Skeleton3D skeleton, Creator creator)
     private void OnShapePickerChanged(float value, MeshInstance3D meshInstance, string meshName, int shapeId,
         string shapeName)
     {
+        creator.UpdatePrevMobData();
         if (MobConstants.BodyMeshesInfo.TryGetValue(meshName, out var bmi))
         {
             var bodyField = MobUtils.GetBodyDataFieldValue(creator.MobData.BodyData, bmi.FieldName);

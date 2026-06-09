@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using CharacterDemo.General;
 using CharacterDemo.General.Services;
 using CharacterDemo.Mob;
@@ -42,9 +42,9 @@ public partial class PresetTab : TabBar
 		
 		_presetPicker.Init((List<string>)[UiConstants.NewPresetName, .. _presets.Keys], "Preset");
 		_presetPicker.VariableChanged += v => OnPresetChanged((string)v);
-		_typePicker.Init(System.Enum.GetNames<MobEnums.MobTypes>(), "Mob Type");
+		_typePicker.Init(Enum.GetNames<MobEnums.MobTypes>(), "Mob Type");
 		_typePicker.VariableChanged += v => OnTypeChanged((string)v);
-		_racePicker.Init(System.Enum.GetNames<MobEnums.MobRaces>(), "Race");
+		_racePicker.Init(Enum.GetNames<MobEnums.MobRaces>(), "Race");
 		_racePicker.VariableChanged += v => OnRaceChanged((string)v);
 		_genderPicker.ValueChanged += v => OnGenderChanged((int)v);
 		_namePicker.TextChanged += OnMobNameChanged;
@@ -58,13 +58,14 @@ public partial class PresetTab : TabBar
 	public void SetMobDataToPresetPickers(MobData mobData)
 	{
 		_namePicker.Text = mobData.MobName;
-		_typePicker.Picker!.Value = (int)mobData.Type;
-		_racePicker.Picker!.Value = (int)mobData.Race;
+		_typePicker.SetValue(mobData.Type.ToString());
+		_racePicker.SetValue(mobData.Race.ToString());
 		_genderPicker.Value = (int)mobData.Gender;
 	}
 
 	private void OnPresetChanged(string mobName)
 	{
+		_parent.UpdatePrevMobData();
 		bool isNew = mobName == UiConstants.NewPresetName;
 		GD.Print("disabling edit = ",isNew);
 		UiUtils.DisableEdit(_deletePresetButton, isNew);
@@ -72,7 +73,7 @@ public partial class PresetTab : TabBar
 		if (!isNew && _presets.TryGetValue(mobName, out var md))
 		{
 			UiUtils.ButtonShowWarning(_savePresetButton, UiConstants.OverrideWarning);
-			var newMobData = CopyMobData(md);
+			var newMobData = md.Duplicate();
 			_parent.MobData = newMobData;
 			MobSetter.SetMobDataToMob(newMobData, _parent.Player);
 			_parent.UpdateAllPickers();
@@ -87,6 +88,7 @@ public partial class PresetTab : TabBar
 	private void OnGenderChanged(int gender)
 	{
 		if ((int)_parent.MobData.Gender == gender) return;
+		_parent.UpdatePrevMobData();
 		_parent.MobData.Gender = (MobEnums.Gender)gender;
 		if (gender != (int)MobEnums.Gender.NonBin)
 		{
@@ -110,7 +112,7 @@ public partial class PresetTab : TabBar
 
 	private void OnSavePresetPressed()
 	{
-		var newData = CopyMobData(_parent.MobData);
+		var newData = _parent.MobData.Duplicate();
 		_presets[newData.MobName] = newData;
 		_presetPicker.UpdateValues([UiConstants.NewPresetName, .. _presets.Keys]);
 		UiUtils.DisableEdit(_deletePresetButton, false);
@@ -132,9 +134,10 @@ public partial class PresetTab : TabBar
 
 	private void OnRaceChanged(string raceV)
 	{
-		var race = System.Enum.Parse<MobEnums.MobRaces>(raceV);
+		var race = Enum.Parse<MobEnums.MobRaces>(raceV);
 		_cameraManager.SetCameraHeightByRace(race);
 		if (_parent.MobData.Race == race) return;
+		_parent.UpdatePrevMobData();
 		_parent.MobData.Race = race;
 		var norms = new List<NormInfo>(MobConstants.RaceNorms[race]);
 		_parent.MobData.BodyData = MobAdjuster.AdjustBodyData(norms, _parent.MobData.BodyData);
@@ -145,14 +148,16 @@ public partial class PresetTab : TabBar
 
 	private void OnTypeChanged(string typeV)
 	{
-		var type = System.Enum.Parse<MobEnums.MobTypes>(typeV);
+		var type = Enum.Parse<MobEnums.MobTypes>(typeV);
 		if (_parent.MobData.Type == type) return;
+		_parent.UpdatePrevMobData();
 		_parent.MobData.Type = type;
 		OnRandomClothesPressed();
 	}
 
 	private void OnRandomNamePressed()
 	{
+		_parent.UpdatePrevMobData();
 		var possibleNames = MobConstants.MobNames[_parent.MobData.Gender];
 		var newName = GeneralUtils.PickRandom(possibleNames);
 		_namePicker.Text = newName;
@@ -161,6 +166,7 @@ public partial class PresetTab : TabBar
 
 	private void OnRandomBodyPressed()
 	{
+		_parent.UpdatePrevMobData();
 		var norms = MobGetter.GetRtgNorms(_parent.MobData.Race, _parent.MobData.Type, _parent.MobData.Gender);
 		_parent.MobData.BodyData = MobGetter.GetRandomBodyData(norms);
 		MobSetter.SetBodyData(_parent.MobData.BodyData, _parent.Player);
@@ -169,6 +175,7 @@ public partial class PresetTab : TabBar
 
 	private void OnRandomClothesPressed()
 	{
+		_parent.UpdatePrevMobData();
 		var norms = MobGetter.GetRtgNorms(_parent.MobData.Race, _parent.MobData.Type, _parent.MobData.Gender);
 		Color? skinColor = _parent.MobData.BodyData.HeadMesh.MeshColors.Count > 0 ? _parent.MobData.BodyData.HeadMesh.MeshColors[0] : null;
 		_parent.MobData.EquipmentData = MobGetter.GetRandomEquipmentData(norms, null,skinColor);
@@ -176,29 +183,4 @@ public partial class PresetTab : TabBar
 		_parent.SetMobDataToPickers(_parent.MobData);
 	}
 	
-	private MobData CopyMobData(MobData md)
-	{
-		var newMobData = new MobData(md.Race, md.Type, md.MobName, md.Gender,
-			new BodyData
-			{
-				HeadMesh = CopyMeshData(md.BodyData.HeadMesh),
-				EyeMesh = CopyMeshData(md.BodyData.EyeMesh),
-				LashesMesh = CopyMeshData(md.BodyData.LashesMesh),
-				HairMesh = CopyMeshData(md.BodyData.HairMesh),
-				BeardMesh = CopyMeshData(md.BodyData.BeardMesh),
-				BrowMesh = CopyMeshData(md.BodyData.BrowMesh),
-			}, new EquipmentData
-			{
-				TopMesh = CopyMeshData(md.EquipmentData.TopMesh),
-				BottomMesh = CopyMeshData(md.EquipmentData.BottomMesh),
-				ShoeMesh = CopyMeshData(md.EquipmentData.ShoeMesh),
-				HatMesh = CopyMeshData(md.EquipmentData.HatMesh),
-				RHandMesh = CopyMeshData(md.EquipmentData.RHandMesh),
-				LHandMesh = CopyMeshData(md.EquipmentData.LHandMesh),
-				AccessoryMesh = CopyMeshData(md.EquipmentData.AccessoryMesh)
-			});
-		return newMobData;
-	}
-	
-	private MeshData CopyMeshData(MeshData md)=>  new (md.MeshColors.ToList(), md.MeshFile, md.MeshShapes.ToList());
 }

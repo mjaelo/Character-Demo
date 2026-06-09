@@ -1,6 +1,6 @@
 ﻿namespace CharacterDemo.Mob.DataFiles;
 
-public class EquipmentData
+public record EquipmentData
 {
     public MeshData TopMesh = new();
     public MeshData BottomMesh = new();

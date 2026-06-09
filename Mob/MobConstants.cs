@@ -87,7 +87,7 @@ public static class MobConstants
     private static readonly IReadOnlyList<MobShapeInfo> HeadShapes = [new("Lips Width"), new("Lips Thickness"), new("Lip Corner"), new("Jaw Shape"), new("Face Length"), new("Eye Lower Lid Height"),  new("Eye Upper Lid Height"), new("Eye Edge Height") ];
     private static readonly IReadOnlyList<MobShapeInfo> BrowShapes = [new("Brow Thickness",GeneralUtils.GetFloatRange(0)), new("Brow Inner Height",GeneralUtils.GetFloatRange(0)), new("Brow Outer Height",GeneralUtils.GetFloatRange(0)) ];
     private static readonly IReadOnlyList<MobShapeInfo> LashShapes = [new("Eye Lower Lid Height"), new("Eye Upper Lid Height"), new("Eye Edge Height")];
-    private static readonly IReadOnlyList<MobShapeInfo> BeardShapes = [new("Body Mass"),new("Jaw Shape"), new("Face Length")];
+    private static readonly IReadOnlyList<MobShapeInfo> BeardShapes = [new("Jaw Shape"), new("Face Length")];
     
     public static  readonly IReadOnlyDictionary<string, MobMeshInfo> BodyMeshesInfo = new Dictionary<string, MobMeshInfo>
         {

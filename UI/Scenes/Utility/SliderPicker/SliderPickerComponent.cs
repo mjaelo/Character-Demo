@@ -12,74 +12,78 @@ public partial class SliderPickerComponent : HBoxContainer
 	}
 	private bool _disabled;
 
-	private List<string> Values { get; set; } = [];
-	public HSlider? Picker { get; private set; }
-	private object? _selectedValue;
+	private List<string> _values = [];
+	private HSlider? _picker;
+	private string? _selectedValue;
 
 	[Signal] public delegate void VariableChangedEventHandler(Variant newValue);
 
 	public void Init(IEnumerable<string> values, string header = "")
 	{
-		Values = [.. values];
+		_values = [.. values];
 		GetNode<Label>("VBoxContainer/Labels/Name").Text = header;
 		GetNode<TextureButton>("RandomButton").Pressed += OnRandomButtonPressed;
-		if (Values.Count < 2)
+		if (_values.Count < 2)
 		{
-			if (Values.Count == 1) OnPickerValueChanged(0);
+			if (_values.Count == 1) OnPickerValueChanged(0);
 			Disabled = true; 
 			return;
 		}
 		Disabled = false;
-		Picker = new HSlider { MaxValue = Values.Count - 1 };
-		Picker.ValueChanged += OnPickerValueChanged;
-		GetNode<VBoxContainer>("VBoxContainer").AddChild(Picker);
+		_picker = new HSlider { MaxValue = _values.Count - 1 };
+		_picker.ValueChanged += v => OnPickerValueChanged(v);
+		GetNode<VBoxContainer>("VBoxContainer").AddChild(_picker);
 		OnPickerValueChanged(0);
 	}
 
 	// set value to a picker from outside
-	public void SetValue(string value)
+	public void SetValue(string value,bool recordChange = false)
 	{
 		if (Disabled) return;
-		int idx = Values.IndexOf(value);
-		if (idx >= 0 && Picker != null) Picker.Value = idx;
+		int idx = _values.IndexOf(value);
+		if (idx >= 0 && _picker != null)
+		{
+			OnPickerValueChanged(idx,recordChange);
+			_picker.Value = idx;
+		}
 		else GD.Print(Name + ": " + value + " not found in values");
 	}
 
 	public void UpdateValues(IEnumerable<string> values)
 	{
-		Values = [.. values];
-		if (Values.Count < 2)
+		_values = [.. values];
+		if (_values.Count < 2)
 		{
 			Disabled = true;
-			if (Values.Count == 1) OnPickerValueChanged(0);
+			if (_values.Count == 1) OnPickerValueChanged(0,false);
 			return;
 		}
 		Disabled = false;
-		if (Picker == null)
+		if (_picker == null)
 		{
-			Picker = new HSlider { MaxValue = Values.Count - 1 };
-			Picker.ValueChanged += OnPickerValueChanged;
-			GetNode<VBoxContainer>("VBoxContainer").AddChild(Picker);
+			_picker = new HSlider { MaxValue = _values.Count - 1 };
+			_picker.ValueChanged += v => OnPickerValueChanged(v,false);
+			GetNode<VBoxContainer>("VBoxContainer").AddChild(_picker);
 		}
 		else
 		{
-			Picker.MaxValue = Values.Count - 1;
-			if (Picker.Value > Picker.MaxValue) Picker.Value = 0;
+			_picker.MaxValue = _values.Count - 1;
+			if (_picker.Value > _picker.MaxValue) _picker.Value = 0;
 		}
 	}
 
-	private void OnPickerValueChanged(double newIndex)
+	private void OnPickerValueChanged(double newIndex, bool recordChange = true)
 	{
-		var newValue = Values[(int)newIndex];
+		var newValue = _values[(int)newIndex];
 		if (_selectedValue?.Equals(newValue) == true) return;
 		_selectedValue = newValue;
 		GetNode<Label>("VBoxContainer/Labels/Value").Text = newValue;
-		EmitSignal(SignalName.VariableChanged, Variant.From(newValue));
+		if  (recordChange) EmitSignal(SignalName.VariableChanged, Variant.From(newValue));
 	}
 
 	private void OnRandomButtonPressed()
 	{
-		if (Picker == null || Values.Count == 0) { Disabled = true; return; }
-		SetValue(Values[GD.RandRange(0, Values.Count - 1)]);
+		if (_picker == null || _values.Count == 0) { Disabled = true; return; }
+		SetValue(_values[GD.RandRange(0, _values.Count - 1)],true);
 	}
 }

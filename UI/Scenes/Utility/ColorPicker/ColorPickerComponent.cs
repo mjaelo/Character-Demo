@@ -12,41 +12,41 @@ public partial class ColorPickerComponent : HBoxContainer
 	}
 	private bool _disabled;
 
-	public List<Color> Values { get; private set; } = [];
-	public ColorPickerButton? Picker { get; private set; }
+	private List<Color> _values  = [];
+	private ColorPickerButton? _picker; 
 	private Color _selectedValue = Colors.White;
 
 	[Signal] public delegate void VariableChangedEventHandler(Color newValue);
 
 	public void Init(List<Color> values, string header = "")
 	{
-		Values = values;
+		_values = values;
 		GetNode<Label>("VBoxContainer/Labels/Name").Text = header;
 		GetNode<TextureButton>("RandomButton").Pressed += OnRandomButtonPressed;
-		if (Values.Count < 1) { Disabled = true; return; }
+		if (_values.Count < 1) { Disabled = true; return; }
 		Disabled = false;
-		Picker = new ColorPickerButton { CustomMinimumSize = new Vector2(0, 20) };
-		Picker.ColorChanged += OnPickerValueChanged;
-		GetNode<VBoxContainer>("VBoxContainer").AddChild(Picker);
+		_picker = new ColorPickerButton { CustomMinimumSize = new Vector2(0, 20) };
+		_picker.ColorChanged += v => OnPickerValueChanged(v);
+		GetNode<VBoxContainer>("VBoxContainer").AddChild(_picker);
 	}
 
-	public void SetValue(Color value)
+	public void SetValue(Color value,bool recordChange = false)
 	{
-		if (Disabled || Picker == null) return;
-		Picker.Color = value;
-		OnPickerValueChanged(value);
+		if (Disabled || _picker == null) return;
+		OnPickerValueChanged(value,recordChange);
+		_picker.Color = value;
 	}
 
-	private void OnPickerValueChanged(Color newValue)
+	private void OnPickerValueChanged(Color newValue, bool recordChange = true)
 	{
 		if (_selectedValue == newValue) return;
 		_selectedValue = newValue;
-		EmitSignal(SignalName.VariableChanged, newValue);
+		if  (recordChange) EmitSignal(SignalName.VariableChanged, newValue);
 	}
 
 	private void OnRandomButtonPressed()
 	{
-		if (Picker == null || Values.Count < 1) { Disabled = true; return; }
-		SetValue(Values[GD.RandRange(0, Values.Count - 1)]);
+		if (_picker == null || _values.Count < 1) { Disabled = true; return; }
+		SetValue(_values[GD.RandRange(0, _values.Count - 1)],true);
 	}
 }
