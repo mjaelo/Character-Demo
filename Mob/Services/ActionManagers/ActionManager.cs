@@ -77,15 +77,21 @@ public class ActionManager
         _animTree.AnimationFinished += OnAnimationFinished;
     }
 
-    public void HandleInput(Vector3 inputDir, bool isMoving)
+    public void HandlePressInput(bool isMoving)
+    {
+        if (_armBlend == 0.0 && BodyAction.CheckActionInput(isMoving)) return;
+        Combat.CheckCombatInput();
+    }
+
+    public void HandleHoldInput(Vector3 inputDir)
     {
         Movement.UpdateVelocity(inputDir);
-
-        if (BodyAction.CheckActionInput(isMoving)) return;
-        if (Combat.CheckCombatInput()) return;
-
-        // show movement or idle animation if no action is activated
-        if (isMoving) Movement.HandleMovementAnimation();
+        if (IsInputBlocked())
+        {
+            Mob.CurrentSpeed = Mob.NormalSpeed;
+            return;
+        }
+        if (inputDir != Vector3.Zero) Movement.HandleMovementAnimation();
         else
         {
             if ("Idle" != BodyStateMachine.GetCurrentNode()) BodyStateMachine.Travel("Idle");
@@ -93,10 +99,7 @@ public class ActionManager
         }
     }
 
-    public bool IsInputBlocked()
-    {
-        return !Mob.IsOnFloor() || BodyStateMachine.GetCurrentNode() == "Action" || _armBlend > 0.1f;
-    }
+    public bool IsInputBlocked() { return !Mob.IsOnFloor() || BodyStateMachine.GetCurrentNode() == "Action"; }
 
     public void HandleFalling(float delta)
     {

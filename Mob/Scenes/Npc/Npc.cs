@@ -6,7 +6,7 @@ namespace CharacterDemo.Mob.Scenes.Npc;
 /// </summary>
 public partial class Npc : Mob.Mob
 {
-	protected override void HandleInput(float delta)
+	protected override void HandleHoldInput()
 	{
 		// AI logic will drive movement here in the future.
 	}

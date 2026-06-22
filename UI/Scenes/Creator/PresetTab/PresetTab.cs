@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using CharacterDemo.General;
 using CharacterDemo.General.Services;
 using CharacterDemo.Mob;
@@ -139,7 +140,11 @@ public partial class PresetTab : TabBar
 		if (_parent.MobData.Race == race) return;
 		_parent.UpdatePrevMobData();
 		_parent.MobData.Race = race;
-		var norms = new List<NormInfo>(MobConstants.RaceNorms[race]);
+		var norms = MobConstants.RaceNorms[race]
+			.Concat(MobConstants.TypeNorms[_parent.MobData.Type])
+			.Concat(MobConstants.GenderNorms[_parent.MobData.Gender])
+			.ToList();
+
 		_parent.MobData.BodyData = MobAdjuster.AdjustBodyData(norms, _parent.MobData.BodyData);
 		_parent.MobData.EquipmentData = MobAdjuster.AdjustEquipmentData(norms, _parent.MobData.EquipmentData);
 		MobSetter.SetMobDataToMob(_parent.MobData, _parent.Player);

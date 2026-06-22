@@ -32,7 +32,10 @@ public class BodyActionManager(ActionManager am)
         v.Z = 0;
         Mob.Velocity = v;
         if (animName.Contains("Jump"))
+        {
+            am.BodyStateMachine.Start("Idle");
             am.IdleStateMachine.Travel("Fall");
+        }
     }
 
     private void OnRollPressed()

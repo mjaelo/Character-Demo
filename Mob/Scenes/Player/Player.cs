@@ -19,11 +19,18 @@ public partial class Player : Mob.Mob
 		CameraManager = GetNode<PlayerCameraManager>("CameraManager");
 	}
 
-	protected override void HandleInput(float delta)
+	protected override void HandlePressInput()
 	{
 		var inputDir = GetMovementInputDirection();
 		var isMoving = inputDir != Vector3.Zero;
-		Actions.HandleInput(inputDir, isMoving);
+		Actions.HandlePressInput(isMoving);
+	}
+	
+	protected override void HandleHoldInput()
+	{
+		var inputDir = GetMovementInputDirection();
+		var isMoving = inputDir != Vector3.Zero;
+		Actions.HandleHoldInput(inputDir);
 		if (isMoving) RotateBody();
 	}
 

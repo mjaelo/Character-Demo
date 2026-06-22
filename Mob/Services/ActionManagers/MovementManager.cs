@@ -18,25 +18,34 @@ public class MovementManager(ActionManager am)
     
     public void HandleMovementAnimation()
     {
-        var isRunning = Input.IsActionPressed("Run");
-        am.BodyStateMachine.Travel("Movement");
-        
+        if(am.BodyStateMachine.GetCurrentNode()!="Movement")
+            am.BodyStateMachine.Travel("Movement");
         if (am.Idle.PerformingEvent) // stop idle event
         {
             am.Idle.PerformingEvent = false;
             am.BodyIdleStateMachine.Next();
             am.BodyStateMachine.Start("Movement");
         }
-
-        bool isNormalSpeed = GeneralUtils.FloatEquals(Mob.CurrentSpeed,Mob.NormalSpeed);
-        if (isRunning && isNormalSpeed)
+        if (Mob.CurrentSpeed < Mob.NormalSpeed)
         {
-            am.MovementStateMachine.Travel("Run");
-            Mob.CurrentSpeed = Mob.NormalSpeed * ActionManager.HoldSpeedModifiers["Run"];
+            am.MovementStateMachine.Travel("Walk");//TODO add slower movement animation
             return;
         }
-        am.MovementStateMachine.Travel("Walk");
-        if (!isNormalSpeed && !isRunning && IsBodyActionRunning()) Mob.CurrentSpeed = Mob.NormalSpeed;
+        
+        var isRunning = Input.IsActionPressed("Run");
+
+        bool isNormalSpeed = GeneralUtils.FloatEquals(Mob.CurrentSpeed,Mob.NormalSpeed);
+        if (isRunning)
+        {
+            if (!isNormalSpeed) return;
+            am.MovementStateMachine.Travel("Run");
+            Mob.CurrentSpeed = Mob.NormalSpeed * ActionManager.HoldSpeedModifiers["Run"];
+        }
+        else
+        {
+            am.MovementStateMachine.Travel("Walk");
+            if (!isNormalSpeed && IsBodyActionRunning()) Mob.CurrentSpeed = Mob.NormalSpeed;
+        }
     }
 
     private bool IsBodyActionRunning() => am.ArmBlend == 0 && am.BodyStateMachine.GetCurrentNode() != "Action";

@@ -31,22 +31,23 @@ public partial class Mob : CharacterBody3D
 	// Action Management
 	public ActionManager Actions = null!;
 
-	public override void _Ready()
-	{
-		Actions = new ActionManager(this);
-	}
+	public override void _Ready() { Actions = new ActionManager(this); }
+
+	// Godot docs recommend _input for press and_physics_process for hold
+	public override void _Input(InputEvent @event) { if (!Actions.IsInputBlocked()) HandlePressInput(); }
 
 	public override void _PhysicsProcess(double delta)
-	{ 
+	{
 		if (!IsOnFloor()) Actions.HandleFalling((float)delta);
 		else if (Actions.IdleStateMachine.GetCurrentNode() == "Fall") Actions.IdleStateMachine.Travel("Idle");
-		
-		if (!Actions.IsInputBlocked()) HandleInput((float)delta);
-		
+
+		HandleHoldInput();
 		MoveAndSlide();
 	}
 
-	protected virtual void HandleInput(float delta) { } // implemented by player
+	protected virtual void HandleHoldInput() { } // implemented by player
+
+	protected virtual void HandlePressInput() { } // implemented by player
 
 	public void OnWeaponBodyEntered(Node3D body) => Actions.Combat.OnWeaponBodyEntered(body);
 }

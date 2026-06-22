@@ -6,8 +6,7 @@
   "Face": [
 	{ "MeshName": "Eyes",  "ColorPickers": [false, true] },
 	{ "MeshName": "Eyelashes", "HasFilePicker": true},
-	{ "MeshName": "Head",  "HasShapePicker": true },
-	{ "MeshName": "Accessory", "HasFilePicker": true }
+	{ "MeshName": "Head",  "HasShapePicker": true }
   ],
   "Hair": [
 	{ "MeshName": "Hair", "HasFilePicker": true, "ColorPickers": [true] },
