@@ -109,7 +109,7 @@ public class TabBuilder(Skeleton3D skeleton, Creator creator)
             return node;
         }
 
-        node.VariableChanged += c => OnColorPickerChanged(c, meshInstance, meshName, materialNr);
+        node.VariableChanged += col => OnColorPickerChanged(col, meshInstance, meshName, materialNr);
         return node;
     }
 

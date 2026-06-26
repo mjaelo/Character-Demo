@@ -9,16 +9,16 @@ namespace CharacterDemo.Mob.Services.ActionManagers;
 public class MovementManager(ActionManager am)
 {
     private Scenes.Mob.Mob Mob => am.Mob;
-    
+
     public void UpdateVelocity(Vector3 inputDir)
     {
         Mob.Velocity = new Vector3(inputDir.X * Mob.CurrentSpeed, Mob.Velocity.Y, inputDir.Z * Mob.CurrentSpeed);
         Mob.Direction = inputDir;
     }
-    
+
     public void HandleMovementAnimation()
     {
-        if(am.BodyStateMachine.GetCurrentNode()!="Movement")
+        if (am.BodyStateMachine.GetCurrentNode() != "Movement")
             am.BodyStateMachine.Travel("Movement");
         if (am.Idle.PerformingEvent) // stop idle event
         {
@@ -26,15 +26,16 @@ public class MovementManager(ActionManager am)
             am.BodyIdleStateMachine.Next();
             am.BodyStateMachine.Start("Movement");
         }
+
         if (Mob.CurrentSpeed < Mob.NormalSpeed)
         {
-            am.MovementStateMachine.Travel("Walk");//TODO add slower movement animation
+            am.MovementStateMachine.Travel("Walk"); //TODO add slower movement animation
             return;
         }
-        
+
         var isRunning = Input.IsActionPressed("Run");
 
-        bool isNormalSpeed = GeneralUtils.FloatEquals(Mob.CurrentSpeed,Mob.NormalSpeed);
+        bool isNormalSpeed = GeneralUtils.FloatEquals(Mob.CurrentSpeed, Mob.NormalSpeed);
         if (isRunning)
         {
             if (!isNormalSpeed) return;
@@ -49,5 +50,4 @@ public class MovementManager(ActionManager am)
     }
 
     private bool IsBodyActionRunning() => am.ArmBlend == 0 && am.BodyStateMachine.GetCurrentNode() != "Action";
-
 }

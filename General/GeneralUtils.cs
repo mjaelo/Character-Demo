@@ -9,10 +9,10 @@ public static class GeneralUtils
     private static readonly Random Rng = new();
 
     public static bool HasAll<T>(IEnumerable<T> mainArray, IEnumerable<T> elementsArray)
-        => elementsArray.All(e => mainArray.Contains(e));
+        => elementsArray.All(mainArray.Contains);
 
     public static bool HasAny<T>(IEnumerable<T> mainArray, IEnumerable<T> elementsArray)
-        => elementsArray.Any(e => mainArray.Contains(e));
+        => elementsArray.Any(mainArray.Contains);
 
     public static T PickRandom<T>(List<T> array)
         => array[Rng.Next(array.Count)];
@@ -31,6 +31,6 @@ public static class GeneralUtils
     }
     
     public static bool FloatEquals(float a, float b)
-        => Math.Abs(a - b) < GeneralConstants.FloatPrecition;
+        => Math.Abs(a - b) < GeneralConstants.FloatPrecision;
 }
 

@@ -20,8 +20,19 @@ public class IdleManager
     private readonly ActionManager _am;
     private Scenes.Mob.Mob Mob => _am.Mob;
 
-    private enum IdleFaceAnims { FaceLookAround, FaceLookDown, FaceBlinking }
-    private enum IdleBodyAnims { IdleLookAround, IdleStretchArms, IdleStretchNeck }
+    private enum IdleFaceAnims
+    {
+        FaceLookAround,
+        FaceLookDown,
+        FaceBlinking
+    }
+
+    private enum IdleBodyAnims
+    {
+        IdleLookAround,
+        IdleStretchArms,
+        IdleStretchNeck
+    }
 
     public IdleManager(ActionManager am)
     {
@@ -46,6 +57,7 @@ public class IdleManager
             if (!PerformingEvent) OnIdleEventTimerTimeout();
         }
     }
+
     private void OnIdleEventTimerTimeout()
     {
         if (GeneralUtils.CheckRng(FaceIdleEventProbability)) StartFacialIdleEvent();
@@ -66,5 +78,4 @@ public class IdleManager
         _am.BodyIdleStateMachine.Travel(GeneralUtils.PickRandom(Enum.GetValues<IdleBodyAnims>()).ToString());
         PerformingEvent = true;
     }
-
 }

@@ -1,6 +1,7 @@
 using CharacterDemo.General;
 using CharacterDemo.Mob.DataFiles;
 using CharacterDemo.Mob.Services.ActionManagers;
+using CharacterDemo.UI.Scenes.Stats;
 using Godot;
 using static CharacterDemo.Mob.MobEnums;
 
@@ -38,6 +39,10 @@ public partial class Mob : CharacterBody3D
 
 	public override void _PhysicsProcess(double delta)
 	{
+		if (this is Player.Player)
+		{
+			GetNode<Stats>("../AnimStats").UpdateStats();
+		}
 		if (!IsOnFloor()) Actions.HandleFalling((float)delta);
 		else if (Actions.IdleStateMachine.GetCurrentNode() == "Fall") Actions.IdleStateMachine.Travel("Idle");
 
@@ -49,5 +54,5 @@ public partial class Mob : CharacterBody3D
 
 	protected virtual void HandlePressInput() { } // implemented by player
 
-	public void OnWeaponBodyEntered(Node3D body) => Actions.Combat.OnWeaponBodyEntered(body);
+	private void OnWeaponBodyEntered(Node3D body) => Actions.Combat.OnWeaponBodyEntered(body);
 }

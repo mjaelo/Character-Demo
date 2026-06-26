@@ -5,8 +5,8 @@ namespace CharacterDemo.Mob.Services.Camera;
 /// Shared camera manipulation logic used by both CameraManager (game) and CreatorCameraManager (creator).
 public class CameraService(Node3D pivot, SpringArm3D arm, Camera3D camera1P)
 {
-    public const float RotMinX = -0.9f;
-    public const float RotMaxX = 0.5f;
+    private const float RotMinX = -0.9f;
+    private const float RotMaxX = 0.5f;
 
     private Node3D Pivot { get; } = pivot;
     private SpringArm3D Arm { get; } = arm;
@@ -25,7 +25,7 @@ public class CameraService(Node3D pivot, SpringArm3D arm, Camera3D camera1P)
     public void Zoom(float amount)
     {
         var next = Arm.SpringLength + amount;
-        if (next >= MobConstants.ZoomMin && next <= MobConstants.ZoomMax)
+        if (next is >= MobConstants.ZoomMin and <= MobConstants.ZoomMax)
             Arm.SpringLength = next;
     }
 

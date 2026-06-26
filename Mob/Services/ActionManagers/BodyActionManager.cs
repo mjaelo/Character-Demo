@@ -14,11 +14,13 @@ public class BodyActionManager(ActionManager am)
             OnRollPressed();
             return true;
         }
+
         if (Input.IsActionJustPressed("Jump"))
         {
             OnJumpPressed();
             return true;
         }
+
         return false;
     }
 
@@ -57,6 +59,7 @@ public class BodyActionManager(ActionManager am)
         await Mob.ToSignal(Mob.GetTree().CreateTimer(JumpTimeout), SceneTreeTimer.SignalName.Timeout);
         if (GodotObject.IsInstanceValid(Mob)) OnJumpTimerTimeout();
     }
+
     private void OnJumpTimerTimeout()
     {
         var v = Mob.Velocity;

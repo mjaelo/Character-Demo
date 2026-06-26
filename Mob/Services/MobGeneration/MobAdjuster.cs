@@ -10,7 +10,7 @@ namespace CharacterDemo.Mob.Services.MobGeneration;
 ///  ADJUST (keep valid, re-randomize invalid) 
 public static class MobAdjuster
 {
-    // adjust non editable parameters, f.e. scale, colors, visibility TODO export colors and skel body meshes and leave only mob scale & AlbedoTextureMsdf
+    // adjust non editable parameters, f.e. scale, colors, visibility TODO export colors and skeleton body meshes and leave only mob scale & AlbedoTextureMsdf
     public static void AdjustRaceExtraFeatures(Scenes.Mob.Mob mob, MobRaces race) // TODO store values externally? f.e. json, in norms
     {
         var skeleton = mob.GetNode<Skeleton3D>("body/Armature/Skeleton3D");

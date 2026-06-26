@@ -13,8 +13,8 @@ public class ActionManager
 
     public readonly Scenes.Mob.Mob Mob;
     public readonly CombatManager Combat;
-    public readonly BodyActionManager BodyAction;
-    public readonly MovementManager Movement;
+    private readonly BodyActionManager _bodyAction;
+    private readonly MovementManager _movement;
     public readonly IdleManager Idle;
 
     public readonly AnimationNodeStateMachinePlayback ArmStateMachine,
@@ -60,18 +60,21 @@ public class ActionManager
         FaceStateMachine = (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/FaceAnims/playback");
         IdleStateMachine = (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/BodyAnims/Idle/playback");
         ActionStateMachine = (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/BodyAnims/Action/playback");
-        MovementStateMachine = (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/BodyAnims/Movement/playback");
-        BodyIdleStateMachine = (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/BodyAnims/BodyIdles/playback");
+        MovementStateMachine =
+            (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/BodyAnims/Movement/playback");
+        BodyIdleStateMachine =
+            (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/BodyAnims/BodyIdles/playback");
         AttackStateMachine = (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/ArmAnims/Attack/playback");
         BlockStateMachine = (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/ArmAnims/Block/playback");
         DrawStateMachine = (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/ArmAnims/DrawWeapon/playback");
         FaceIdleStateMachine = (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/FaceAnims/Idle/playback");
-        FaceEmotionStateMachine = (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/FaceAnims/Emotion/playback");
+        FaceEmotionStateMachine =
+            (AnimationNodeStateMachinePlayback)_animTree.Get("parameters/FaceAnims/Emotion/playback");
         _armBlend = (float)_animTree.Get("parameters/ArmBlend/blend_amount");
 
         Combat = new CombatManager(this);
-        BodyAction = new BodyActionManager(this);
-        Movement = new MovementManager(this);
+        _bodyAction = new BodyActionManager(this);
+        _movement = new MovementManager(this);
         Idle = new IdleManager(this);
 
         _animTree.AnimationFinished += OnAnimationFinished;
@@ -79,19 +82,20 @@ public class ActionManager
 
     public void HandlePressInput(bool isMoving)
     {
-        if (_armBlend == 0.0 && BodyAction.CheckActionInput(isMoving)) return;
+        if (_armBlend == 0.0 && _bodyAction.CheckActionInput(isMoving)) return;
         Combat.CheckCombatInput();
     }
 
     public void HandleHoldInput(Vector3 inputDir)
     {
-        Movement.UpdateVelocity(inputDir);
+        _movement.UpdateVelocity(inputDir);
         if (IsInputBlocked())
         {
             Mob.CurrentSpeed = Mob.NormalSpeed;
             return;
         }
-        if (inputDir != Vector3.Zero) Movement.HandleMovementAnimation();
+
+        if (inputDir != Vector3.Zero) _movement.HandleMovementAnimation();
         else
         {
             if ("Idle" != BodyStateMachine.GetCurrentNode()) BodyStateMachine.Travel("Idle");
@@ -99,7 +103,10 @@ public class ActionManager
         }
     }
 
-    public bool IsInputBlocked() { return !Mob.IsOnFloor() || BodyStateMachine.GetCurrentNode() == "Action"; }
+    public bool IsInputBlocked()
+    {
+        return !Mob.IsOnFloor() || BodyStateMachine.GetCurrentNode() == "Action";
+    }
 
     public void HandleFalling(float delta)
     {
@@ -131,6 +138,6 @@ public class ActionManager
         else if (name.StartsWith("CombatAnimations"))
             Combat.OnAnimationFinished(name);
         else if (name.StartsWith("GeneralAnimations"))
-            BodyAction.OnAnimationFinished(name);
+            _bodyAction.OnAnimationFinished(name);
     }
 }

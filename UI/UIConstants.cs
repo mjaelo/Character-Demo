@@ -9,7 +9,7 @@ public static class UiConstants
 {
 	// strings
 	public const string OverrideWarning = "Overriding preset with the same name";
-	public const string NewPresetName = "empty"; // not visible name of an default empty preset (randomized MD)
+	public const string NewPresetName = "empty"; // not visible name of a default empty preset (randomized MD)
 
 	// styling
 	public const float PickerPadding = 10.0f;

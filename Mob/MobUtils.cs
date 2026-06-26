@@ -12,7 +12,7 @@ namespace CharacterDemo.Mob;
 
 public static class MobUtils // TODO move GET SET ADJUST functions to MobGeneration services?
 {
-    private static readonly Dictionary<string, List<string>> CachedMeshShapeNames = new(); // TODO caches shouldnt be kept here
+    private static readonly Dictionary<string, List<string>> CachedMeshShapeNames = new(); // TODO caches shouldn't be kept here
 
     //  SET MESH DATA 
     public static void SetMeshFile(string fileName, MeshInstance3D meshInstance, string path)
@@ -40,14 +40,14 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
             : new SphereShape3D { Radius = 10 };
     }
 
-    public static void SetSkeletonShapeKey(float value, string shapeName, Skeleton3D skel)
+    public static void SetSkeletonShapeKey(float value, string shapeName, Skeleton3D skeleton)
     {
-        foreach (var child in skel.GetChildren().OfType<MeshInstance3D>())
+        foreach (var child in skeleton.GetChildren().OfType<MeshInstance3D>())
             if (child.GetBlendShapeCount() > 0)
                 SetMeshShapeKey(value, shapeName, child);
 
         if (MobConstants.HipMovers.Contains(shapeName))
-            AdjustHip(skel);
+            AdjustHip(skeleton);
     }
 
     private static void AdjustHairHider(Skeleton3D skeleton)
@@ -98,10 +98,10 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
         }
     }
 
-    private static void AdjustHip(Skeleton3D skel)
+    private static void AdjustHip(Skeleton3D skeleton)
     {
-        var hipManager = skel.GetNode<Node3D>("Hip/HipContainer");
-        var bodyMesh = skel.GetNode<MeshInstance3D>("Top");
+        var hipManager = skeleton.GetNode<Node3D>("Hip/HipContainer");
+        var bodyMesh = skeleton.GetNode<MeshInstance3D>("Top");
         if (bodyMesh.Mesh is not ArrayMesh arrayMesh || arrayMesh.GetBlendShapeCount() == 0)
             return; // Mesh has no blend shapes (e.g., skeleton variants)
         
@@ -146,8 +146,8 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
     {
         foreach (var meshName in MobConstants.MeshesWithSkin)
         {
-            if (!MobConstants.EqMeshesInfo.ContainsKey(meshName)) continue;
-            var fieldName = MobConstants.EqMeshesInfo[meshName].FieldName;
+            if (!MobConstants.EqMeshesInfo.TryGetValue(meshName, out var meshInfo)) continue;
+            var fieldName = meshInfo.FieldName;
             var meshData = GetEqDataFieldValue(eqData, fieldName);
             if (meshData.MeshColors.Count == 0) continue;
             var colors = meshData.MeshColors.ToList();
@@ -155,9 +155,9 @@ public static class MobUtils // TODO move GET SET ADJUST functions to MobGenerat
             meshData.MeshColors = colors;
             
             if (skeleton == null) continue;
-            MeshInstance3D? skelMesh = GetMeshFromSkeleton(meshName, skeleton);
-            if (skelMesh == null) continue;
-            SetMeshColor(skinColor, skelMesh, 0);
+            MeshInstance3D? mesh = GetMeshFromSkeleton(meshName, skeleton);
+            if (mesh == null) continue;
+            SetMeshColor(skinColor, mesh, 0);
         }
     }
 

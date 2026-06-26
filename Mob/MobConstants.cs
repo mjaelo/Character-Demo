@@ -10,7 +10,7 @@ using static CharacterDemo.Mob.MobEnums;
 namespace CharacterDemo.Mob;
 
 // TODO
-//  add more variation probabilities: nonbin prob, hat prob
+//  add more variation probabilities: non bin prob, hat prob
 //  add tag validation from tag_list variable?
 public static class MobConstants 
 {

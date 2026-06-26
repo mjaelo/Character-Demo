@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://bqq07otg34ov0" path="res://General/Scenes/Main/Main.cs" id="1_hg08b"]
 [ext_resource type="PackedScene" uid="uid://klqaekdm4u3l" path="res://UI/Scenes/Creator/Creator/Creator.tscn" id="4_cf756"]
 [ext_resource type="PackedScene" uid="uid://c5bc32v5me474" path="res://General/Scenes/World/World.tscn" id="4_jll6a"]
-
+[ext_resource type="PackedScene" uid="uid://cbo5vvwfej6cd" path="res://UI/Scenes/Stats/Stats.tscn" id="5_7tu74"]
 
 [node name="Main" type="Node3D" unique_id=1056390184]
 script = ExtResource("1_hg08b")
@@ -15,3 +15,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.19209e-07, 0)
 [node name="Creator" parent="." unique_id=145191626 instance=ExtResource("4_cf756")]
 
 [node name="World" parent="." unique_id=1390406972 instance=ExtResource("4_jll6a")]
+
+[node name="AnimStats" parent="." unique_id=99873398 instance=ExtResource("5_7tu74")]
+visible = false

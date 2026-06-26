@@ -4,9 +4,9 @@ using CharacterDemo.Mob;
 using CharacterDemo.Mob.DataFiles;
 using CharacterDemo.Mob.Scenes.Player;
 using CharacterDemo.Mob.Services.MobGeneration;
+using CharacterDemo.UI.Scenes.Utility.ColorPicker;
+using CharacterDemo.UI.Scenes.Utility.SliderPicker;
 using Godot;
-using ColorPickerComponent = CharacterDemo.UI.Scenes.Utility.ColorPicker.ColorPickerComponent;
-using SliderPickerComponent = CharacterDemo.UI.Scenes.Utility.SliderPicker.SliderPickerComponent;
 
 namespace CharacterDemo.UI.Scenes.Creator;
 
@@ -17,8 +17,7 @@ public partial class Creator : Control
 	private Button _startButton = null!;
 	private TextureButton _undoButton = null!;
 	private CreatorCameraManager.CreatorCameraManager _cameraManager = null!;
-
-
+	
 	public Player Player = null!;
 	private MobData? _prevData;
 	public MobData MobData  = new();
@@ -73,6 +72,9 @@ public partial class Creator : Control
 		
 		MobUtils.SpawnOpponent(GetParent());
 		MobUtils.TogglePlayerControl(true, Player);
+		
+		GetNode<Stats.Stats>("../AnimStats").Visible = true;
+		
 		QueueFree();
 	}
 

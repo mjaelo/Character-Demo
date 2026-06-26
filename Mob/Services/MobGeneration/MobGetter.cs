@@ -90,7 +90,7 @@ public static class MobGetter
         var allFiles = GetAllFileNames(meshName, fileFolder);
         
         // Ensure "empty" is available if any enforce file norm requires it, regardless of NonEmptyNames
-        if (!allFiles.Contains("empty") && fileNorms.Any(n => n.Enforce && !n.Forbidden && n.Files.Contains("empty")))
+        if (!allFiles.Contains("empty") && fileNorms.Any(n => n is { Enforce: true, Forbidden: false } && n.Files.Contains("empty")))
             allFiles.Insert(0, "empty");
         
         if (allFiles.Count == 0) { GD.Print("No files for ", fileFolder); return "empty"; }

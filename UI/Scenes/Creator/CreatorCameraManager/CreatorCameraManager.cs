@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using CharacterDemo.Mob;
 using CharacterDemo.Mob.Scenes.Player;
-using CharacterDemo.Mob.Services;
 using CharacterDemo.Mob.Services.Camera;
 using Godot;
 using PlayerCameraManager = CharacterDemo.Mob.Services.Camera.PlayerCameraManager;
@@ -13,7 +13,7 @@ namespace CharacterDemo.UI.Scenes.Creator.CreatorCameraManager;
 public partial class CreatorCameraManager : Control
 {
 	// player variables
-	public PlayerCameraManager PlayerCameraManager = null!;
+	private PlayerCameraManager _playerCameraManager = null!;
 	private CameraService _camera = null!;
 
 	// Creator variables
@@ -34,10 +34,10 @@ public partial class CreatorCameraManager : Control
 	public void Initialize(Player player)
 	{
 		SetupNodes();
-		PlayerCameraManager = player.CameraManager;
-		_camera = PlayerCameraManager.Camera;
+		_playerCameraManager = player.CameraManager;
+		_camera = _playerCameraManager.Camera;
 		player.Body.Rotation = Vector3.Zero;
-		_camera.Zoom(MobConstants.ZoomInitialCreator - PlayerCameraManager.GetNode<SpringArm3D>("SpringArm3D").SpringLength);
+		_camera.Zoom(MobConstants.ZoomInitialCreator - _playerCameraManager.GetNode<SpringArm3D>("SpringArm3D").SpringLength);
 		SetCameraHeightByRace(MobEnums.MobRaces.Human);
 		SetupUiSignals();
 	}
@@ -78,7 +78,7 @@ public partial class CreatorCameraManager : Control
 
 	public void SetCameraHeightByRace(MobEnums.MobRaces race)
 	{
-		var height = MobConstants.RaceCamHeights.TryGetValue(race, out var h) ? h : MobConstants.RaceCamHeightDefault;
+		var height = MobConstants.RaceCamHeights.GetValueOrDefault(race, MobConstants.RaceCamHeightDefault);
 		_cameraHeightSlider.Value = height;
 		_camera.SetHeight(height);
 	}

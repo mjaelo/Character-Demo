@@ -43,6 +43,7 @@ public partial class Player : Mob.Mob
 		if (Input.IsActionPressed("Right")) dir += CameraManager.GlobalTransform.Basis.X;
 		return dir.LengthSquared() > 0 ? dir.Normalized() : dir;
 	}
+	
 	private void RotateBody()
 	{
 		if (Direction == Vector3.Zero || !(CurrentSpeed > 0) || CameraManager.CurrentCamera == CameraManager.Camera1P) return;

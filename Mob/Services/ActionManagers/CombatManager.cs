@@ -24,9 +24,9 @@ public class CombatManager
     private readonly MeshInstance3D _sword, _shield;
     private bool _weaponDrawn;
 
-    private Skeleton3D _skeleton;
-    private int _spineBoneIdx;
-    private PlayerCameraManager? _camMan;
+    private readonly Skeleton3D _skeleton;
+    private readonly int _spineBoneIdx;
+    private readonly PlayerCameraManager? _camManager;
 
     public CombatManager(ActionManager am)
     {
@@ -38,11 +38,9 @@ public class CombatManager
         _lHandSlot = mob.GetNode<Node3D>("body/Armature/Skeleton3D/Left Hand/HandContainer");
         _sword = mob.GetNode<MeshInstance3D>("body/Armature/Skeleton3D/Hip/HipContainer/Sword");
         _shield = mob.GetNode<MeshInstance3D>("body/Armature/Skeleton3D/Back/BackContainer/Shield");
-
-
         _skeleton = Mob.GetNode<Skeleton3D>("body/Armature/Skeleton3D");
         _spineBoneIdx = _skeleton.FindBone("mixamorig1_Spine");
-        if (Mob is Player) _camMan = Mob.GetNode<PlayerCameraManager>("CameraManager");
+        if (Mob is Player) _camManager = Mob.GetNode<PlayerCameraManager>("CameraManager");
     }
 
     public bool CheckCombatInput()
@@ -111,7 +109,8 @@ public class CombatManager
     public void OnWeaponBodyEntered(Node3D body)
     {
         if (body == Mob || body is not Scenes.Mob.Mob mob || _am.ArmBlend < 1 ||
-            !_am.AttackStateMachine.IsPlaying() && !_am.AttackStateMachine.GetCurrentNode().ToString().Contains("Attack")) return;
+            !_am.AttackStateMachine.IsPlaying() &&
+            !_am.AttackStateMachine.GetCurrentNode().ToString().Contains("Attack")) return;
         mob.Actions.IdleStateMachine.Travel("Die");
         mob.Actions.Idle.IsAlive = false;
     }
@@ -134,6 +133,7 @@ public class CombatManager
             case CombatKeys.Block:
                 Block();
                 break;
+            case CombatKeys.DrawWeapon:
             default:
                 ToggleWeaponDrawn();
                 break;
@@ -183,8 +183,8 @@ public class CombatManager
 
     private void RotateSpineWithCamera()
     {
-        if (_camMan == null) return;
-        var camRot = _camMan.GlobalTransform.Basis.Z;
+        if (_camManager == null) return;
+        var camRot = _camManager.GlobalTransform.Basis.Z;
         _skeleton.SetBoneGlobalPoseOverride(
             _spineBoneIdx,
             new Transform3D(

@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using CharacterDemo.General.Services;
 using Godot;
 using Godot.Collections;
-using CharacterDemo.General.Services;
 
 namespace CharacterDemo.General;
 
@@ -18,6 +17,6 @@ public static class GeneralConstants
     public const float DefaultSpeedLimit = 100.0f;
     
     // general
-    public const float FloatPrecition = 0.01f;
+    public const float FloatPrecision = 0.01f;
 }
 
