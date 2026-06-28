@@ -1,7 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="PackedScene" path="res://Mob/Scenes/Mob/Mob.tscn" id="1_mob"]
-[ext_resource type="Script" path="res://Mob/Scenes/Npc/Npc.cs" id="2_npc"]
-
-[node name="Npc" instance=ExtResource("1_mob")]
-script = ExtResource("2_npc")

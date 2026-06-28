@@ -1,6 +1,6 @@
 ﻿using CharacterDemo.General.Services;
 using Godot;
-using Godot.Collections;
+using System.Collections.Generic;
 
 namespace CharacterDemo.General;
 
@@ -8,7 +8,7 @@ public static class GeneralConstants
 {
     public static readonly AssetCache<ArrayMesh> MeshCache = new();
     public static readonly AssetCache<Texture2D> TextureCache = new();
-    public static readonly AssetCache<Dictionary> JsonCache = new();
+    public static readonly Dictionary<string, List<string>> CachedMeshShapeNames = new();
 
     // Physics
     public const float DefaultGravity = 30.0f;

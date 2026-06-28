@@ -1,6 +1,6 @@
+using CharacterDemo.Mobs.Scenes.PlayerScene;
+using CharacterDemo.UI.Scenes.CreatorScenes.CreatorScene;
 using Godot;
-using CharacterDemo.Mob.Scenes.Player;
-using CharacterDemo.UI.Scenes.Creator;
 
 namespace CharacterDemo.General.Scenes.Main;
 

@@ -29,11 +29,11 @@ enabled=PackedStringArray()
 
 folder_colors={
 "res://Assets/": "purple",
-"res://Assets/Mob/": "purple",
-"res://Assets/Mob/shaders/": "pink",
+"res://Assets/Mobs/": "purple",
+"res://Assets/Mobs/shaders/": "pink",
 "res://Assets/UI/": "purple",
 "res://General/": "yellow",
-"res://Mob/": "red",
+"res://Mobs/": "red",
 "res://UI/": "green"
 }
 

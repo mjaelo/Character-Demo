@@ -19,8 +19,8 @@ public static class UiConstants
 	public const string PresetFile = "preset.json";
 	public const string PresetPath = "res://UI/Scenes/Creator/";
 	private const string CreatorMenuDataPath = "res://Assets/UI/InfoFiles/CreatorMenuData.json";
-	private const string SliderPickerPath = "res://UI/Scenes/Utility/SliderPicker/SliderPickerComponent.tscn";
-	private const string ColorPickerPath = "res://UI/Scenes/Utility/ColorPicker/ColorPickerComponent.tscn";
+	private const string SliderPickerPath = "res://UI/Scenes/UtilityScenes/SliderPickerScene/SliderPickerComponent.tscn";
+	private const string ColorPickerPath = "res://UI/Scenes/UtilityScenes/ColorPickerScene/ColorPickerComponent.tscn";
 
 	public static PackedScene SliderPickerScene => ResourceLoader.Load<PackedScene>(SliderPickerPath);
 	public static PackedScene ColorPickerScene => ResourceLoader.Load<PackedScene>(ColorPickerPath);

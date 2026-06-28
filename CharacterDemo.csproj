@@ -13,12 +13,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Mob\Scenes\Npc\Npc.tscn" />
+    <Content Include="Mobs\Scenes\NpcScene\Npc.tscn" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include=".godot\mono\" />
-    <Folder Include="UI\Scenes\Creator\Creator\" />
+    <Folder Include="UI\Scenes\CreatorScenes\CreatorScene\" />
   </ItemGroup>
 </Project>
 

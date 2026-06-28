@@ -1,8 +1,0 @@
-﻿{
-  "Civilian": [{ "Tags": ["Civilian", "Guard", "Noble", "Merchant", "Farmer"], "Forbidden": true }],
-  "Guard": [{ "Tags": ["Guard"] }],
-  "Noble": [{ "Tags": ["Noble"] }],
-  "Merchant": [{ "Tags": ["Merchant"] }],
-  "Farmer": [{ "Tags": ["Farmer"] }]
-}
-

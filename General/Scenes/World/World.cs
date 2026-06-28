@@ -1,5 +1,5 @@
+using CharacterDemo.Mobs.Scenes.PlayerScene;
 using Godot;
-using CharacterDemo.Mob.Scenes.Player;
 
 namespace CharacterDemo.General.Scenes.World;
 

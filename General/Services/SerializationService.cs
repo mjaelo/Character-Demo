@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using CharacterDemo.Mob;
+using CharacterDemo.Mobs;
 using Godot;
 
 namespace CharacterDemo.General.Services;
