@@ -7,6 +7,7 @@ using CharacterDemo.Mobs;
 using CharacterDemo.Mobs.DataFiles;
 using CharacterDemo.Mobs.InfoFiles;
 using CharacterDemo.Mobs.Services.MobGeneration;
+using CharacterDemo.UI.Scenes.CreatorScenes.CreatorCameraManagerScene;
 using CharacterDemo.UI.Scenes.CreatorScenes.CreatorScene;
 using Godot;
 using SliderPickerComponent = CharacterDemo.UI.Scenes.UtilityScenes.SliderPickerScene.SliderPickerComponent;
@@ -20,7 +21,7 @@ public partial class PresetTab : TabBar
 	private SliderPickerComponent _presetPicker = null!, _typePicker = null!, _racePicker = null!;
 	private HSlider _genderPicker = null!;
 	private LineEdit _namePicker = null!;
-	private CreatorCameraManagerScene.CreatorCameraManager _cameraManager = null!;
+	private CreatorCameraManager _cameraManager = null!;
 	private readonly IDictionary<string, MobData> _presets =
 		FileService.LoadJson<IDictionary<string, MobData>>(UiConstants.PresetPath + UiConstants.PresetFile)
 		?? new Dictionary<string, MobData>();
@@ -36,7 +37,7 @@ public partial class PresetTab : TabBar
 		_racePicker = GetNode<SliderPickerComponent>("ScrollContainer/VBoxContainer/Race");
 		_genderPicker = GetNode<HSlider>("ScrollContainer/VBoxContainer/GenderContainer/EditGender");
 		_namePicker = GetNode<LineEdit>("ScrollContainer/VBoxContainer/NamePicker");
-		_cameraManager = GetNode<CreatorCameraManagerScene.CreatorCameraManager>("../../Right/CreatorCameraManager");
+		_cameraManager = GetNode<CreatorCameraManager>("../../Right/CreatorCameraManager");
 		
 		GetNode<TextureButton>("ScrollContainer/VBoxContainer/CharacterName/RandomName").Pressed += OnRandomNamePressed;
 		GetNode<Button>("ScrollContainer/VBoxContainer/HBoxContainer/RandomBody").Pressed += OnRandomBodyPressed;

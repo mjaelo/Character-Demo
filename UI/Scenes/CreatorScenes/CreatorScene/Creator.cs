@@ -6,9 +6,9 @@ using CharacterDemo.Mobs.Scenes.PlayerScene;
 using CharacterDemo.Mobs.Services.MobGeneration;
 using CharacterDemo.UI.Scenes.CreatorScenes.CreatorCameraManagerScene;
 using CharacterDemo.UI.Scenes.CreatorScenes.PresetTabScene;
+using CharacterDemo.UI.Scenes.UtilityScenes.ColorPickerScene;
+using CharacterDemo.UI.Scenes.UtilityScenes.SliderPickerScene;
 using Godot;
-using ColorPickerComponent = CharacterDemo.UI.Scenes.UtilityScenes.ColorPickerScene.ColorPickerComponent;
-using SliderPickerComponent = CharacterDemo.UI.Scenes.UtilityScenes.SliderPickerScene.SliderPickerComponent;
 
 namespace CharacterDemo.UI.Scenes.CreatorScenes.CreatorScene;
 
