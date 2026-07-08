@@ -90,11 +90,7 @@ public class ActionManager
     public void HandleHoldInput(Vector3 inputDir)
     {
         _movement.UpdateVelocity(inputDir);
-        if (IsInputBlocked())
-        {
-            Mob.CurrentSpeed = Mob.NormalSpeed;
-            return;
-        }
+        if (IsInputBlocked()) return;
 
         if (inputDir != Vector3.Zero) _movement.HandleMovementAnimation();
         else
@@ -112,6 +108,10 @@ public class ActionManager
     public void HandleFalling(float delta)
     {
         Idle.PerformingEvent = false;
+        string bodyNode = BodyStateMachine.GetCurrentNode();
+        if (bodyNode != "Action" && bodyNode != "Idle")
+            BodyStateMachine.Travel("Idle");
+
         if (Mob.Velocity.Y < Mob.SpeedLimit)
         {
             var v = Mob.Velocity;

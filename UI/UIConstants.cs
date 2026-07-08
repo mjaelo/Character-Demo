@@ -16,8 +16,7 @@ public static class UiConstants
 
 	// assets
 	public const string WarningIconPath = "res://Assets/UI/UiIcons/Warning.png";
-	public const string PresetFile = "preset.json";
-	public const string PresetPath = "res://UI/Scenes/Creator/";
+	public const string PresetPath = "res://UI/Scenes/CreatorScenes/presets.json";
 	private const string CreatorMenuDataPath = "res://Assets/UI/InfoFiles/CreatorMenuData.json";
 	private const string SliderPickerPath = "res://UI/Scenes/UtilityScenes/SliderPickerScene/SliderPickerComponent.tscn";
 	private const string ColorPickerPath = "res://UI/Scenes/UtilityScenes/ColorPickerScene/ColorPickerComponent.tscn";

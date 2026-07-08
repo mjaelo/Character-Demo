@@ -11,7 +11,7 @@ public static class GeneralConstants
     public static readonly Dictionary<string, List<string>> CachedMeshShapeNames = new();
 
     // Physics
-    public const float DefaultGravity = 30.0f;
+    public const float DefaultGravity = 50.0f;
     public const float DefaultSpeed = 10.0f;
     public const float DefaultJumpImpulse = 21.0f;
     public const float DefaultSpeedLimit = 100.0f;

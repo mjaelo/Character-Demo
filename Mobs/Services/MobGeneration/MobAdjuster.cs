@@ -78,7 +78,6 @@ public static class MobAdjuster
         origin.X = 17 + addedAmount;
         hipManager.Transform = hipManager.Transform with { Origin = origin };
     }
-
-
+    
 }
 

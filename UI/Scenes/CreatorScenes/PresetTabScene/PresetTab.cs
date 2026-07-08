@@ -5,7 +5,6 @@ using CharacterDemo.General;
 using CharacterDemo.General.Services;
 using CharacterDemo.Mobs;
 using CharacterDemo.Mobs.DataFiles;
-using CharacterDemo.Mobs.InfoFiles;
 using CharacterDemo.Mobs.Services.MobGeneration;
 using CharacterDemo.UI.Scenes.CreatorScenes.CreatorCameraManagerScene;
 using CharacterDemo.UI.Scenes.CreatorScenes.CreatorScene;
@@ -23,7 +22,7 @@ public partial class PresetTab : TabBar
 	private LineEdit _namePicker = null!;
 	private CreatorCameraManager _cameraManager = null!;
 	private readonly IDictionary<string, MobData> _presets =
-		FileService.LoadJson<IDictionary<string, MobData>>(UiConstants.PresetPath + UiConstants.PresetFile)
+		FileService.LoadJson<IDictionary<string, MobData>>(UiConstants.PresetPath)
 		?? new Dictionary<string, MobData>();
 
 	public void Initialize(Creator parent)
@@ -54,8 +53,8 @@ public partial class PresetTab : TabBar
 		_savePresetButton.Pressed += OnSavePresetPressed;
 		_deletePresetButton.Pressed += OnDeletePresetPressed;
 		
-		UiUtils.DisableEdit(GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Save Preset"), string.IsNullOrEmpty(parent.MobData.MobName));
-		UiUtils.DisableEdit(GetNode<Button>("ScrollContainer/VBoxContainer/Preset Handler/Delete Preset"), true);
+		UiUtils.DisableEdit(_savePresetButton, string.IsNullOrEmpty(parent.MobData.MobName));
+		UiUtils.DisableEdit(_deletePresetButton, true);
 	}
 
 	public void SetMobDataToPresetPickers(MobData mobData)
@@ -70,7 +69,6 @@ public partial class PresetTab : TabBar
 	{
 		_parent.UpdatePrevMobData();
 		bool isNew = mobName == UiConstants.NewPresetName;
-		GD.Print("disabling edit = ",isNew);
 		UiUtils.DisableEdit(_deletePresetButton, isNew);
 		UiUtils.DisableEdit(_savePresetButton, isNew);
 		if (!isNew && _presets.TryGetValue(mobName, out var md))
@@ -83,24 +81,10 @@ public partial class PresetTab : TabBar
 			return;
 		}
 
-		GD.Print(mobName+" not found in presets");
+		if (mobName != "empty")
+			GD.Print(mobName+" not found in presets");
 		_parent.RandomizeCreatorValues();
 
-	}
-
-	private void OnGenderChanged(int gender)
-	{
-		if ((int)_parent.MobData.Gender == gender) return;
-		_parent.UpdatePrevMobData();
-		_parent.MobData.Gender = (MobEnums.Gender)gender;
-		if (gender != (int)MobEnums.Gender.NonBin)
-		{
-			var norms = new List<NormInfo>(MobConstants.GenderNorms[(MobEnums.Gender)gender]);
-			_parent.MobData.BodyData = MobDataAdjuster.AdjustBodyData(norms, _parent.MobData.BodyData);
-			_parent.MobData.EquipmentData = MobDataAdjuster.AdjustEquipmentData(norms, _parent.MobData.EquipmentData);
-		}
-		MobDataSetter.SetMobDataToMob(_parent.MobData, _parent.Player);
-		_parent.UpdateAllPickers();
 	}
 
 	private void OnMobNameChanged(string newText)
@@ -120,7 +104,7 @@ public partial class PresetTab : TabBar
 		_presetPicker.UpdateValues([UiConstants.NewPresetName, .. _presets.Keys]);
 		UiUtils.DisableEdit(_deletePresetButton, false);
 		UiUtils.ButtonShowWarning(_savePresetButton, UiConstants.OverrideWarning);
-		FileService.SaveJson(_presets, UiConstants.PresetPath + UiConstants.PresetFile);
+		FileService.SaveJson(_presets, UiConstants.PresetPath);
 		_presetPicker.SetValue(newData.MobName);
 	}
 	
@@ -131,8 +115,27 @@ public partial class PresetTab : TabBar
 		_presetPicker.UpdateValues([UiConstants.NewPresetName, .. _presets.Keys]);
 		_presetPicker.SetValue(UiConstants.NewPresetName);
 		UiUtils.DisableEdit(_deletePresetButton, true);
-		FileService.SaveJson(_presets, UiConstants.PresetPath + UiConstants.PresetFile);
+		FileService.SaveJson(_presets, UiConstants.PresetPath);
 		_parent.RandomizeCreatorValues();
+	}
+
+	private void OnGenderChanged(int gender)
+	{
+		if ((int)_parent.MobData.Gender == gender) return;
+		_parent.UpdatePrevMobData();
+		_parent.MobData.Gender = (MobEnums.Gender)gender;
+		if (gender == (int)MobEnums.Gender.NonBin) return;
+		
+		var norms = MobConstants.RaceNorms[_parent.MobData.Race]
+			.Concat(MobConstants.TypeNorms[_parent.MobData.Type])
+			.Concat(MobConstants.GenderNorms[(MobEnums.Gender)gender])
+			.ToList();
+
+		_parent.MobData.BodyData = MobDataAdjuster.AdjustBodyData(norms, _parent.MobData.BodyData);
+		_parent.MobData.EquipmentData = MobDataAdjuster.AdjustEquipmentData(norms, _parent.MobData.EquipmentData);
+		
+		MobDataSetter.SetMobDataToMob(_parent.MobData, _parent.Player);
+		_parent.UpdateAllPickers();
 	}
 
 	private void OnRaceChanged(string raceV)

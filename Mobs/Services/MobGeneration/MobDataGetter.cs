@@ -13,7 +13,6 @@ namespace CharacterDemo.Mobs.Services.MobGeneration;
 public static class MobDataGetter
 {
 
-    //  GET 
     public static MobData GetRandomMobData(MobRaces race = (MobRaces)(-1), MobTypes type = (MobTypes)(-1), Gender gender = (Gender)(-1), string mobName = "empty", MobData? mobData = null)
     {
         mobData ??= new MobData { Race = race, Type = type, Gender = gender };
@@ -164,6 +163,30 @@ public static class MobDataGetter
         return result;
     }
 
+    // Field Accessors
+    public static MeshData GetBodyDataFieldValue(BodyData bodyData, string fieldName) => fieldName switch
+    {
+        "HeadMesh" => bodyData.HeadMesh,
+        "EyeMesh" => bodyData.EyeMesh,
+        "LashesMesh" => bodyData.LashesMesh,
+        "HairMesh" => bodyData.HairMesh,
+        "BeardMesh" => bodyData.BeardMesh,
+        "BrowMesh" => bodyData.BrowMesh,
+        _ => new MeshData()
+    };
+
+    public static MeshData GetEqDataFieldValue(EquipmentData eqData, string fieldName) => fieldName switch
+    {
+        "TopMesh" => eqData.TopMesh,
+        "BottomMesh" => eqData.BottomMesh,
+        "ShoeMesh" => eqData.ShoeMesh,
+        "HatMesh" => eqData.HatMesh,
+        "RHandMesh" => eqData.RHandMesh,
+        "LHandMesh" => eqData.LHandMesh,
+        "AccessoryMesh" => eqData.AccessoryMesh,
+        _ => new MeshData()
+    };
+    
     //  INTERNAL HELPERS 
     private static List<string> GetAllFileNames(string meshName, string fileFolder)
     {
@@ -215,29 +238,4 @@ public static class MobDataGetter
         }
         return possibleValues;
     }
-    
-    // Field Accessors
-    public static MeshData GetBodyDataFieldValue(BodyData bodyData, string fieldName) => fieldName switch
-    {
-        "HeadMesh" => bodyData.HeadMesh,
-        "EyeMesh" => bodyData.EyeMesh,
-        "LashesMesh" => bodyData.LashesMesh,
-        "HairMesh" => bodyData.HairMesh,
-        "BeardMesh" => bodyData.BeardMesh,
-        "BrowMesh" => bodyData.BrowMesh,
-        _ => new MeshData()
-    };
-
-    public static MeshData GetEqDataFieldValue(EquipmentData eqData, string fieldName) => fieldName switch
-    {
-        "TopMesh" => eqData.TopMesh,
-        "BottomMesh" => eqData.BottomMesh,
-        "ShoeMesh" => eqData.ShoeMesh,
-        "HatMesh" => eqData.HatMesh,
-        "RHandMesh" => eqData.RHandMesh,
-        "LHandMesh" => eqData.LHandMesh,
-        "AccessoryMesh" => eqData.AccessoryMesh,
-        _ => new MeshData()
-    };
-
 }

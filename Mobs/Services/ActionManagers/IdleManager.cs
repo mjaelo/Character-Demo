@@ -55,7 +55,7 @@ public class IdleManager
         {
             await Mob.ToSignal(Mob.GetTree().CreateTimer(IdleEventInterval), SceneTreeTimer.SignalName.Timeout);
             if (!GodotObject.IsInstanceValid(Mob) || !IsAlive) break;
-            if (!PerformingEvent) OnIdleEventTimerTimeout();
+            if (CanStartIdleEvent()) OnIdleEventTimerTimeout();
         }
     }
 
@@ -67,16 +67,34 @@ public class IdleManager
 
     private void StartFacialIdleEvent()
     {
+        if (!CanStartIdleEvent()) return;
+        PerformingEvent = true;
         _am.FaceBlend = 1;
         _am.FaceStateMachine.Travel("Idle");
         _am.FaceIdleStateMachine.Travel(GeneralUtils.PickRandom(Enum.GetValues<IdleFaceAnims>()).ToString());
-        PerformingEvent = true;
     }
 
     private void StartBodyIdleEvent()
     {
+        if (!CanStartIdleEvent()) return;
+        PerformingEvent = true;
         _am.BodyStateMachine.Travel("BodyIdles");
         _am.BodyIdleStateMachine.Travel(GeneralUtils.PickRandom(Enum.GetValues<IdleBodyAnims>()).ToString());
-        PerformingEvent = true;
+    }
+
+    private bool CanStartIdleEvent()
+    {
+        if (PerformingEvent || !Mob.IsOnFloor()) return false;
+        if (_am.BodyStateMachine.GetCurrentNode() != "Idle") return false;
+        if (_am.IdleStateMachine.GetCurrentNode() != "Idle") return false;
+        return !HasMovementInput();
+    }
+
+    private static bool HasMovementInput()
+    {
+        return Input.IsActionPressed("Up")
+            || Input.IsActionPressed("Down")
+            || Input.IsActionPressed("Left")
+            || Input.IsActionPressed("Right");
     }
 }

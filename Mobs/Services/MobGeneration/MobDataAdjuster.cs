@@ -8,7 +8,6 @@ namespace CharacterDemo.Mobs.Services.MobGeneration;
 ///  ADJUST (keep valid, re-randomize invalid) 
 public static class MobDataAdjuster
 {
-    
     public static BodyData AdjustBodyData(List<NormInfo> norms, BodyData bodyData)
     {
         foreach (var (meshName, meshInfo) in MobConstants.BodyMeshesInfo)
