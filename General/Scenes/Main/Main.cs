@@ -1,0 +1,20 @@
+using CharacterDemo.Mobs.Scenes.PlayerScene;
+using CharacterDemo.UI.Scenes.CreatorScenes.CreatorScene;
+using Godot;
+
+namespace CharacterDemo.General.Scenes.Main;
+
+public partial class Main : Node3D
+{
+	private Creator _creator = null!;
+	private Player _player = null!;
+	private Skeleton3D _skeleton = null!;
+
+	public override void _Ready()
+	{
+		_creator = GetNode<Creator>("Creator");
+		_player = GetNode<Player>("Player");
+		_skeleton = GetNode<Skeleton3D>("Player/body/Armature/Skeleton3D");
+		_creator.Initialize(_player, _skeleton);
+	}
+}

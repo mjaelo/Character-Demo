@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://cbo5vvwfej6cd"]
+
+[ext_resource type="Script" uid="uid://puypjk3mncgt" path="res://UI/Scenes/Stats/Stats.cs" id="1_bimg8"]
+
+[node name="AnimStats" type="Control" unique_id=99873398]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_bimg8")
+
+[node name="Panel" type="Panel" parent="." unique_id=774923931]
+layout_mode = 0
+offset_right = 282.0
+offset_bottom = 340.0
+
+[node name="Label" type="Label" parent="Panel" unique_id=335790]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Speed:
+Direction:
+On Floor:
+
+_____________________
+
+ArmStateMachine: 
+BodyStateMachine:
+FaceStateMachine:
+IdleStateMachine:
+ActionStateMachine: 
+MovementStateMachine:"

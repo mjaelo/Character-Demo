@@ -8,32 +8,18 @@
 
 config_version=5
 
-[animation]
-
-compatibility/default_parent_skeleton_in_mesh_instance_3d=true
-
 [application]
 
 config/name="Character Demo"
 config/description="Demonstration of 3D character creator and short movement test"
 config/version="0.1"
 run/main_scene="res://General/Scenes/Main/Main.tscn"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.6", "C#", "Forward Plus")
 config/icon="res://icon.svg"
-
-[autoload]
-
-GeneralConstants="*res://General/GeneralConstants.gd"
-UIConstants="*res://UI/UIConstants.gd"
-GeneralUtils="*res://General/GeneralUtils.gd"
-MobUtils="*res://Mob/MobUtils.gd"
-UIUtils="*res://UI/UIUtils.gd"
-MobConstants="*res://Mob/MobConstants.gd"
-FileUtils="*res://General/Services/FileUtils.gd"
 
 [dotnet]
 
-project/assembly_name="Character Demo"
+project/assembly_name="CharacterDemo"
 
 [editor_plugins]
 
@@ -43,11 +29,11 @@ enabled=PackedStringArray()
 
 folder_colors={
 "res://Assets/": "purple",
-"res://Assets/Mob/": "purple",
-"res://Assets/Mob/shaders/": "pink",
+"res://Assets/Mobs/": "purple",
+"res://Assets/Mobs/shaders/": "pink",
 "res://Assets/UI/": "purple",
 "res://General/": "yellow",
-"res://Mob/": "red",
+"res://Mobs/": "red",
 "res://UI/": "green"
 }
 
